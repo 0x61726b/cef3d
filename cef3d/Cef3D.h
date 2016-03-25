@@ -37,7 +37,7 @@ public:
 
 	virtual void OnContextReady() = 0; //Context is ready,we can create browsers here
 	virtual void OnBrowserReady(unsigned index) = 0; //Browser is ready,the texture should be up now
-	
+
 };
 
 
@@ -51,15 +51,27 @@ namespace CefUI
 		virtual ~Cef3D();
 
 		bool Initialize(const char* binaryDir);
+		bool DoInit();
+
 		void Shutdown();
 
 		int CreateBrowser(const CefRect& rect,const std::string&);
 		void RunCefLoop();
 
+		void HandleKeyDown(unsigned key,unsigned mouseButton,int repeat);
+		void HandleKeyUp(unsigned key,unsigned mouseButton,int repeat);
+		void HandleMouseButtonDown(int mouseX,int mouseY,int modifiers,int button,unsigned buttons);
+		void HandleMouseButtonUp(int mouseX,int mouseY,int modifiers,int button,unsigned buttons);
+		void HandleMouseMove(int mouseX,int mouseY,int modifiers,unsigned buttons);
+
+		void HandleKeyEvent(int type,int modifiers,unsigned key);
 	private:
 		void* windowHandle_;
 		CefOsrDelegate* osr_delegate_;
 		CefRefPtr<SimpleApp> client_app_;
+		CefSettings cefSettings_;
+
+		bool isInitialized_;
 	};
 }
 

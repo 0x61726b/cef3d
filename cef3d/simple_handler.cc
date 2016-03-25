@@ -87,6 +87,101 @@ void SimpleHandler::CloseAllBrowsers(bool force_close) {
 		(*it)->GetHost()->CloseBrowser(force_close);
 }
 
+void SimpleHandler::HandleKeyEvent(int type,int modifiers,unsigned key)
+{
+	CefKeyEvent event;
+
+	
+	if(key == 1073742049)
+		key = 16;
+	if(key == 1073742048)
+		key = 17;
+	if(key	== 1073742050)
+		key = 18;
+
+	event.windows_key_code = key;
+
+	if(type == 0)
+		event.type = KEYEVENT_RAWKEYDOWN;
+	if(type == 1)
+		event.type = KEYEVENT_CHAR;
+	if(type == 2)
+		event.type = KEYEVENT_KEYUP;
+
+
+	event.modifiers = modifiers;
+
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendKeyEvent(event);
+
+}
+
+void SimpleHandler::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
+{
+	CefKeyEvent event;
+	event.windows_key_code = key;
+	event.native_key_code = key;
+
+	event.type = KEYEVENT_RAWKEYDOWN;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendKeyEvent(event);
+}
+
+
+void SimpleHandler::HandleKeyUp(unsigned key,unsigned mouseButton,int repeat)
+{
+	CefKeyEvent event;
+	event.native_key_code = key;
+	event.windows_key_code = key;
+	event.type = KEYEVENT_KEYUP;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendKeyEvent(event);
+}
+
+void SimpleHandler::HandleMouseButtonDown(int mouseX,int mouseY,int native,int button,unsigned buttons)
+{
+	CefMouseEvent event;
+	event.x = mouseX;
+	event.y = mouseY;
+	event.modifiers = native;
+
+	bool mouseUp = false;
+	CefBrowserHost::MouseButtonType btnType = MBT_LEFT;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
+}
+
+void SimpleHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,int button,unsigned buttons)
+{
+	CefMouseEvent event;
+	event.x = mouseX;
+	event.y = mouseY;
+	event.modifiers = native;
+
+	bool mouseUp = true;
+	CefBrowserHost::MouseButtonType btnType = MBT_LEFT;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
+}
+
+void SimpleHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsigned buttons)
+{
+	CefMouseEvent event;
+	event.x = mouseX;
+	event.y = mouseY;
+	event.modifiers = native;
+
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+		(*it)->GetHost()->SendMouseMoveEvent(event,false);
+
+}
+
 
 bool SimpleHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 	CefRect& rect) {

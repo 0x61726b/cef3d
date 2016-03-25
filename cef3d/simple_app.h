@@ -12,11 +12,11 @@ class CefOsrDelegate;
 
 // Implement application-level callbacks for the browser process.
 class SimpleApp : public CefApp,
-	public CefBrowserProcessHandler {
+	public CefBrowserProcessHandler
+{
 public:
 	SimpleApp(CefOsrDelegate* osr);
 
-	// CefApp methods:
 	void OnBeforeCommandLineProcessing(
 		const CefString& process_type,
 		CefRefPtr<CefCommandLine> command_line) OVERRIDE;
@@ -25,8 +25,9 @@ public:
 
 
 	int CreateBrowser(const CefRect& rect,const std::string& url);
-		// CefBrowserProcessHandler methods:
 	virtual void OnContextInitialized() OVERRIDE;
+
+	CefRefPtr<SimpleHandler> GetClientHandler() const { return client_handler_; }
 
 	CefOsrDelegate* osr_delegate_;
 	CefRefPtr<SimpleHandler> client_handler_;
