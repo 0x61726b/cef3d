@@ -53,9 +53,12 @@ namespace CefUI
 #else
 		pathToSubProces.append("/YumeCefSubProcess");
 #endif
+		std::string pathToLogFile(binaryDir);
+		pathToLogFile.append("/YumeCef.log");
 
 		CefString(&cefSettings_.browser_subprocess_path).FromASCII(pathToSubProces.c_str());
-
+		CefString(&cefSettings_.log_file).FromASCII(pathToLogFile.c_str());
+		cefSettings_.log_severity = LOGSEVERITY_INFO;
 		client_app_ = (new SimpleApp(osr_delegate_));
 
 		return true;

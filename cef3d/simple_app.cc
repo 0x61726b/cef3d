@@ -32,7 +32,7 @@ void SimpleApp::OnBeforeCommandLineProcessing(
 int SimpleApp::CreateBrowser(const CefRect& rect,const std::string& url)
 {
 	CefWindowInfo window_info;
-	window_info.SetAsWindowless(NULL,false);
+	window_info.SetAsWindowless(NULL,true);
 
 	client_handler_->AddBrowserRect(rect);
 	CefBrowserSettings browser_settings;
