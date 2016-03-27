@@ -2,7 +2,7 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#include "simple_app.h"
+#include "Cef3DApp.h"
 
 #include <string>
 
@@ -11,14 +11,15 @@
 #include "include/cef_command_line.h"
 #include "include/wrapper/cef_helpers.h"
 
+#include "Cef3DV8Handler.h"
 #include "Cef3D.h"
 
-SimpleApp::SimpleApp(CefOsrDelegate* osr): osr_delegate_(osr)
+Cef3DApp::Cef3DApp(CefOsrDelegate* osr): osr_delegate_(osr)
 {
-	client_handler_ = (new SimpleHandler(osr_delegate_));
+	client_handler_ = (new Cef3DClientHandler(osr_delegate_));
 }
 
-void SimpleApp::OnBeforeCommandLineProcessing(
+void Cef3DApp::OnBeforeCommandLineProcessing(
 	const CefString& process_type,
 	CefRefPtr<CefCommandLine> command_line)
 {
@@ -29,7 +30,7 @@ void SimpleApp::OnBeforeCommandLineProcessing(
 	command_line->AppendSwitch("enable-begin-frame-scheduling");
 }
 
-int SimpleApp::CreateBrowser(const CefRect& rect,const std::string& url)
+int Cef3DApp::CreateBrowser(const CefRect& rect,const std::string& url)
 {
 	CefWindowInfo window_info;
 	window_info.SetAsWindowless(NULL,true);
@@ -42,8 +43,17 @@ int SimpleApp::CreateBrowser(const CefRect& rect,const std::string& url)
 	return client_handler_->GetBrowserListSize() - 1;
 }
 
-void SimpleApp::OnContextInitialized() {
+
+void Cef3DApp::OnContextInitialized()
+{
 	CEF_REQUIRE_UI_THREAD();
 
 	osr_delegate_->OnContextReady();
+
+	LOG(INFO) << "Context is initialized";
+}
+
+void Cef3DApp::SetExtensionSource(const char* extension)
+{
+	extensionSourceCode_ = extension;
 }

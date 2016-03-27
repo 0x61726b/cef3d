@@ -35,12 +35,16 @@ include_directories(${YUME_BOOST_PATH})
 include_directories(${CEF_INCLUDE_DIRS})
 include_directories(${YUME_3RDPARTY_PATH}/log4cplus/include)
 
+add_definitions(-DBOOST_ALL_NO_LIB=1)
+
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}) #This is to avoid linker error on MSVC so tell that this is a win32 app LOL
 
 target_link_libraries(${PROJECT_NAME} ${CEF_LIB_DEBUG} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+target_link_libraries(${PROJECT_NAME} ${YUME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Yume")
 
 source_group(${PROJECT_NAME} FILES ${HEADER_FILES} ${SOURCE_FILES})
 
 set_output_dir(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} SDL2main)

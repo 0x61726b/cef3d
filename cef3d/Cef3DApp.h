@@ -6,34 +6,47 @@
 #define CEF_TESTS_CEFSIMPLE_SIMPLE_APP_H_
 
 #include "include/cef_app.h"
-#include "simple_handler.h"
+#include "Cef3DClientHandler.h"
 
 class CefOsrDelegate;
 
 // Implement application-level callbacks for the browser process.
-class SimpleApp : public CefApp,
+class Cef3DApp :
+	public CefApp,
 	public CefBrowserProcessHandler
 {
 public:
-	SimpleApp(CefOsrDelegate* osr);
+	Cef3DApp(CefOsrDelegate* osr);
 
 	void OnBeforeCommandLineProcessing(
 		const CefString& process_type,
 		CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+
 	virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
 		OVERRIDE{return this;}
 
 
 	int CreateBrowser(const CefRect& rect,const std::string& url);
+
+	//CefRenderProcess
 	virtual void OnContextInitialized() OVERRIDE;
 
-	CefRefPtr<SimpleHandler> GetClientHandler() const { return client_handler_; }
 
+	
+
+	void SetExtensionSource(const char*);
+
+	CefRefPtr<Cef3DClientHandler> GetClientHandler() const { return client_handler_; }
+
+
+
+private:
+	const char* extensionSourceCode_;
 	CefOsrDelegate* osr_delegate_;
-	CefRefPtr<SimpleHandler> client_handler_;
+	CefRefPtr<Cef3DClientHandler> client_handler_;
 private:
 	// Include the default reference counting implementation.
-	IMPLEMENT_REFCOUNTING(SimpleApp);
+	IMPLEMENT_REFCOUNTING(Cef3DApp);
 };
 
 #endif  // CEF_TESTS_CEFSIMPLE_SIMPLE_APP_H_

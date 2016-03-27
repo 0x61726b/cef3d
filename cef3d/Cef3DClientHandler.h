@@ -2,24 +2,60 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#ifndef CEF_TESTS_CEFSIMPLE_SIMPLE_HANDLER_H_
-#define CEF_TESTS_CEFSIMPLE_SIMPLE_HANDLER_H_
+#ifndef __Cef3DClientHandler_h__
+#define __Cef3DClientHandler_h__
 
 #include "include/cef_client.h"
 
 #include <list>
+#include <set>
 
 class CefOsrDelegate;
 
-class SimpleHandler : public CefClient,
+class Cef3DClientHandler :
+	public CefClient,
 	public CefLifeSpanHandler,
-	public CefRenderHandler {
+	public CefRenderHandler,
+	public CefLoadHandler
+{
 public:
-	SimpleHandler(CefOsrDelegate* del);
-	~SimpleHandler();
+	Cef3DClientHandler(CefOsrDelegate* del);
+	~Cef3DClientHandler();
+
+	class ProcessMessageDelegate : public virtual CefBase {
+	public:
+		explicit ProcessMessageDelegate(const char* message_namespace)
+			: message_namespace_(message_namespace) {}
+
+		// Called when a process message is received. Return true if the message was
+		// handled and should not be passed on to other handlers.
+		// ProcessMessageDelegates should check for unique message names to avoid
+		// interfering with each other.
+		virtual bool OnProcessMessageReceived(
+			CefRefPtr<Cef3DClientHandler> handler,
+			CefRefPtr<CefBrowser> browser,
+			CefProcessId source_process,
+			CefRefPtr<CefProcessMessage> message) {
+			return false;
+		}
+
+		virtual bool IsAcceptedNamespace(std::string message_name) {
+			return (
+				message_namespace_
+				&& message_name.find(message_namespace_) == 0);
+		}
+
+	protected:
+		const char* message_namespace_;
+
+	};
+
+	void SendJSEvent(int browserIndex, const CefString& name,const CefString& data);
+	typedef std::set<CefRefPtr<ProcessMessageDelegate> >
+		ProcessMessageDelegateSet;
 
 	// Provide access to the single global instance of this object.
-	static SimpleHandler* GetInstance();
+	static Cef3DClientHandler* GetInstance();
 
 	// CefClient methods:
 	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE{
@@ -29,10 +65,19 @@ public:
 		return this;
 	}
 
+	virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+		CefProcessId source_process,
+		CefRefPtr<CefProcessMessage> message)
+		OVERRIDE;
+
 	// CefLifeSpanHandler methods:
 	virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 	virtual bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 	virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+	//CefLoadHandler
+	void OnLoadStart(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefFrame> frame);
 
 	void HandleKeyDown(unsigned key,unsigned mouseButton,int repeat);
 	void HandleKeyUp(unsigned key,unsigned mouseButton,int repeat);
@@ -79,15 +124,17 @@ public:
 	void CloseAllBrowsers(bool force_close);
 
 	void AddBrowserRect(const CefRect& rect);
-
 	int GetBrowserListSize() const { return browser_list_.size(); }
-
 	bool IsClosing() const { return is_closing_; }
+
+	CefRefPtr<CefBrowser> GetOverlayBrowser() { return browser_list_.front(); }
 
 private:
 	// List of existing browser windows. Only accessed on the CEF UI thread.
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
+
+	ProcessMessageDelegateSet process_message_delegates_;
 
 	typedef std::vector<CefRect> BrowserRectList;
 	BrowserRectList browser_rects_;
@@ -97,7 +144,7 @@ private:
 	bool is_closing_;
 
 	// Include the default reference counting implementation.
-	IMPLEMENT_REFCOUNTING(SimpleHandler);
+	IMPLEMENT_REFCOUNTING(Cef3DClientHandler);
 };
 
 #endif  // CEF_TESTS_CEFSIMPLE_SIMPLE_HANDLER_H_

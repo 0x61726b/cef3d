@@ -2,7 +2,7 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#include "simple_handler.h"
+#include "Cef3DClientHandler.h"
 
 #include <sstream>
 #include <string>
@@ -12,29 +12,60 @@
 #include "include/wrapper/cef_closure_task.h"
 #include "include/wrapper/cef_helpers.h"
 
+#include "Cef3DBrowserDelegate.h"
 #include "Cef3D.h"
 namespace {
 
-	SimpleHandler* g_instance = NULL;
+	Cef3DClientHandler* g_instance = NULL;
 
 }  // namespace
 
-SimpleHandler::SimpleHandler(CefOsrDelegate* del)
+Cef3DClientHandler::Cef3DClientHandler(CefOsrDelegate* del)
 	: is_closing_(false),osr_delegate_(del) {
 	DCHECK(!g_instance);
 	g_instance = this;
+
+	CefUI::Cef3DBrowserDelegate::CreateProcessMessageDelegates(&process_message_delegates_);
 }
 
-SimpleHandler::~SimpleHandler() {
+Cef3DClientHandler::~Cef3DClientHandler() {
 	g_instance = NULL;
 }
 
 // static
-SimpleHandler* SimpleHandler::GetInstance() {
+Cef3DClientHandler* Cef3DClientHandler::GetInstance() {
 	return g_instance;
 }
 
-void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+void Cef3DClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefFrame> frame)
+{
+
+}
+
+bool Cef3DClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+	CefProcessId source_process,
+	CefRefPtr<CefProcessMessage> message)
+{
+	std::string message_name = message->GetName();
+	bool handled = false;
+	// Execute delegate callbacks.
+	for(const auto &delegate : process_message_delegates_) {
+		handled = delegate->OnProcessMessageReceived(
+			this,
+			browser,
+			source_process,
+			message
+			);
+	}
+
+	if(!handled)
+		LOG(WARNING) << "Unknown proccess message: " << message_name;
+
+	return handled;
+}
+
+void Cef3DClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	CEF_REQUIRE_UI_THREAD();
 
 	// Add to the list of existing browsers.
@@ -42,7 +73,7 @@ void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 	osr_delegate_->OnBrowserReady(browser_list_.size() - 1);
 }
 
-bool SimpleHandler::DoClose(CefRefPtr<CefBrowser> browser) {
+bool Cef3DClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
 	CEF_REQUIRE_UI_THREAD();
 
 	// Closing the main window requires special handling. See the DoClose()
@@ -58,7 +89,7 @@ bool SimpleHandler::DoClose(CefRefPtr<CefBrowser> browser) {
 	return false;
 }
 
-void SimpleHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
+void Cef3DClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 	CEF_REQUIRE_UI_THREAD();
 
 	// Remove from the list of existing browsers.
@@ -71,11 +102,11 @@ void SimpleHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 	}
 }
 
-void SimpleHandler::CloseAllBrowsers(bool force_close) {
+void Cef3DClientHandler::CloseAllBrowsers(bool force_close) {
 	if(!CefCurrentlyOn(TID_UI)) {
 		// Execute on the UI thread.
 		CefPostTask(TID_UI,
-			base::Bind(&SimpleHandler::CloseAllBrowsers,this,force_close));
+			base::Bind(&Cef3DClientHandler::CloseAllBrowsers,this,force_close));
 		return;
 	}
 
@@ -87,11 +118,34 @@ void SimpleHandler::CloseAllBrowsers(bool force_close) {
 		(*it)->GetHost()->CloseBrowser(force_close);
 }
 
-void SimpleHandler::HandleKeyEvent(int type,int modifiers,unsigned key)
+void Cef3DClientHandler::SendJSEvent(int browserIndex,const CefString& name,const CefString& data)
+{
+	CefRefPtr<CefBrowser> browser;
+	int counter = 0;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+	{
+		if(counter == browserIndex)
+			browser = *it;
+	}
+
+	if(!browser)
+		return;
+
+	CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("dispatchEvent");
+	message->GetArgumentList()->SetString(0,name);
+	message->GetArgumentList()->SetString(1,data);
+
+
+	browser->SendProcessMessage(PID_RENDERER,message);
+}
+
+
+void Cef3DClientHandler::HandleKeyEvent(int type,int modifiers,unsigned key)
 {
 	CefKeyEvent event;
 
-	
+
 	if(key == 1073742049)
 		key = 16;
 	if(key == 1073742048)
@@ -117,7 +171,7 @@ void SimpleHandler::HandleKeyEvent(int type,int modifiers,unsigned key)
 
 }
 
-void SimpleHandler::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
+void Cef3DClientHandler::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
 {
 	CefKeyEvent event;
 	event.windows_key_code = key;
@@ -130,7 +184,7 @@ void SimpleHandler::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
 }
 
 
-void SimpleHandler::HandleKeyUp(unsigned key,unsigned mouseButton,int repeat)
+void Cef3DClientHandler::HandleKeyUp(unsigned key,unsigned mouseButton,int repeat)
 {
 	CefKeyEvent event;
 	event.native_key_code = key;
@@ -141,7 +195,7 @@ void SimpleHandler::HandleKeyUp(unsigned key,unsigned mouseButton,int repeat)
 		(*it)->GetHost()->SendKeyEvent(event);
 }
 
-void SimpleHandler::HandleMouseButtonDown(int mouseX,int mouseY,int native,int button,unsigned buttons)
+void Cef3DClientHandler::HandleMouseButtonDown(int mouseX,int mouseY,int native,int button,unsigned buttons)
 {
 	CefMouseEvent event;
 	event.x = mouseX;
@@ -155,7 +209,7 @@ void SimpleHandler::HandleMouseButtonDown(int mouseX,int mouseY,int native,int b
 		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
 }
 
-void SimpleHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,int button,unsigned buttons)
+void Cef3DClientHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,int button,unsigned buttons)
 {
 	CefMouseEvent event;
 	event.x = mouseX;
@@ -169,7 +223,7 @@ void SimpleHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,int but
 		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
 }
 
-void SimpleHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsigned buttons)
+void Cef3DClientHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsigned buttons)
 {
 	CefMouseEvent event;
 	event.x = mouseX;
@@ -183,13 +237,13 @@ void SimpleHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsigned bu
 }
 
 
-bool SimpleHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+bool Cef3DClientHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 	CefRect& rect) {
 	CEF_REQUIRE_UI_THREAD();
 	return true;
 }
 
-bool SimpleHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
+bool Cef3DClientHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
 	CefRect& rect) {
 	CEF_REQUIRE_UI_THREAD();
 
@@ -208,12 +262,12 @@ bool SimpleHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
 	return true;
 }
 
-void SimpleHandler::AddBrowserRect(const CefRect& rect)
+void Cef3DClientHandler::AddBrowserRect(const CefRect& rect)
 {
 	browser_rects_.push_back(rect);
 }
 
-bool SimpleHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
+bool Cef3DClientHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
 	int viewX,
 	int viewY,
 	int& screenX,
@@ -223,25 +277,25 @@ bool SimpleHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
 	return true;
 }
 
-bool SimpleHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
+bool Cef3DClientHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
 	CefScreenInfo& screen_info) {
 	CEF_REQUIRE_UI_THREAD();
 	return true;
 }
 
-void SimpleHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
+void Cef3DClientHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
 	bool show) {
 	CEF_REQUIRE_UI_THREAD();
 
 }
 
-void SimpleHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
+void Cef3DClientHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
 	const CefRect& rect) {
 	CEF_REQUIRE_UI_THREAD();
 
 }
 
-void SimpleHandler::OnPaint(CefRefPtr<CefBrowser> browser,
+void Cef3DClientHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 	PaintElementType type,
 	const RectList& dirtyRects,
 	const void* buffer,
@@ -276,7 +330,7 @@ void SimpleHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 
 }
 
-void SimpleHandler::OnCursorChange(
+void Cef3DClientHandler::OnCursorChange(
 	CefRefPtr<CefBrowser> browser,
 	CefCursorHandle cursor,
 	CursorType type,
@@ -285,7 +339,7 @@ void SimpleHandler::OnCursorChange(
 
 }
 
-bool SimpleHandler::StartDragging(CefRefPtr<CefBrowser> browser,
+bool Cef3DClientHandler::StartDragging(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefDragData> drag_data,
 	CefRenderHandler::DragOperationsMask allowed_ops,
 	int x,int y) {
@@ -293,7 +347,7 @@ bool SimpleHandler::StartDragging(CefRefPtr<CefBrowser> browser,
 	return true;
 }
 
-void SimpleHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
+void Cef3DClientHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
 	CefRenderHandler::DragOperation operation) {
 	CEF_REQUIRE_UI_THREAD();
 }

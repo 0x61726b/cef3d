@@ -14,32 +14,43 @@
 //51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.*/
 //----------------------------------------------------------------------------
 //
-// File : <Filename> YumeGraphics.h
-// Date : 2.19.2016
+// File : <Filename>
+// Date : <Date>
 // Comments :
 //
 //----------------------------------------------------------------------------
-#include "include/cef_render_handler.h"
-#include "include/cef_app.h"
+#ifndef __CefV8Handler_h__
+#define __CefV8Handler_h__
+//----------------------------------------------------------------------------
+#include "Cef3DRequired.h"
+#include "include/cef_v8.h"
 #include "include/cef_client.h"
-#include "include/cef_browser.h"
-#include "include/cef_command_line.h"
-#include "include/wrapper/cef_helpers.h"
+#include "Cef3DRendererApp.h"
+//----------------------------------------------------------------------------
 
-#include "cef3d/Cef3DRendererApp.h"
+class Cef3DV8Handler : public CefV8Handler
+{
+public:
+	explicit Cef3DV8Handler(CefRefPtr<Cef3DRendererApp> clientApp)
+		: client_app_(clientApp),
+		messageId(0)
+	{
+	}
 
-#include <Core/YumeFile.h>
+	virtual bool Execute(const CefString& name,
+		CefRefPtr<CefV8Value> object,
+		const CefV8ValueList& arguments,
+		CefRefPtr<CefV8Value>& retval,
+		CefString& exception) OVERRIDE;
 
-int main(int argc,char* argv[]) {
-#ifdef _WIN32
-	CefMainArgs main_args(GetModuleHandle(NULL));
-#else
-	CefMainArgs main_args(argc,argv);
+private:
+	CefRefPtr<Cef3DRendererApp> client_app_;
+	int32 messageId;
+
+	IMPLEMENT_REFCOUNTING(Cef3DV8Handler);
+};
+
+
+
+//----------------------------------------------------------------------------
 #endif
-	using namespace YumeEngine;
-	YumeFile file(YumeString("D:/Arken/C++/Yume/v2/YumeEngine/Engine/Assets/UI/Cef3D.js"));
-
-	YumeString extension = file.ReadString();
-	CefRefPtr<Cef3DRendererApp> app(new Cef3DRendererApp(extension.c_str()));
-	return CefExecuteProcess(main_args,app.get(),nullptr);
-}

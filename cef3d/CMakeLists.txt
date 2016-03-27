@@ -24,10 +24,20 @@ set(CEF3D_SOURCES
   Cef3DRequired.h
   Cef3D.h
   Cef3D.cc
-  simple_app.h
-  simple_app.cc
-  simple_handler.h
-  simple_handler.cc
+  Cef3DApp.h
+  Cef3DApp.cc
+  Cef3DClientHandler.h
+  Cef3DClientHandler.cc
+  Cef3DV8Handler.h
+  Cef3DV8Handler.cc
+  Cef3DHelper.h
+  Cef3DHelper.cc
+  Cef3DBrowserDelegate.h
+  Cef3DBrowserDelegate.cc
+  Cef3DRendererApp.h
+  Cef3DRendererApp.cc
+  Cef3DDOM.h
+  Cef3DDOM.cc
 )
 
 include_directories(${YUME_INCLUDE_DIR})

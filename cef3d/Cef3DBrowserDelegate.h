@@ -14,32 +14,38 @@
 //51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.*/
 //----------------------------------------------------------------------------
 //
-// File : <Filename> YumeGraphics.h
-// Date : 2.19.2016
+// File : <Filename>
+// Date : <Date>
 // Comments :
 //
 //----------------------------------------------------------------------------
-#include "include/cef_render_handler.h"
-#include "include/cef_app.h"
-#include "include/cef_client.h"
-#include "include/cef_browser.h"
-#include "include/cef_command_line.h"
-#include "include/wrapper/cef_helpers.h"
+#ifndef __Cef3DBrowserDelegate_h__
+#define __Cef3DBrowserDelegate_h__
+//----------------------------------------------------------------------------
+#include "Cef3DRequired.h"
 
-#include "cef3d/Cef3DRendererApp.h"
+#include "Cef3DClientHandler.h"
+//----------------------------------------------------------------------------
+namespace CefUI
+{
+	class Cef3DBrowserDelegate : Cef3DClientHandler::ProcessMessageDelegate
+	{
+	public:
+		Cef3DBrowserDelegate();
 
-#include <Core/YumeFile.h>
+		virtual bool OnProcessMessageReceived(
+			CefRefPtr<Cef3DClientHandler> handler,
+			CefRefPtr<CefBrowser> browser,
+			CefProcessId source_process,
+			CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
-int main(int argc,char* argv[]) {
-#ifdef _WIN32
-	CefMainArgs main_args(GetModuleHandle(NULL));
-#else
-	CefMainArgs main_args(argc,argv);
-#endif
-	using namespace YumeEngine;
-	YumeFile file(YumeString("D:/Arken/C++/Yume/v2/YumeEngine/Engine/Assets/UI/Cef3D.js"));
+		// Create message delegates that run in the browser process
+		static void CreateProcessMessageDelegates(Cef3DClientHandler::ProcessMessageDelegateSet *delegates);
 
-	YumeString extension = file.ReadString();
-	CefRefPtr<Cef3DRendererApp> app(new Cef3DRendererApp(extension.c_str()));
-	return CefExecuteProcess(main_args,app.get(),nullptr);
+		IMPLEMENT_REFCOUNTING(Cef3DBrowserDelegate);
+	};
 }
+
+
+//----------------------------------------------------------------------------
+#endif

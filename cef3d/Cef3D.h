@@ -23,8 +23,8 @@
 #define __Cef3D_h__
 //----------------------------------------------------------------------------
 #include "Cef3DRequired.h"
-#include "simple_handler.h"
-#include "simple_app.h"
+#include "Cef3DClientHandler.h"
+#include "Cef3DApp.h"
 //----------------------------------------------------------------------------
 
 
@@ -35,7 +35,8 @@ public:
 		int width,
 		int height) = 0;
 
-	virtual void OnContextReady() = 0; //Context is ready,we can create browsers here
+	virtual void OnContextReady() { }; //Context is ready,we can create browsers here
+	virtual void OnRendererContextReady() { }; //Context is ready,we can create browsers here
 	virtual void OnBrowserReady(unsigned index) = 0; //Browser is ready,the texture should be up now
 
 };
@@ -50,10 +51,16 @@ namespace CefUI
 
 		virtual ~Cef3D();
 
+		static Cef3D* GetInstance();
+
 		bool Initialize(const char* binaryDir);
 		bool DoInit();
 
 		void Shutdown();
+
+		void SendEvent(int browserIndex,const CefString& name,const CefString& data);
+
+		
 
 		int CreateBrowser(const CefRect& rect,const std::string&);
 		void RunCefLoop();
@@ -65,12 +72,19 @@ namespace CefUI
 		void HandleMouseMove(int mouseX,int mouseY,int modifiers,unsigned buttons);
 
 		void HandleKeyEvent(int type,int modifiers,unsigned key);
+
+		void SetCustomExtensionSourceCode(const char*);
+		const char* GetCustomExtensionSourceCode() const { return customExtensionSourceCode;}
+
+		bool IsInitialized() const { return isInitialized_; }
+		CefOsrDelegate* GetDelegate() const {return osr_delegate_; }
 	private:
 		void* windowHandle_;
 		CefOsrDelegate* osr_delegate_;
-		CefRefPtr<SimpleApp> client_app_;
+		CefRefPtr<Cef3DApp> client_app_;
 		CefSettings cefSettings_;
 
+		const char* customExtensionSourceCode;
 		bool isInitialized_;
 	};
 }

@@ -20,8 +20,11 @@
 //
 //----------------------------------------------------------------------------
 #include "Cef3D.h"
-#include "simple_app.h"
+#include "Cef3DApp.h"
 
+namespace {
+	CefUI::Cef3D* gInst = 0;
+}
 
 namespace CefUI
 {
@@ -31,12 +34,17 @@ namespace CefUI
 		osr_delegate_(del),
 		isInitialized_(false)
 	{
-
+		gInst = this;
 	}
 
 	Cef3D::~Cef3D()
 	{
 
+	}
+
+	Cef3D* Cef3D::GetInstance()
+	{
+		return gInst;
 	}
 
 	bool Cef3D::Initialize(const char* binaryDir)
@@ -58,8 +66,8 @@ namespace CefUI
 
 		CefString(&cefSettings_.browser_subprocess_path).FromASCII(pathToSubProces.c_str());
 		CefString(&cefSettings_.log_file).FromASCII(pathToLogFile.c_str());
-		cefSettings_.log_severity = LOGSEVERITY_INFO;
-		client_app_ = (new SimpleApp(osr_delegate_));
+		cefSettings_.log_severity = LOGSEVERITY_DEFAULT;
+		client_app_ = (new Cef3DApp(osr_delegate_));
 
 		return true;
 	}
@@ -83,6 +91,11 @@ namespace CefUI
 			DoInit();
 
 		return client_app_->CreateBrowser(::CefRect(rect.x,rect.y,rect.width,rect.height),url);
+	}
+
+	void Cef3D::SendEvent(int browserIndex,const CefString& name,const CefString& data)
+	{
+		client_app_->GetClientHandler()->SendJSEvent(browserIndex,name,data);
 	}
 
 	void Cef3D::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
@@ -114,8 +127,14 @@ namespace CefUI
 	void Cef3D::HandleKeyEvent(int type,int modifiers,unsigned key)
 	{
 		client_app_->GetClientHandler()->HandleKeyEvent(type,modifiers,key);
+
+		
 	}
 
+	void Cef3D::SetCustomExtensionSourceCode(const char* source)
+	{
+		customExtensionSourceCode = source;
+	}
 
 	void Cef3D::Shutdown()
 	{

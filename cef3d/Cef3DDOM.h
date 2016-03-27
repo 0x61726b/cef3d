@@ -14,32 +14,22 @@
 //51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.*/
 //----------------------------------------------------------------------------
 //
-// File : <Filename> YumeGraphics.h
-// Date : 2.19.2016
+// File : <Filename>
+// Date : <Date>
 // Comments :
 //
 //----------------------------------------------------------------------------
-#include "include/cef_render_handler.h"
-#include "include/cef_app.h"
-#include "include/cef_client.h"
-#include "include/cef_browser.h"
-#include "include/cef_command_line.h"
-#include "include/wrapper/cef_helpers.h"
+#ifndef __Cef3DDOM_h__
+#define __Cef3DDOM_h__
+//----------------------------------------------------------------------------
+#include "include/cef_dom.h"
+#include "Cef3DClientHandler.h"
+//----------------------------------------------------------------------------
+namespace CefUI
+{
 
-#include "cef3d/Cef3DRendererApp.h"
 
-#include <Core/YumeFile.h>
 
-int main(int argc,char* argv[]) {
-#ifdef _WIN32
-	CefMainArgs main_args(GetModuleHandle(NULL));
-#else
-	CefMainArgs main_args(argc,argv);
-#endif
-	using namespace YumeEngine;
-	YumeFile file(YumeString("D:/Arken/C++/Yume/v2/YumeEngine/Engine/Assets/UI/Cef3D.js"));
-
-	YumeString extension = file.ReadString();
-	CefRefPtr<Cef3DRendererApp> app(new Cef3DRendererApp(extension.c_str()));
-	return CefExecuteProcess(main_args,app.get(),nullptr);
 }
+//----------------------------------------------------------------------------
+#endif
