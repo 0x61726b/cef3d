@@ -38,7 +38,7 @@ public:
 	virtual void OnContextReady() { }; //Context is ready,we can create browsers here
 	virtual void OnRendererContextReady() { }; //Context is ready,we can create browsers here
 	virtual void OnBrowserReady(unsigned index) = 0; //Browser is ready,the texture should be up now
-
+	virtual void OnDomEvent(const std::string& str,const std::string& event, const std::string& data) { };
 };
 
 

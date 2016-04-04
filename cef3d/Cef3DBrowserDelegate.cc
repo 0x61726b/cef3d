@@ -77,6 +77,13 @@ namespace CefUI
 		{
 			
 		}
+		if(message_name == "SendDomEvent")
+		{
+			CefString arg1 = request_args->GetString(1); //DOM element
+			CefString arg2 = request_args->GetString(2); //event type
+			CefString arg3 = request_args->GetString(3); //bool
+			Cef3D::GetInstance()->GetDelegate()->OnDomEvent(arg1,arg2,arg3);
+		}
 		if(message_name == "OnDomReady")
 		{
 			Cef3D::GetInstance()->GetDelegate()->OnRendererContextReady();
