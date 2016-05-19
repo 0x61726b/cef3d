@@ -59,6 +59,7 @@ namespace CefUI
 		void Shutdown();
 
 		void SendEvent(int browserIndex,const CefString& name,const CefString& data);
+		void SetCppProperty(int browserIndex,const CefString& name,const CefString& data);
 
 		
 

@@ -38,7 +38,7 @@ Cef3DClientHandler* Cef3DClientHandler::GetInstance() {
 }
 
 void Cef3DClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
-                           CefRefPtr<CefFrame> frame)
+	CefRefPtr<CefFrame> frame)
 {
 
 }
@@ -123,7 +123,7 @@ void Cef3DClientHandler::SendJSEvent(int browserIndex,const CefString& name,cons
 	CefRefPtr<CefBrowser> browser;
 	int counter = 0;
 	BrowserList::const_iterator it = browser_list_.begin();
-	for(; it != browser_list_.end(); ++it)
+	for(; it != browser_list_.end(); ++it,counter++)
 	{
 		if(counter == browserIndex)
 			browser = *it;
@@ -139,8 +139,27 @@ void Cef3DClientHandler::SendJSEvent(int browserIndex,const CefString& name,cons
 
 	browser->SendProcessMessage(PID_RENDERER,message);
 }
+void Cef3DClientHandler::SetCppProperty(int browserIndex,const CefString& name,const CefString& data)
+{
+	CefRefPtr<CefBrowser> browser;
+	int counter = 0;
+	BrowserList::const_iterator it = browser_list_.begin();
+	for(; it != browser_list_.end(); ++it)
+	{
+		if(counter == browserIndex)
+			browser = *it;
+	}
+
+	if(!browser)
+		return;
+
+	CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("setCppProperty");
+	message->GetArgumentList()->SetString(0,name);
+	message->GetArgumentList()->SetString(1,data);
 
 
+	browser->SendProcessMessage(PID_RENDERER,message);
+}
 void Cef3DClientHandler::HandleKeyEvent(int type,int modifiers,unsigned key)
 {
 	CefKeyEvent event;
@@ -206,7 +225,14 @@ void Cef3DClientHandler::HandleMouseButtonDown(int mouseX,int mouseY,int native,
 	CefBrowserHost::MouseButtonType btnType = MBT_LEFT;
 	BrowserList::const_iterator it = browser_list_.begin();
 	for(; it != browser_list_.end(); ++it)
+	{
+		CefRect rect;
+		GetViewRect(*it,rect);
+
+		event.x -= rect.x;
+		event.y -= rect.y;
 		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
+	}
 }
 
 void Cef3DClientHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,int button,unsigned buttons)
@@ -220,7 +246,14 @@ void Cef3DClientHandler::HandleMouseButtonUp(int mouseX,int mouseY,int native,in
 	CefBrowserHost::MouseButtonType btnType = MBT_LEFT;
 	BrowserList::const_iterator it = browser_list_.begin();
 	for(; it != browser_list_.end(); ++it)
+	{
+		CefRect rect;
+		GetViewRect(*it,rect);
+
+		event.x -= rect.x;
+		event.y -= rect.y;
 		(*it)->GetHost()->SendMouseClickEvent(event,btnType,mouseUp,1);
+	}
 }
 
 void Cef3DClientHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsigned buttons)
@@ -232,7 +265,14 @@ void Cef3DClientHandler::HandleMouseMove(int mouseX,int mouseY,int native,unsign
 
 	BrowserList::const_iterator it = browser_list_.begin();
 	for(; it != browser_list_.end(); ++it)
+	{
+		CefRect rect;
+		GetViewRect(*it,rect);
+
+		event.x -= rect.x;
+		event.y -= rect.y;
 		(*it)->GetHost()->SendMouseMoveEvent(event,false);
+	}
 
 }
 

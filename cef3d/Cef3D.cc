@@ -98,15 +98,20 @@ namespace CefUI
 		client_app_->GetClientHandler()->SendJSEvent(browserIndex,name,data);
 	}
 
+	void Cef3D::SetCppProperty(int browserIndex,const CefString& name,const CefString& data)
+	{
+		client_app_->GetClientHandler()->SetCppProperty(browserIndex,name,data);
+	}
+
 	void Cef3D::HandleKeyDown(unsigned key,unsigned mouseButton,int repeat)
 	{
-		
+
 	}
 
 
 	void Cef3D::HandleKeyUp(unsigned key,unsigned mouseButton,int repeat)
 	{
-		
+
 	}
 
 	void Cef3D::HandleMouseButtonDown(int mouseX,int mouseY,int modifiers,int button,unsigned buttons)
@@ -128,7 +133,7 @@ namespace CefUI
 	{
 		client_app_->GetClientHandler()->HandleKeyEvent(type,modifiers,key);
 
-		
+
 	}
 
 	void Cef3D::SetCustomExtensionSourceCode(const char* source)

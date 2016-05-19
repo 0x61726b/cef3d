@@ -24,6 +24,7 @@
 #include "Cef3D.h"
 
 
+
 #include "Cef3DHelper.h"
 
 void Cef3DRendererApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
@@ -38,12 +39,14 @@ void Cef3DRendererApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefFrame> frame,
 	CefRefPtr<CefV8Context> context)
 {
-	
+
 }
 
 void Cef3DRendererApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
 {
+#ifndef NDEBUG
 	LOG(INFO) << "Render thread is created";
+#endif
 }
 void Cef3DRendererApp::OnWebKitInitialized()
 {
@@ -115,6 +118,28 @@ bool Cef3DRendererApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 					CefV8ValueList args;
 					args.push_back(CefV8Value::CreateString(eventName));
 					args.push_back(CefV8Value::CreateString(eventData));
+
+					js_window->ExecuteFunction(global,args);
+				}
+			}
+
+			context->Exit();
+		}
+		else if(message->GetName() == "setCppProperty")
+		{
+			CefRefPtr<CefListValue> messageArgs = message->GetArgumentList();
+			std::string propName = messageArgs->GetString(0);
+			std::string propData = messageArgs->GetSize() > 1 ? messageArgs->GetString(1) : "[]";
+
+			CefRefPtr<CefV8Context> context = browser->GetMainFrame()->GetV8Context();
+			context->Enter();
+			CefRefPtr<CefV8Value> global = context->GetGlobal();
+			if(global->HasValue("setCppProperty")) {
+				CefRefPtr<CefV8Value> js_window = global->GetValue("setCppProperty");
+				if(js_window->IsFunction()) {
+					CefV8ValueList args;
+					args.push_back(CefV8Value::CreateString(propName));
+					args.push_back(CefV8Value::CreateString(propData));
 
 					js_window->ExecuteFunction(global,args);
 				}

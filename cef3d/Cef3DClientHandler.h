@@ -51,6 +51,9 @@ public:
 	};
 
 	void SendJSEvent(int browserIndex, const CefString& name,const CefString& data);
+	void SetCppProperty(int browserIndex, const CefString& name,const CefString& data);
+
+
 	typedef std::set<CefRefPtr<ProcessMessageDelegate> >
 		ProcessMessageDelegateSet;
 
