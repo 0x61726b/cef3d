@@ -17,43 +17,18 @@
 # Date : 8.27.2015
 # Comments :
 ################################################################################
-set(PROJECT_NAME "Cef3D")
+set(LIB_NAME "Cef3D")
 
+file(GLOB CEF3D_FILES *.cpp *.h)
 
-set(CEF3D_SOURCES
-  Cef3DRequired.h
-  Cef3D.h
-  Cef3D.cc
-  Cef3DApp.h
-  Cef3DApp.cc
-  Cef3DClientHandler.h
-  Cef3DClientHandler.cc
-  Cef3DV8Handler.h
-  Cef3DV8Handler.cc
-  Cef3DHelper.h
-  Cef3DHelper.cc
-  Cef3DBrowserDelegate.h
-  Cef3DBrowserDelegate.cc
-  Cef3DRendererApp.h
-  Cef3DRendererApp.cc
-  Cef3DDOM.h
-  Cef3DDOM.cc
-)
+source_group(Cef3D FILES ${CEF3D_FILES})
 
-include_directories(${YUME_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${YUME_BOOST_PATH})
-include_directories(${CEF_INCLUDE_DIRS})
-include_directories(${YUME_3RDPARTY_PATH}/log4cplus/include)
+add_definitions(-DCEF3D_EXPORTS)
 
+if(${CEF3D_SHARED_LIBS})
+    ADD_LIBRARY(${LIB_NAME} SHARED ${CEF3D_FILES})
+else()
+    ADD_LIBRARY(${LIB_NAME} ${CEF3D_FILES})
+endif()
 
-source_group(Cef3D FILES ${CEF3D_SOURCES})
-
-add_definitions(-DBUILDING_CEF3D)
-
-ADD_LIBRARY(${PROJECT_NAME} ${CEF3D_BROWSER_SOURCE} ${CEF3D_RENDERER_SOURCE} ${CEF3D_COMMON_SOURCE} ${CEF3D_SOURCES})
-
-target_link_libraries(${PROJECT_NAME} ${CEF_LIB_DEBUG} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Yume")
-
-set_output_dir(${PROJECT_NAME})
+target_link_libraries(${LIB_NAME} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
