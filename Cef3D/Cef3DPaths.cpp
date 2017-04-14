@@ -12,13 +12,31 @@
 
 #include "Cef3D.h"
 
-namespace Cef3DPrivate
-{
+namespace Cef3D {
+	namespace Cef3DPrivate
+	{
+		bool StringStartsWith(const std::string& A, const std::string& B)
+		{
+			if (A.compare(0, B.length(), B))
+				return true;
+			return false;
+		}
+	}
 
 }
 
 namespace Cef3D
 {
+	bool Cef3DPaths::IsRelative(const std::string& Path)
+	{
+		using namespace Cef3D::Cef3DPrivate;
+
+		const bool Rel = StringStartsWith(Path, "\\")
+			|| StringStartsWith(Path, "/")
+			|| Path.length() >= 2 && isalpha((int)Path[0]) && Path[1] == ':';
+		return !Rel;
+	}
+
 	const std::string& Cef3DPaths::Root()
 	{
 		static std::string RootDir;

@@ -52,6 +52,7 @@
 #endif
 
 #include <string>
+#include <list>
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>

@@ -18,6 +18,7 @@ namespace Cef3D
 	class CEF3D_API Cef3DPaths
 	{
 	public:
+		static bool IsRelative(const std::string& Path);
 		static const std::string& Root();
 	};
 }

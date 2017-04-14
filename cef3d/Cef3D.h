@@ -16,3 +16,6 @@
 #include "Cef3DBuild.h"
 #include "Cef3DFileSystem.h"
 #include "Cef3DPaths.h"
+#include "Cef3DHandler.h"
+
+#include "Cef3DApplication.h"

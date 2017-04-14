@@ -25,6 +25,8 @@ source_group(Cef3D FILES ${CEF3D_FILES})
 
 add_definitions(-DCEF3D_EXPORTS)
 
+include_directories(${CMAKE_SOURCE_DIRECTORY}/Cef)
+
 if(${CEF3D_SHARED_LIBS})
     ADD_LIBRARY(${LIB_NAME} SHARED ${CEF3D_FILES})
 else()

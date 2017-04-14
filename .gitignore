@@ -28,3 +28,6 @@
 *.app
 
 build_wx64
+Cef3D/Binaries
+Cef/Debug
+Cef/Release
