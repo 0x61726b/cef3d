@@ -6,28 +6,53 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
-// Cef3DGlobals.h
+// Cef3D.h
 // Date: 13.04.2017
 //---------------------------------------------------------------------------
 
 #pragma once
 
-#include "include/cef_app.h"
-
 namespace Cef3D
 {
-	class CEF3D_API Cef3DApplication : public CefApp,
-		public CefBrowserProcessHandler
+	enum CefProcessType
 	{
-	public:
-		Cef3DApplication();
+		ProcessBrowser,
+		ProcessRenderer
+	};
 
-		virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() OVERRIDE { return this; }
+	enum Cef3DLogLevel
+	{
+		Default,
+		Verbose,
+		Info,
+		Warning,
+		Error,
+		None
+	};
 
-		virtual void OnContextInitialized() OVERRIDE;
+	enum Cef3DBrowserType
+	{
+		Offscreen,
+		Normal
+	};
 
-	private:
-		IMPLEMENT_REFCOUNTING(Cef3DApplication);
+	struct Cef3DDefinition
+	{
+		Cef3DDefinition();
 
+		Cef3DLogLevel LogLevel;
+		std::string LogPath;
+		std::string ChildProcessPath;
+		std::string UserAgent;
+		std::list<std::string> CmdSwitches;
+	};
+
+	struct Cef3DBrowserDefinition
+	{
+		Cef3DBrowserDefinition();
+
+		int Width;
+		int Height;
+		Cef3DBrowserType Type;
 	};
 }

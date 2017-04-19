@@ -57,3 +57,17 @@
 #if PLATFORM_WINDOWS
 #include <Windows.h>
 #endif
+
+#if PLATFORM_WINDOWS
+typedef HWND WindowHandle;
+#elif PLATFORM_MACOS
+typedef NSView* WindowHandle;
+#else
+typedef void* WindowHandle;
+#endif
+
+#if PLATFORM_WINDOWS
+typedef HANDLE ProcessHandle;
+#elif defined(__linux__) || defined(__APPLE__)
+typedef pid_t ProcessHandle;
+#endif

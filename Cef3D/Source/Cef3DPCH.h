@@ -6,27 +6,23 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
-// Cef3DFileSystem.h
+// Cef3D.h
 // Date: 13.04.2017
 //---------------------------------------------------------------------------
 
-#include "Cef3D.h"
+#pragma once
 
-namespace Cef3D
-{
-	bool Cef3DFileSystem::Exists(const char* AbsPath)
-	{
-#if HAS_CPP17_FILESYSTEM
-		return std::experimental::filesystem::exists(AbsPath);
-#else
-		return false;
-#endif
-	}
+#include "Cef3DPlatform.h"
+#include "Cef3DBuild.h"
+#include "Cef3DDefs.h"
+#include "Cef3DUtils.h"
+#include "Cef3DFileSystem.h"
+#include "Cef3DPaths.h"
+#include "Cef3DHandler.h"
 
+#include "Cef3DApplication.h"
+#include "Cef3DRenderer.h"
 
-	Cef3DFileSystem& Cef3DFileSystem::Get()
-	{
-		static Cef3DFileSystem FileSystem;
-		return FileSystem;
-	}
-}
+#include "Cef3DBrowser.h"
+
+#include "Cef3DGlobals.h"

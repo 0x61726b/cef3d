@@ -10,9 +10,10 @@
 // Date: 13.04.2017
 //---------------------------------------------------------------------------
 
-#include "Cef3D.h"
+#include "Cef3DPCH.h"
 
-namespace Cef3D {
+namespace Cef3D 
+{
 	namespace Cef3DPrivate
 	{
 		bool StringStartsWith(const std::string& A, const std::string& B)

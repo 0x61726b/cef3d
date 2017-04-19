@@ -6,16 +6,11 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
-// Cef3D.h
+// Cef3DGlobals.h
 // Date: 13.04.2017
 //---------------------------------------------------------------------------
 
 #pragma once
 
-#include "Cef3DPlatform.h"
-#include "Cef3DBuild.h"
-#include "Cef3DFileSystem.h"
-#include "Cef3DPaths.h"
-#include "Cef3DHandler.h"
-
-#include "Cef3DApplication.h"
+extern CEF3D_API CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp;
+extern CEF3D_API CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler;

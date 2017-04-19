@@ -55,9 +55,6 @@ endif()
 
 set(BINARY_OUTPUT_DIR ${PROJECT_SOURCE_DIR}/Cef3D/Binaries/${BINARY_PREFIX})
 
-
-set(INORI_LIBRARY_OUTPUT_DIR BINARY_OUTPUT_DIR)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BINARY_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BINARY_OUTPUT_DIR})
 
@@ -70,5 +67,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${BINARY_OUTPUT_DIR})
 option(CEF3D_SHARED_LIBS OFF)
 
 add_subdirectory(Cef)
-add_subdirectory(Cef3D)
+add_subdirectory(Cef3D/Source)
+add_subdirectory(CefSubProcess)
 add_subdirectory(Demos)

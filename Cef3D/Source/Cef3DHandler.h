@@ -31,15 +31,9 @@ namespace Cef3D
 		static Cef3DHandler* Get();
 
 		// CefClient methods:
-		virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
-			return this;
-		}
-		virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE {
-			return this;
-		}
-		virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE {
-			return this;
-		}
+		virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE { return this; }
+		virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE { return this;}
+		virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE { return this; }
 
 		// CefDisplayHandler methods:
 		virtual void OnTitleChange(CefRefPtr<CefBrowser> browser,const CefString& title) OVERRIDE;

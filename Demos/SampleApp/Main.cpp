@@ -18,25 +18,22 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// Enable High-DPI support on Windows 7 or newer.
-	CefEnableHighDPISupport();
+	Cef3D::Cef3DDefinition definition;
 
-	CefMainArgs main_args(hInInstance);
+	bool init = Cef3D_Init(definition);
 
-	int exit_code = CefExecuteProcess(main_args, 0, 0);
-	if (exit_code >= 0) {
-		return exit_code;
-	}
+	if (!init)
+		return -1;
 
-	CefSettings settings;
+	Cef3D::Cef3DBrowser* browser = Cef3D_CreateBrowser(800, 600);
+	UNREFERENCED_PARAMETER(browser);
 
-	CefRefPtr<Cef3D::Cef3DApplication> app(new Cef3D::Cef3DApplication);
 
-	// Initialize CEF.
-	CefInitialize(main_args, settings, app.get(), NULL);
+	Cef3D_PumpMessageLoop();
 
-	CefRunMessageLoop();
+	Cef3D_Shutdown();
 
-	CefShutdown();
+	
+
 	return 0;
 }
