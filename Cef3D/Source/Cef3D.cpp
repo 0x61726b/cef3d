@@ -44,11 +44,22 @@ void Cef3D_PumpMessageLoop()
 
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrowserType Type)
 {
+	Cef3D::Cef3DBrowserDefinition settings;
+	settings.Width = Width;
+	settings.Height = Height;
+
+	return Cef3D_CreateBrowser(settings);
+}
+
+Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& Definition)
+{
 	Cef3D::Cef3DBrowser* browser = new Cef3D::Cef3DBrowser;
-	browser->SetWidth(Width);
-	browser->SetHeight(Height);
+	browser->SetWidth(Definition.Width);
+	browser->SetHeight(Definition.Height);
 
 	Cef3D::Cef3DBrowserDefinition settings;
+	settings.Width = Definition.Width;
+	settings.Height = Definition.Height;
 	Cef3DBrowserApp->CreateBrowser(settings, Cef3DBrowserHandler);
 
 	Cef3DBrowserApp->BrowserList.push_back(browser);

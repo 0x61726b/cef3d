@@ -88,6 +88,8 @@ namespace Cef3D
 
 	void Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler)
 	{
+		CEF_REQUIRE_UI_THREAD();
+
 #if PLATFORM_WINDOWS || PLATFORM_LINUX
 		const bool use_views = true;
 #else

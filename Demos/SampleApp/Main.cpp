@@ -25,8 +25,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	if (!init)
 		return -1;
 
-	Cef3D::Cef3DBrowser* browser = Cef3D_CreateBrowser(800, 600);
-	UNREFERENCED_PARAMETER(browser);
+	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(800, 600);
+	UNREFERENCED_PARAMETER(browser1);
+
+	Cef3D::Cef3DBrowser* browser2 = Cef3D_CreateBrowser(1024, 768);
+	UNREFERENCED_PARAMETER(browser2);
 
 
 	Cef3D_PumpMessageLoop();
