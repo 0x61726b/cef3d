@@ -61,6 +61,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		PostQuitMessage(0);
 		return 0;
 	} break;
+	case WM_KEYDOWN:
+	{
+		if (wParam == VK_ESCAPE)
+			PostQuitMessage(0);
+		return 0;
+	} break;
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
@@ -114,8 +120,8 @@ bool InitD3D(int Width,int Height, HWND window)
 
 	scd.BufferCount = 1;                                   
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;    
-	scd.BufferDesc.Width = Height;                   
-	scd.BufferDesc.Height = Width;                 
+	scd.BufferDesc.Width = Width;
+	scd.BufferDesc.Height = Height;                 
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     
 	scd.OutputWindow = window;                               
 	scd.SampleDesc.Count = 4;                              
@@ -191,12 +197,14 @@ bool InitD3D(int Width,int Height, HWND window)
 	devcon->VSSetShader(pVS, 0, 0);
 	devcon->PSSetShader(pPS, 0, 0);
 
-	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0, 0, -1, 0), DirectX::XMVectorSet(0, 0, 0, 0), DirectX::XMVectorSet(0, 1, 0, 0));
+	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0, 0, -5, 0), DirectX::XMVectorSet(0, 0, 0, 0), DirectX::XMVectorSet(0, 1, 0, 0));
 	DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(60), Width / Height, 0.1f, 10.0f);
 
 	DirectX::XMMATRIX VP = DirectX::XMMatrixMultiply(V, P);
+	
 	DirectX::XMVECTOR Det;
 	DirectX::XMMATRIX VPInv = DirectX::XMMatrixInverse(&Det, VP);
+
 
 	VsConstantBuffer VsConstData;
 	VsConstData.CamPos = DirectX::XMFLOAT3(0,0, 0);

@@ -29,5 +29,5 @@ PS_INPUT fs_triangle_vs(in float3 pos : POSITION)
 
 float4 fs_triangle_ps(PS_INPUT input) : SV_Target
 {
-    return float4(input.tex_coord,0,0);
+    return float4(input.view_ray,1.0f);
 }
