@@ -22,6 +22,7 @@ namespace Cef3D
 }
 
 CEF3D_API bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition);
+CEF3D_API int Cef3D_SubprocessLogic();
 CEF3D_API bool Cef3D_Shutdown();
 CEF3D_API void Cef3D_PumpMessageLoop();
 

@@ -83,10 +83,20 @@ namespace Cef3D
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		Cef3DBrowserHandler = new Cef3DHandler;
+		Handler = new Cef3DHandler;
 	}
 
-	void Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler)
+	Cef3DBrowser* Cef3DApplication::GetCef3DBrowser(CefRefPtr<CefBrowser> Browser)
+	{
+		DCHECK(Browser);
+
+		std::map<int, Cef3DBrowser*>::iterator bit = BrowserMap.find(Browser->GetIdentifier());
+		if(bit != BrowserMap.end())
+			return bit->second;
+		return 0;
+	}
+
+	int Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
@@ -103,6 +113,8 @@ namespace Cef3D
 				CustomHandler, testLoadUrl, settings, NULL, NULL);
 
 			CefRefPtr<CefWindow> cefWindow = CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate(browser_view, Definition));
+
+			return browser_view->GetBrowser()->GetIdentifier();
 		}
 		else
 		{
@@ -112,8 +124,11 @@ namespace Cef3D
 			window_info.SetAsPopup(NULL, "cefsimple");
 #endif
 
-			CefBrowserHost::CreateBrowser(window_info, CustomHandler, testLoadUrl, settings,
+			CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(window_info, CustomHandler, testLoadUrl, settings,
 				NULL);
+			return browser->GetIdentifier();
 		}
+
+		return -1;
 	}
 }

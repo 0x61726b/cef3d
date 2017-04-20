@@ -45,6 +45,8 @@ namespace Cef3D
 		std::string ChildProcessPath;
 		std::string UserAgent;
 		std::list<std::string> CmdSwitches;
+
+		bool UseChildProcess;
 	};
 
 	struct Cef3DBrowserDefinition

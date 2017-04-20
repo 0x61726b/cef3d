@@ -16,23 +16,28 @@
 
 namespace Cef3D
 {
+	class Cef3DBrowser;
 	class CEF3D_API Cef3DApplication : 
 		public CefApp,
 		public CefBrowserProcessHandler
 	{
 	public:
+
 		Cef3DApplication();
 
 		virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() OVERRIDE { return this; }
 
 		virtual void OnContextInitialized() OVERRIDE;
 
-		void CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler);
+		int CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler);
+
+		Cef3DBrowser* GetCef3DBrowser(CefRefPtr<CefBrowser> Browser);
 
 	public:
-		std::list<class Cef3DBrowser*> BrowserList;
+		std::map<int,Cef3DBrowser*> BrowserMap;
+		std::list<Cef3DBrowser*> TempBrowserList;
 	private:
 		IMPLEMENT_REFCOUNTING(Cef3DApplication);
-
+		CefRefPtr<Cef3DHandler> Handler;
 	};
 }

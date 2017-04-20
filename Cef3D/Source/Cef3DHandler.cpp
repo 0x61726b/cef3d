@@ -21,7 +21,7 @@
 
 namespace Cef3D
 {
-	static Cef3DHandler* Instance = 0;
+	static Cef3DHandler* Instance;
 
 	Cef3DHandler::Cef3DHandler()
 	{
@@ -32,6 +32,19 @@ namespace Cef3D
 	Cef3DHandler::~Cef3DHandler()
 	{
 		Instance = 0;
+	}
+
+	CefRefPtr<CefBrowser> Cef3DHandler::GetCefBrowser(Cef3DBrowser* Browser)
+	{
+		DCHECK(Browser);
+
+		BrowserList::iterator bit = browser_list_.begin();
+		for (; bit != browser_list_.end(); ++bit)
+		{
+			if ((*bit)->GetIdentifier() == Browser->GetBrowserID())
+				return (*bit);
+		}
+		return 0;
 	}
 
 	void Cef3DHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title)
@@ -51,12 +64,16 @@ namespace Cef3D
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		return false;
+		/*Cef3DBrowser* cef3DBrowser = Cef3DBrowserApp->BrowserMap.find(browser->GetIdentifier())->second;
+		cef3DBrowser->LoadURL("http://youtube.com");*/
+
+		return false; // return true for prevent closing
 	}
 
 	void Cef3DHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 	{
 		CEF_REQUIRE_UI_THREAD();
+
 
 		BrowserList::iterator bit = browser_list_.begin();
 		for (; bit != browser_list_.end(); ++bit)

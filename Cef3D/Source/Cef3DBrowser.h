@@ -50,6 +50,8 @@ namespace Cef3D
 		void SelectAll();
 		/* */
 
+		double GetZoomLevel();
+		int GetBrowserID() const { return BrowserID; }
 		const std::string& GetURL() const { return Url; }
 		const std::string& GetTitle() const { return Title;  }
 
@@ -62,6 +64,7 @@ namespace Cef3D
 
 	private:
 		Cef3DBrowserType Type;
+		int BrowserID;
 		int ProcessID;
 		int RoutingID;
 		int NextRoutingID;
@@ -73,5 +76,8 @@ namespace Cef3D
 		bool Transparent;
 		int Width;
 		int Height;
+
+	public:
+		void SetBrowserID(int BrowserID);
 	};
 }

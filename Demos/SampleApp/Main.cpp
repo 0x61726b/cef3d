@@ -18,7 +18,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	bool isSubProcessed = false;
+
 	Cef3D::Cef3DDefinition definition;
+	definition.UseChildProcess = isSubProcessed;
+
+	int returnCode = Cef3D_SubprocessLogic();
+	if (returnCode >= 0)
+		return returnCode;
+
 
 	bool init = Cef3D_Init(definition);
 
@@ -27,10 +35,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(800, 600);
 	UNREFERENCED_PARAMETER(browser1);
-
-	Cef3D::Cef3DBrowser* browser2 = Cef3D_CreateBrowser(1024, 768);
-	UNREFERENCED_PARAMETER(browser2);
-
 
 	Cef3D_PumpMessageLoop();
 

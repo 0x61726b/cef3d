@@ -16,6 +16,8 @@
 
 namespace Cef3D
 {
+	class Cef3DBrowser;
+
 	class CEF3D_API Cef3DHandler :
 		public CefClient,
 		public CefDisplayHandler,
@@ -46,6 +48,9 @@ namespace Cef3D
 		// CefLoadHandler methods:
 		virtual void OnLoadError(CefRefPtr<CefBrowser> browser,CefRefPtr<CefFrame> frame,ErrorCode errorCode,const CefString& errorText,const CefString& failedUrl) OVERRIDE;
 
+
+	public:
+		CefRefPtr<CefBrowser> GetCefBrowser(Cef3DBrowser* Browser);
 
 		IMPLEMENT_REFCOUNTING(Cef3DHandler);
 	private:

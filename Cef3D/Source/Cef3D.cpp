@@ -25,8 +25,12 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 
 	CefSettings settings;
 	settings.no_sandbox = true;
+
+	if (Definition.UseChildProcess)
+	{
+		CefString(&settings.browser_subprocess_path).FromASCII(Definition.ChildProcessPath.c_str());
+	}
 	
-	CefString(&settings.browser_subprocess_path).FromASCII(Definition.ChildProcessPath.c_str());
 	CefString(&settings.log_file).FromASCII(Definition.LogPath.c_str());
 
 	settings.log_severity = Cef3D::Cef3DPrivate::Cef3DLogLevelToCef(Definition.LogLevel);
@@ -35,6 +39,17 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 
 
 	return CefInitialize(main_args, settings, Cef3DBrowserApp.get(), NULL);;
+}
+
+int Cef3D_SubprocessLogic()
+{
+#if PLATFORM_WINDOWS
+	CefMainArgs main_args(GetModuleHandle(NULL));
+#else
+	CefMainArgs main_args();
+#endif
+
+	return CefExecuteProcess(main_args, NULL, NULL);
 }
 
 void Cef3D_PumpMessageLoop()
@@ -60,16 +75,17 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& De
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Definition.Width;
 	settings.Height = Definition.Height;
-	Cef3DBrowserApp->CreateBrowser(settings, Cef3DBrowserHandler);
-
-	Cef3DBrowserApp->BrowserList.push_back(browser);
+	int BrowserId = Cef3DBrowserApp->CreateBrowser(settings, Cef3D::Cef3DHandler::Get());
+	
+	browser->SetBrowserID(BrowserId);
+	Cef3DBrowserApp->BrowserMap.insert(std::make_pair(BrowserId, browser));
 
 	return browser;
 }
 
 bool Cef3D_Shutdown()
 {
-	Cef3DBrowserApp->BrowserList.clear();
+	/*Cef3DBrowserApp->BrowserList.clear();*/
 
 	CefShutdown();
 

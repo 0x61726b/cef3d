@@ -13,4 +13,4 @@
 #pragma once
 
 extern CEF3D_API CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp;
-extern CEF3D_API CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler;
+//extern CEF3D_API CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler;
