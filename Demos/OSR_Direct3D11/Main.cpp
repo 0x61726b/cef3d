@@ -309,14 +309,15 @@ void Frame()
 void Cleanup()
 {
 	swapchain->SetFullscreenState(FALSE, NULL);
-	pLayout->Release();
-	pVS->Release();
-	pPS->Release();
-	pVBuffer->Release();
-	swapchain->Release();
-	backbuffer->Release();
-	dev->Release();
-	devcon->Release();
+
+	D3D_SAFE_RELEASE(pLayout);
+	D3D_SAFE_RELEASE(pVS);
+	D3D_SAFE_RELEASE(pPS);
+	D3D_SAFE_RELEASE(pVBuffer);
+	D3D_SAFE_RELEASE(swapchain);
+	D3D_SAFE_RELEASE(backbuffer);
+	D3D_SAFE_RELEASE(dev);
+	D3D_SAFE_RELEASE(devcon);
 }
 
 void PumpMessageLoop()
