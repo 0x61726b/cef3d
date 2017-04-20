@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.6.1)
 set(PROJECT_NAME "Cef3D")
 project(${PROJECT_NAME})
 
+include(CMakeDependentOption)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
@@ -65,6 +67,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${BINARY_OUTPUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${BINARY_OUTPUT_DIR})
 
 option(CEF3D_SHARED_LIBS OFF)
+CMAKE_DEPENDENT_OPTION(CEF3D_BUILD_DIRECT3D11_SAMPLE "Build OSR Direct3D 11 Sample App" ON "WIN32;" OFF)
 
 add_subdirectory(Cef)
 add_subdirectory(Cef3D/Source)

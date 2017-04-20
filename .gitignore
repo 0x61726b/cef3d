@@ -28,6 +28,7 @@
 *.app
 
 build_wx64
+build_wx64_VS2015
 Cef3D/Binaries
 Cef/Debug
 Cef/Release

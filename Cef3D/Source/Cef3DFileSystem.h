@@ -23,6 +23,7 @@ namespace Cef3D
 	{
 	public:
 		bool Exists(const char* AbsPath);
+		std::string ReadFile(const std::string& AbsPath);
 
 		static Cef3DFileSystem& Get();
 	};

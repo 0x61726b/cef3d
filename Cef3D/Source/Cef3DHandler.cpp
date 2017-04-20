@@ -67,7 +67,7 @@ namespace Cef3D
 		/*Cef3DBrowser* cef3DBrowser = Cef3DBrowserApp->BrowserMap.find(browser->GetIdentifier())->second;
 		cef3DBrowser->LoadURL("http://youtube.com");*/
 
-		return false; // return true for prevent closing
+		return false; // return true to prevent closing
 	}
 
 	void Cef3DHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)

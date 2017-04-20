@@ -12,6 +12,9 @@
 
 #include "Cef3DPCH.h"
 
+#include <fstream>
+#include <streambuf>
+
 namespace Cef3D
 {
 	bool Cef3DFileSystem::Exists(const char* AbsPath)
@@ -21,6 +24,21 @@ namespace Cef3D
 #else
 		return false;
 #endif
+	}
+
+	std::string Cef3DFileSystem::ReadFile(const std::string & AbsPath)
+	{
+		std::ifstream str(AbsPath);
+		std::string content;
+
+		str.seekg(0, std::ios::end);
+		content.reserve(str.tellg());
+		str.seekg(0, std::ios::beg);
+
+		content.assign((std::istreambuf_iterator<char>(str)),
+			std::istreambuf_iterator<char>());
+
+		return content;
 	}
 
 

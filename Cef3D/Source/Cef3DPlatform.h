@@ -48,7 +48,7 @@
 #endif
 
 #ifndef HAS_CPP17_FILESYSTEM
-#deifne HAS_CPP17_FILESYSTEM 0
+#define HAS_CPP17_FILESYSTEM 1
 #endif
 
 #include <string>

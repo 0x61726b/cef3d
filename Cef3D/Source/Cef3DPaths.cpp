@@ -59,6 +59,28 @@ namespace Cef3D
 			RootDir = RootDir.substr(0, last_slash);
 		}
 
+		// Remove this in the future
+
+		// Binaries
+		last_slash = RootDir.find_last_of('\\');
+		if (last_slash == std::string::npos)
+			last_slash = RootDir.find_last_of('/');
+
+		if (last_slash != std::string::npos)
+		{
+			RootDir = RootDir.substr(0, last_slash);
+		}
+
+		// Cef3D
+		last_slash = RootDir.find_last_of('\\');
+		if (last_slash == std::string::npos)
+			last_slash = RootDir.find_last_of('/');
+
+		if (last_slash != std::string::npos)
+		{
+			RootDir = RootDir.substr(0, last_slash);
+		}
+
 		return RootDir;
 	}
 }
