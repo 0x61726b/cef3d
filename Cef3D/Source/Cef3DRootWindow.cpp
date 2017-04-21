@@ -10,24 +10,18 @@
 // Date: 13.04.2017
 //---------------------------------------------------------------------------
 
-#pragma once
+#include "Cef3DPCH.h"
 
-#include "Cef3DPlatform.h"
-#include "Cef3DBuild.h"
-#include "Cef3DDefs.h"
-#include "Cef3DUtils.h"
-#include "Cef3DFileSystem.h"
-#include "Cef3DPaths.h"
-#include "Cef3DHandler.h"
-
-#include "Cef3DApplication.h"
-#include "Cef3DRenderer.h"
-
-#include "Cef3DBrowser.h"
-#include "Cef3DRootWindow.h"
-#include "Cef3DViewsWindow.h"
-#include "Cef3DRootWindowViews.h"
-#include "Cef3DTempWindow.h"
-#include "Cef3DWindowManager.h"
-#include "Cef3DContext.h"
-#include "Cef3DGlobals.h"
+namespace Cef3D
+{
+	scoped_refptr<RootWindow> RootWindow::Create(bool use_views)
+	{
+		if(use_views)
+			return new RootWindowViews();
+		else
+		{
+			//To do
+		}
+		return 0;
+	}
+}

@@ -21,17 +21,17 @@
 
 namespace Cef3D
 {
-	static Cef3DHandler* Instance;
-
-	Cef3DHandler::Cef3DHandler()
+	Cef3DHandler::Cef3DHandler(Cef3DHandlerDelegate* HandlerDelegate, bool Osr, const std::string& url)
+		: IsOsr(Osr),
+		StartupUrl(url),
+		browser_count_(0),
+		Delegate(HandlerDelegate),
+		console_log_file_("")
 	{
-		Instance = this;
-		DCHECK(Instance);
 	}
 
 	Cef3DHandler::~Cef3DHandler()
 	{
-		Instance = 0;
 	}
 
 	CefRefPtr<CefBrowser> Cef3DHandler::GetCefBrowser(Cef3DBrowser* Browser)
@@ -47,27 +47,167 @@ namespace Cef3D
 		return 0;
 	}
 
-	void Cef3DHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title)
+	bool Cef3DHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
 	{
 		CEF_REQUIRE_UI_THREAD();
+
+		if (message_router_->OnProcessMessageReceived(browser, source_process,
+			message)) {
+			return true;
+		}
+
+		// Check for messages from the client renderer.
+		std::string message_name = message->GetName();
+		if (message_name == "ClientRenderer.FocusedNodeChanged") {
+			// A message is sent from ClientRenderDelegate to tell us whether the
+			// currently focused DOM node is editable. Use of |focus_on_editable_field_|
+			// is redundant with CefKeyEvent.focus_on_editable_field in OnPreKeyEvent
+			// but is useful for demonstration purposes.
+			focus_on_editable_field_ = message->GetArgumentList()->GetBool(0);
+			return true;
+		}
+
+		return false;
+	}
+
+	void Cef3DHandler::OnBeforeContextMenu(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		CefRefPtr<CefContextMenuParams> params,
+		CefRefPtr<CefMenuModel> model) {
+		CEF_REQUIRE_UI_THREAD();
+
+		if ((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
+			// Add a separator if the menu already has items.
+			if (model->GetCount() > 0)
+				model->AddSeparator();
+
+			// Add DevTools items to all context menus.
+			model->AddItem(0, "&Show DevTools");
+			model->AddItem(1, "Close DevTools");
+			model->AddSeparator();
+			model->AddItem(2, "Inspect Element");
+
+		}
 	}
 
 
+	bool Cef3DHandler::OnContextMenuCommand(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		CefRefPtr<CefContextMenuParams> params,
+		int command_id,
+		EventFlags event_flags) {
+		CEF_REQUIRE_UI_THREAD();
+
+		switch (command_id) {
+		case 0:
+			ShowDevTools(browser, CefPoint());
+			return true;
+		case 1:
+			CloseDevTools(browser);
+			return true;
+		case 2:
+			ShowDevTools(browser, CefPoint(params->GetXCoord(), params->GetYCoord()));
+			return true;
+		default:
+			return true;
+		}
+	}
+
+	/* CefDisplayHandler */
+	void Cef3DHandler::OnAddressChange(CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		const CefString& url) {
+		CEF_REQUIRE_UI_THREAD();
+
+		// Only update the address for the main (top-level) frame.
+		if (frame->IsMain())
+			NotifyAddress(url);
+	}
+
+	void Cef3DHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+		NotifyTitle(title);
+	}
+
+
+	void Cef3DHandler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser, const std::vector<CefString>& icon_urls)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+	}
+
+	void Cef3DHandler::OnFullscreenModeChange(CefRefPtr<CefBrowser> browser, bool fullscreen)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+		NotifyFullscreen(fullscreen);
+	}
+
+	bool Cef3DHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser, const CefString& message, const CefString& source, int line)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+		return false;
+	}
+	/* END CefDisplayHandler */
+
+	/* CefKeyboardhandler */
+	bool Cef3DHandler::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event, bool* is_keyboard_shortcut)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+		if (!event.focus_on_editable_field && event.windows_key_code == 0x20) {
+			// Special handling for the space character when an input element does not
+			// have focus. Handling the event in OnPreKeyEvent() keeps the event from
+			// being processed in the renderer. If we instead handled the event in the
+			// OnKeyEvent() method the space key would cause the window to scroll in
+			// addition to showing the alert box.
+			/*if (event.type == KEYEVENT_RAWKEYDOWN)
+				test_runner::Alert(browser, "You pressed the space bar!");*/
+			return true;
+		}
+
+		return false;
+	}
+	/* END CefKeyboardhandler */
+
+	/* CefLifeSpanHandler */
 	void Cef3DHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		browser_list_.push_back(browser);
+		browser_count_++;
+
+		if (!message_router_) {
+			// Create the browser-side router for query handling.
+			CefMessageRouterConfig config;
+			message_router_ = CefMessageRouterBrowserSide::Create(config);
+
+			MessageHandlerSet::const_iterator it = message_handler_set_.begin();
+			for (; it != message_handler_set_.end(); ++it)
+				message_router_->AddHandler(*(it), false);
+		}
+
+		// Disable mouse cursor change if requested via the command-line flag.
+		if (mouse_cursor_change_disabled_)
+			browser->GetHost()->SetMouseCursorChangeDisabled(true);
+
+		NotifyBrowserCreated(browser);
 	}
 
 	bool Cef3DHandler::DoClose(CefRefPtr<CefBrowser> browser)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		/*Cef3DBrowser* cef3DBrowser = Cef3DBrowserApp->BrowserMap.find(browser->GetIdentifier())->second;
-		cef3DBrowser->LoadURL("http://youtube.com");*/
+		NotifyBrowserClosing(browser);
 
-		return false; // return true to prevent closing
+		// Allow the close. For windowed browsers this will result in the OS close
+		// event being sent.
+		return false;
 	}
 
 	void Cef3DHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
@@ -75,24 +215,43 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 
-		BrowserList::iterator bit = browser_list_.begin();
-		for (; bit != browser_list_.end(); ++bit)
-		{
-			if ((*bit)->IsSame(browser)) 
-			{
-				browser_list_.erase(bit);
-				break;
+		if (--browser_count_ == 0) {
+			// Remove and delete message router handlers.
+			MessageHandlerSet::const_iterator it =
+				message_handler_set_.begin();
+			for (; it != message_handler_set_.end(); ++it) {
+				message_router_->RemoveHandler(*(it));
+				delete *(it);
 			}
+			message_handler_set_.clear();
+			message_router_ = NULL;
 		}
 
-		if (browser_list_.empty()) 
-		{
-			// All browser windows have closed. Quit the application message loop.
-			CefQuitMessageLoop();
-		}
+		NotifyBrowserClosed(browser);
 	}
 
-	void Cef3DHandler::OnLoadError(CefRefPtr<CefBrowser> browser,CefRefPtr<CefFrame> frame,ErrorCode errorCode,const CefString& errorText,const CefString& failedUrl)
+	bool Cef3DHandler::OnBeforePopup(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		const CefString& target_url,
+		const CefString& target_frame_name,
+		CefLifeSpanHandler::WindowOpenDisposition target_disposition,
+		bool user_gesture,
+		const CefPopupFeatures& popupFeatures,
+		CefWindowInfo& windowInfo,
+		CefRefPtr<CefClient>& client,
+		CefBrowserSettings& settings,
+		bool* no_javascript_access) {
+		CEF_REQUIRE_IO_THREAD();
+
+		// Return true to cancel the popup window.
+		return true;
+	}
+
+	/* END CefLifeSpanHandler */
+
+	/* CefLoadHandler */
+	void Cef3DHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
@@ -107,7 +266,52 @@ namespace Cef3D
 		frame->LoadString(ss.str(), failedUrl);
 	}
 
-	void Cef3DHandler::CloseAllBrowsers(bool force_close) 
+	void Cef3DHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+		bool isLoading,
+		bool canGoBack,
+		bool canGoForward) {
+		CEF_REQUIRE_UI_THREAD();
+
+		NotifyLoadingState(isLoading, canGoBack, canGoForward);
+	}
+	/* END CefLoadHandler */
+
+	void Cef3DHandler::ShowDevTools(CefRefPtr<CefBrowser> browser, const CefPoint& inspect_element_at)
+	{
+		CefWindowInfo windowInfo;
+		CefRefPtr<CefClient> client;
+		CefBrowserSettings settings;
+
+		if (CreatePopupWindow(browser, true, CefPopupFeatures(), windowInfo, client,
+			settings))
+		{
+			browser->GetHost()->ShowDevTools(windowInfo, client, settings,
+				inspect_element_at);
+		}
+	}
+
+	void Cef3DHandler::CloseDevTools(CefRefPtr<CefBrowser> browser) {
+		browser->GetHost()->CloseDevTools();
+	}
+
+	bool Cef3DHandler::CreatePopupWindow(
+		CefRefPtr<CefBrowser> browser,
+		bool is_devtools,
+		const CefPopupFeatures& popupFeatures,
+		CefWindowInfo& windowInfo,
+		CefRefPtr<CefClient>& client,
+		CefBrowserSettings& settings) {
+		// Note: This method will be called on multiple threads.
+
+		// The popup browser will be parented to a new native window.
+		// Don't show URL bar and navigation buttons on DevTools windows.
+		MainContext::Get()->GetRootWindowManager()->CreateRootWindowAsPopup(
+			!is_devtools, IsOsr, popupFeatures, windowInfo, client, settings);
+
+		return true;
+	}
+
+	void Cef3DHandler::CloseAllBrowsers(bool force_close)
 	{
 		if (!CefCurrentlyOn(TID_UI))
 		{
@@ -125,9 +329,135 @@ namespace Cef3D
 			(*it)->GetHost()->CloseBrowser(force_close);
 	}
 
-
-	Cef3DHandler* Cef3DHandler::Get()
+	void Cef3DHandler::NotifyBrowserCreated(CefRefPtr<CefBrowser> browser)
 	{
-		return Instance;
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyBrowserCreated, this, browser));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnBrowserCreated(browser);
 	}
+
+	void Cef3DHandler::NotifyBrowserClosing(CefRefPtr<CefBrowser> browser)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyBrowserClosing, this, browser));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnBrowserClosing(browser);
+	}
+
+	void Cef3DHandler::NotifyBrowserClosed(CefRefPtr<CefBrowser> browser)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyBrowserClosed, this, browser));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnBrowserClosed(browser);
+	}
+
+	void Cef3DHandler::NotifyAddress(const CefString& url)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyAddress, this, url));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetAddress(url);
+	}
+
+	void Cef3DHandler::NotifyTitle(const CefString& title)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyTitle, this, title));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetTitle(title);
+	}
+
+	void Cef3DHandler::NotifyFavicon(CefRefPtr<CefImage> image)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyFavicon, this, image));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetFavicon(image);
+	}
+
+	void Cef3DHandler::NotifyFullscreen(bool fullscreen)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyFullscreen, this, fullscreen));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetFullscreen(fullscreen);
+	}
+
+	void Cef3DHandler::NotifyLoadingState(bool isLoading, bool canGoBack, bool canGoForward)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyLoadingState, this,
+					isLoading, canGoBack, canGoForward));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetLoadingState(isLoading, canGoBack, canGoForward);
+	}
+
+	void Cef3DHandler::NotifyDraggableRegions(const std::vector<CefDraggableRegion>& regions)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(
+				base::Bind(&Cef3DHandler::NotifyDraggableRegions, this, regions));
+			return;
+		}
+
+		if (Delegate)
+			Delegate->OnSetDraggableRegions(regions);
+	}
+
+	void Cef3DHandler::DetachDelegate()
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD()) {
+			// Execute this method on the main thread.
+			MAIN_POST_CLOSURE(base::Bind(&Cef3DHandler::DetachDelegate, this));
+			return;
+		}
+
+		DCHECK(Delegate);
+		Delegate = NULL;
+	}
+
 }
+

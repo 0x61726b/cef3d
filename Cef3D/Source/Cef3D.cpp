@@ -13,15 +13,25 @@
 #include "Cef3D.h"
 #include "Cef3DPCH.h"
 
+using namespace Cef3D;
+
+MainContextImpl* GMainContext = 0;
+
 bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 {
 	// Enable High-DPI support on Windows 7 or newer.
 	CefEnableHighDPISupport();
+	CefRefPtr<CefCommandLine> command_line = CefCommandLine::CreateCommandLine();
+
 #if PLATFORM_WINDOWS
 	CefMainArgs main_args(GetModuleHandle(NULL));
+	command_line->InitFromString(::GetCommandLineW());
 #else
 	CefMainArgs main_args();
+	command_line->InitFromString("");
 #endif
+
+	GMainContext = (new MainContextImpl(command_line, true));
 
 	CefSettings settings;
 	settings.no_sandbox = true;
@@ -32,13 +42,13 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	}
 	
 	CefString(&settings.log_file).FromASCII(Definition.LogPath.c_str());
-
 	settings.log_severity = Cef3D::Cef3DPrivate::Cef3DLogLevelToCef(Definition.LogLevel);
 
 	Cef3DBrowserApp = (new Cef3D::Cef3DApplication);
 
-
-	return CefInitialize(main_args, settings, Cef3DBrowserApp.get(), NULL);;
+	GMainContext->PopulateSettings(&settings);
+	
+	return GMainContext->Initialize(main_args, settings, Cef3DBrowserApp, NULL);
 }
 
 int Cef3D_SubprocessLogic()
@@ -68,24 +78,27 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrow
 
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& Definition)
 {
-	Cef3D::Cef3DBrowser* browser = new Cef3D::Cef3DBrowser;
-	browser->SetWidth(Definition.Width);
-	browser->SetHeight(Definition.Height);
+	//Cef3D::Cef3DBrowser* browser = new Cef3D::Cef3DBrowser;
+	//browser->SetWidth(Definition.Width);
+	//browser->SetHeight(Definition.Height);
 
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Definition.Width;
 	settings.Height = Definition.Height;
-	int BrowserId = Cef3DBrowserApp->CreateBrowser(settings, Cef3D::Cef3DHandler::Get());
+	/*RootWindow* Window = */Cef3DBrowserApp->CreateBrowser(settings);
+	/*browser->SetRootWindow(Window);*/
 	
-	browser->SetBrowserID(BrowserId);
-	Cef3DBrowserApp->BrowserMap.insert(std::make_pair(BrowserId, browser));
-
-	return browser;
+	return 0;
 }
 
 bool Cef3D_Shutdown()
 {
 	/*Cef3DBrowserApp->BrowserList.clear();*/
+	/*GMainContext->Shutdown();*/
+
+	GMainContext->Shutdown();
+	GMainContext = 0;
+	/*delete GMainContext;*/
 
 	CefShutdown();
 

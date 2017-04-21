@@ -13,6 +13,15 @@
 #pragma once
 
 #include "include/cef_base.h"
+#include "include/base/cef_bind.h"
+#include "include/base/cef_scoped_ptr.h"
+#include "include/cef_task.h"
+#include "include/wrapper/cef_closure_task.h"
+
+#define CURRENTLY_ON_MAIN_THREAD() CefCurrentlyOn(TID_UI)
+#define REQUIRE_MAIN_THREAD() DCHECK(CURRENTLY_ON_MAIN_THREAD())
+#define MAIN_POST_TASK(task) CefPostTask(TID_UI, task);
+#define MAIN_POST_CLOSURE(closure) CefPostTask(TID_UI, (CefCreateClosureTask(closure)));
 
 namespace Cef3D
 {
@@ -45,4 +54,17 @@ namespace Cef3D
 			return settings;
 		}
 	}
+
+	struct DeleteOnMainThread {
+		template<typename T>
+		static void Destruct(const T* x) {
+			if (CURRENTLY_ON_MAIN_THREAD()) {
+				delete x;
+			}
+			else {
+				MAIN_POST_CLOSURE(
+					base::Bind(&DeleteOnMainThread::Destruct<T>, x));
+			}
+		}
+	};
 }

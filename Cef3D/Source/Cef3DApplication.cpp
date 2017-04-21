@@ -22,52 +22,28 @@ namespace Cef3D
 {
 	namespace {
 
-
-
-		// When using the Views framework this object provides the delegate
-		// implementation for the CefWindow that hosts the Views-based browser.
-		class SimpleWindowDelegate : public CefWindowDelegate {
+		class SimpleWindowDelegate : public ViewsWindow::Delegate {
 		public:
-			explicit SimpleWindowDelegate(CefRefPtr<CefBrowserView> browser_view, const Cef3DBrowserDefinition& Definition)
-				: browser_view_(browser_view),
-				BrowserDefinition(Definition)
-			{
-			}
-
-			void OnWindowCreated(CefRefPtr<CefWindow> window) OVERRIDE {
-				// Add the browser view and show the window.
-
-				CefSize browserViewSize(BrowserDefinition.Width, BrowserDefinition.Height);
-				browser_view_->SetSize(browserViewSize);
-
-				window->SetSize(browserViewSize);
-				window->AddChildView(browser_view_);
-				window->Show();
-
-				// Give keyboard focus to the browser view.
-				browser_view_->RequestFocus();
-			}
-
-			void OnWindowDestroyed(CefRefPtr<CefWindow> window) OVERRIDE {
-				browser_view_ = NULL;
-			}
-
-			bool CanClose(CefRefPtr<CefWindow> window) OVERRIDE
-			{
-				// Allow the window to close if the browser says it's OK.
-				CefRefPtr<CefBrowser> browser = browser_view_->GetBrowser();
-				if (browser)
-					return browser->GetHost()->TryCloseBrowser();
-				return true;
-			}
-
-		private:
-			CefRefPtr<CefBrowserView> browser_view_;
-			Cef3DBrowserDefinition BrowserDefinition;
-
-			IMPLEMENT_REFCOUNTING(SimpleWindowDelegate);
-			DISALLOW_COPY_AND_ASSIGN(SimpleWindowDelegate);
+			void OnViewsWindowCreated(CefRefPtr<ViewsWindow> window) OVERRIDE;
+			void OnViewsWindowDestroyed(CefRefPtr<ViewsWindow> window) OVERRIDE;
+			virtual void OnExit() OVERRIDE;
 		};
+
+		void SimpleWindowDelegate::OnViewsWindowCreated(CefRefPtr<ViewsWindow> window)
+		{
+
+		}
+
+		void SimpleWindowDelegate::OnViewsWindowDestroyed(CefRefPtr<ViewsWindow> window)
+		{
+
+		}
+
+		void SimpleWindowDelegate::OnExit()
+		{
+
+		}
+
 
 	}  // namespace
 }
@@ -82,8 +58,6 @@ namespace Cef3D
 	void Cef3DApplication::OnContextInitialized()
 	{
 		CEF_REQUIRE_UI_THREAD();
-
-		Handler = new Cef3DHandler;
 	}
 
 	Cef3DBrowser* Cef3DApplication::GetCef3DBrowser(CefRefPtr<CefBrowser> Browser)
@@ -96,39 +70,13 @@ namespace Cef3D
 		return 0;
 	}
 
-	int Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler)
+	RootWindow* Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-#if PLATFORM_WINDOWS || PLATFORM_LINUX
-		const bool use_views = true;
-#else
-		const bool use_views = false;
-#endif
 		std::string testLoadUrl = "http://www.google.com";
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Definition);
-		if (use_views)
-		{
-			CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
-				CustomHandler, testLoadUrl, settings, NULL, NULL);
 
-			CefRefPtr<CefWindow> cefWindow = CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate(browser_view, Definition));
-
-			return browser_view->GetBrowser()->GetIdentifier();
-		}
-		else
-		{
-			CefWindowInfo window_info;
-
-#if defined(OS_WIN)
-			window_info.SetAsPopup(NULL, "cefsimple");
-#endif
-
-			CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(window_info, CustomHandler, testLoadUrl, settings,
-				NULL);
-			return browser->GetIdentifier();
-		}
-
-		return -1;
+		return MainContext::Get()->GetRootWindowManager()->CreateRootWindow(false, false, CefRect(), testLoadUrl);
 	}
 }

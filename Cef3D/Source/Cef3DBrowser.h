@@ -70,6 +70,8 @@ namespace Cef3D
 		int NextRoutingID;
 		ProcessHandle ProcessHandle;
 
+		RootWindow* AssociatedWindow;
+
 		std::string Url;
 		std::string Title;
 
@@ -79,5 +81,6 @@ namespace Cef3D
 
 	public:
 		void SetBrowserID(int BrowserID);
+		void SetRootWindow(RootWindow* Wnd);
 	};
 }

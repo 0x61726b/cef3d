@@ -53,6 +53,7 @@
 
 #include <string>
 #include <list>
+#include <set>
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>

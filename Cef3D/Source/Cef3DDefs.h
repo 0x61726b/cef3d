@@ -57,4 +57,10 @@ namespace Cef3D
 		int Height;
 		Cef3DBrowserType Type;
 	};
+
+	struct Cef3DOSRSettings
+	{
+		bool Transparent;
+		bool ShowUpdateRects;
+	};
 }

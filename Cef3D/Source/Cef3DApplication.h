@@ -17,6 +17,8 @@
 namespace Cef3D
 {
 	class Cef3DBrowser;
+	class RootWindow;
+
 	class CEF3D_API Cef3DApplication : 
 		public CefApp,
 		public CefBrowserProcessHandler
@@ -29,7 +31,7 @@ namespace Cef3D
 
 		virtual void OnContextInitialized() OVERRIDE;
 
-		int CreateBrowser(const Cef3DBrowserDefinition& Definition, CefRefPtr<Cef3D::Cef3DHandler> CustomHandler);
+		RootWindow* CreateBrowser(const Cef3DBrowserDefinition& Definition);
 
 		Cef3DBrowser* GetCef3DBrowser(CefRefPtr<CefBrowser> Browser);
 
