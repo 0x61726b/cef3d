@@ -43,30 +43,14 @@ namespace Cef3D
 
 	}  // namespace
 
-	namespace {
-
-		MainContext* g_main_context = NULL;
-
-	}  // namespace
-
-	   // static
-	MainContext* MainContext::Get() {
-		DCHECK(g_main_context);
-		return g_main_context;
-	}
-
-	MainContext::MainContext() {
-		DCHECK(!g_main_context);
-		g_main_context = this;
+	MainContext::MainContext() : terminate_when_all_windows_closed_(true) {
+		DCHECK(!GMainContext);
+		GMainContext = this;
 
 	}
 
-	MainContext::~MainContext() {
-		g_main_context = NULL;
-	}
 
-
-	MainContextImpl::MainContextImpl(CefRefPtr<CefCommandLine> command_line,
+	MainContext::MainContext(CefRefPtr<CefCommandLine> command_line,
 		bool terminate_when_all_windows_closed)
 		: command_line_(command_line),
 		terminate_when_all_windows_closed_(terminate_when_all_windows_closed),
@@ -110,43 +94,44 @@ namespace Cef3D
 #endif  // defined(OS_WIN) || defined(OS_LINUX)
 	}
 
-	MainContextImpl::~MainContextImpl() {
+	MainContext::~MainContext() {
 		// The context must either not have been initialized, or it must have also
 		// been shut down.
 		DCHECK(!initialized_ || shutdown_);
+		/*GMainContext = NULL;*/
 	}
 
-	std::string MainContextImpl::GetConsoleLogPath() {
+	std::string MainContext::GetConsoleLogPath() {
 		return GetAppWorkingDirectory() + "console.log";
 	}
 
-	std::string MainContextImpl::GetMainURL() {
+	std::string MainContext::GetMainURL() {
 		return main_url_;
 	}
 
-	cef_color_t MainContextImpl::GetBackgroundColor() {
+	cef_color_t MainContext::GetBackgroundColor() {
 		return background_color_;
 	}
 
-	std::string MainContextImpl::GetDownloadPath(const std::string& file_name)
+	std::string MainContext::GetDownloadPath(const std::string& file_name)
 	{
 		return "";
 	}
 
-	std::string MainContextImpl::GetAppWorkingDirectory()
+	std::string MainContext::GetAppWorkingDirectory()
 	{
 		return "";
 	}
 
-	bool MainContextImpl::UseViews() {
+	bool MainContext::UseViews() {
 		return use_views_;
 	}
 
-	bool MainContextImpl::UseWindowlessRendering() {
+	bool MainContext::UseWindowlessRendering() {
 		return use_windowless_rendering_;
 	}
 
-	void MainContextImpl::PopulateSettings(CefSettings* settings) {
+	void MainContext::PopulateSettings(CefSettings* settings) {
 #if defined(OS_WIN)
 		settings->multi_threaded_message_loop =
 			command_line_->HasSwitch("multi-threaded-message-loop");
@@ -161,14 +146,14 @@ namespace Cef3D
 		settings->background_color = background_color_;
 	}
 
-	void MainContextImpl::PopulateBrowserSettings(CefBrowserSettings* settings) {
+	void MainContext::PopulateBrowserSettings(CefBrowserSettings* settings) {
 		if (command_line_->HasSwitch("off-screen-frame-rate")) {
 			settings->windowless_frame_rate = atoi(command_line_->
 				GetSwitchValue("off-screen-frame-rate").ToString().c_str());
 		}
 	}
 
-	void MainContextImpl::PopulateOsrSettings(Cef3DOSRSettings* settings) {
+	void MainContext::PopulateOsrSettings(Cef3DOSRSettings* settings) {
 		settings->Transparent =
 			command_line_->HasSwitch("transparent-painting-enabled");
 		settings->ShowUpdateRects=
@@ -176,12 +161,12 @@ namespace Cef3D
 		//settings->background_color = background_color_;
 	}
 
-	RootWindowManager* MainContextImpl::GetRootWindowManager() {
+	RootWindowManager* MainContext::GetRootWindowManager() {
 		DCHECK(InValidState());
 		return root_window_manager_.get();
 	}
 
-	bool MainContextImpl::Initialize(const CefMainArgs& args,
+	bool MainContext::Initialize(const CefMainArgs& args,
 		const CefSettings& settings,
 		CefRefPtr<CefApp> application,
 		void* windows_sandbox_info) {
@@ -202,7 +187,7 @@ namespace Cef3D
 		return true;
 	}
 
-	void MainContextImpl::Shutdown() {
+	void MainContext::Shutdown() {
 		DCHECK(thread_checker_.CalledOnValidThread());
 		DCHECK(initialized_);
 		DCHECK(!shutdown_);

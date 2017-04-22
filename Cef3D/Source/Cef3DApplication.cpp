@@ -77,6 +77,6 @@ namespace Cef3D
 		std::string testLoadUrl = "http://www.google.com";
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Definition);
 
-		return MainContext::Get()->GetRootWindowManager()->CreateRootWindow(false, false, CefRect(), testLoadUrl);
+		return GMainContext->GetRootWindowManager()->CreateRootWindow(false, false, CefRect(), testLoadUrl);
 	}
 }

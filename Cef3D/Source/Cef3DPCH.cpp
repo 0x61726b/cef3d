@@ -13,19 +13,21 @@
 #include "Cef3DPCH.h"
 
 CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp = 0;
-CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler = 0;
+Cef3D::MainContext* GMainContext = 0;
+
+using namespace Cef3D;
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()
 {
-	std::string subProcessPath = Cef3D::Cef3DPaths::Root();
-	std::string logPath = Cef3D::Cef3DPaths::Root();
-	logPath.append("/Cef3D.log");
-
+	std::string rootPath = Cef3D::Cef3DPaths::Root();
+	std::string logPath = Cef3D::Cef3DPaths::Log();
+	std::string subProcessPath;
+	logPath = Cef3DPaths::Combine(logPath, "Cef3D.log");
 
 #if PLATFORM_WINDOWS
-	subProcessPath.append("/CefSubProcess.exe");
+	subProcessPath = Cef3DPaths::Combine(rootPath, "CefSubProcess.exe");
 #else
-	subProcessPath.append("/CefSubProcess");
+	subProcessPath = Cef3DPaths::Combine(rootPath, "CefSubProcess");
 #endif
 
 	ChildProcessPath = subProcessPath;

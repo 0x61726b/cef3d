@@ -25,6 +25,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CEF_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/Cef3D/Source)
 
+if(OS_WINDOWS)
+    set(SOURCE_FILES "${SOURCE_FILES}" "CefSubProcess.manifest")
+endif()
+
+message(${SOURCE_FILES})
+
 
 set(BINARY_PREFIX "")
 

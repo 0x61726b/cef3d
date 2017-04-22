@@ -81,21 +81,27 @@ endmacro()
 
 # Determine the target output directory based on platform and generator.
 macro(SET_CEF_TARGET_OUT_DIR)
-  if(${CMAKE_GENERATOR} STREQUAL "Ninja")
-    # Ninja does not create a subdirectory named after the configuration.
-    set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-  elseif(OS_LINUX)
+  if(${CMAKE_GENERATOR} STREQUAL "Ninja" OR
+     ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+    # By default Ninja and Make builds don't create a subdirectory named after
+    # the configuration.
     set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
+    # Output binaries (executables, libraries) to the correct directory.
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
   else()
     set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>")
   endif()
 endmacro()
 
 # Copy a list of files from one directory to another. Relative files paths are maintained.
+# The path component of the source |file_list| will be removed.
 macro(COPY_FILES target file_list source_dir target_dir)
   foreach(FILENAME ${file_list})
     set(source_file ${source_dir}/${FILENAME})
-    set(target_file ${target_dir}/${FILENAME})
+    get_filename_component(target_name ${FILENAME} NAME)
+    set(target_file ${target_dir}/${target_name})
     if(IS_DIRECTORY ${source_file})
       add_custom_command(
         TARGET ${target}
@@ -112,19 +118,6 @@ macro(COPY_FILES target file_list source_dir target_dir)
         )
     endif()
   endforeach()
-endmacro()
-
-# Rename a directory replacing the target if it already exists.
-macro(RENAME_DIRECTORY target source_dir target_dir)
-  add_custom_command(
-    TARGET ${target}
-    POST_BUILD
-    # Remove the target directory if it already exists.
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${target_dir}"
-    # Rename the source directory to target directory.
-    COMMAND ${CMAKE_COMMAND} -E rename "${source_dir}" "${target_dir}"
-    VERBATIM
-    )
 endmacro()
 
 
@@ -181,26 +174,20 @@ endif(OS_LINUX)
 
 if(OS_MACOSX)
 
-# Fix the framework link in the helper executable.
-macro(FIX_MACOSX_HELPER_FRAMEWORK_LINK target app_path)
-  add_custom_command(TARGET ${target}
-    POST_BUILD
-    COMMAND install_name_tool -change "@executable_path/Chromium Embedded Framework"
-            "@executable_path/../../../../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework"
-            "${app_path}/Contents/MacOS/${target}"
-    VERBATIM
-    )
+# Fix the framework rpath in the helper executable.
+macro(FIX_MACOSX_HELPER_FRAMEWORK_RPATH target)
+  # The helper is in $app_name.app/Contents/Frameworks/$app_name Helper.app/Contents/MacOS/
+  # so set rpath up to Contents/ so that the loader can find Frameworks/.
+  set_target_properties(${target} PROPERTIES INSTALL_RPATH "@executable_path/../../../..")
+  set_target_properties(${target} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 endmacro()
 
-# Fix the framework link in the main executable.
-macro(FIX_MACOSX_MAIN_FRAMEWORK_LINK target app_path)
-  add_custom_command(TARGET ${target}
-    POST_BUILD
-    COMMAND install_name_tool -change "@executable_path/Chromium Embedded Framework"
-            "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework"
-            "${app_path}/Contents/MacOS/${target}"
-    VERBATIM
-    )
+# Fix the framework rpath in the main executable.
+macro(FIX_MACOSX_MAIN_FRAMEWORK_RPATH target)
+  # The main app is at $app_name.app/Contents/MacOS/$app_name
+  # so set rpath up to Contents/ so that the loader can find Frameworks/.
+  set_target_properties(${target} PROPERTIES INSTALL_RPATH "@executable_path/..")
+  set_target_properties(${target} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 endmacro()
 
 # Manually process and copy over resource files.
@@ -256,13 +243,13 @@ endif(OS_MACOSX)
 if(OS_WINDOWS)
 
 # Add custom manifest files to an executable target.
-macro(ADD_WINDOWS_MANIFEST manifest_path target)
+macro(ADD_WINDOWS_MANIFEST manifest_path target extension)
   add_custom_command(
     TARGET ${target}
     POST_BUILD
     COMMAND "mt.exe" -nologo
-            -manifest \"${manifest_path}/${target}.exe.manifest\" \"${manifest_path}/compatibility.manifest\"
-            -outputresource:"${CEF_TARGET_OUT_DIR}/${target}.exe"\;\#1
+            -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
+            -outputresource:"${CEF_TARGET_OUT_DIR}/${target}.${extension}"\;\#1
     COMMENT "Adding manifest..."
     )
 endmacro()

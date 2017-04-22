@@ -19,6 +19,11 @@ namespace Cef3D
 	{
 	public:
 		static bool IsRelative(const std::string& Path);
+
 		static const std::string& Root();
+		static const std::string& Shaders();
+		static const std::string& Log();
+
+		static const std::string Combine(const std::string& A, const std::string& B);
 	};
 }

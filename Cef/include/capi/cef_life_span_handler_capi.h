@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2017 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -56,7 +56,7 @@ typedef struct _cef_life_span_handler_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Called on the IO thread before a new popup browser is created. The
@@ -102,7 +102,7 @@ typedef struct _cef_life_span_handler_t {
   // has been fired.
   //
   // An application should handle top-level owner window close notifications by
-  // calling cef_browser_host_t::Tryclose_browser() or
+  // calling cef_browser_host_t::try_close_browser() or
   // cef_browser_host_t::CloseBrowser(false (0)) instead of allowing the window
   // to close immediately (see the examples below). This gives CEF an
   // opportunity to process the 'onbeforeunload' event and optionally cancel the
@@ -132,7 +132,7 @@ typedef struct _cef_life_span_handler_t {
   // The below examples describe what should happen during window close when the
   // browser is parented to an application-provided top-level window.
   //
-  // Example 1: Using cef_browser_host_t::Tryclose_browser(). This is
+  // Example 1: Using cef_browser_host_t::try_close_browser(). This is
   // recommended for clients using standard close handling and windows created
   // on the browser process UI thread. 1.  User clicks the window close button
   // which sends a close notification to

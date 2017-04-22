@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
+// Copyright (c) 2017 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 //
@@ -49,18 +49,18 @@ CefDownloadImageCallbackCppToC::CefDownloadImageCallbackCppToC() {
       download_image_callback_on_download_image_finished;
 }
 
-template<> CefRefPtr<CefDownloadImageCallback> CefCppToC<CefDownloadImageCallbackCppToC,
+template<> CefRefPtr<CefDownloadImageCallback> CefCppToCRefCounted<CefDownloadImageCallbackCppToC,
     CefDownloadImageCallback, cef_download_image_callback_t>::UnwrapDerived(
     CefWrapperType type, cef_download_image_callback_t* s) {
   NOTREACHED() << "Unexpected class type: " << type;
   return NULL;
 }
 
-#ifndef NDEBUG
-template<> base::AtomicRefCount CefCppToC<CefDownloadImageCallbackCppToC,
+#if DCHECK_IS_ON()
+template<> base::AtomicRefCount CefCppToCRefCounted<CefDownloadImageCallbackCppToC,
     CefDownloadImageCallback, cef_download_image_callback_t>::DebugObjCt = 0;
 #endif
 
-template<> CefWrapperType CefCppToC<CefDownloadImageCallbackCppToC,
+template<> CefWrapperType CefCppToCRefCounted<CefDownloadImageCallbackCppToC,
     CefDownloadImageCallback, cef_download_image_callback_t>::kWrapperType =
     WT_DOWNLOAD_IMAGE_CALLBACK;

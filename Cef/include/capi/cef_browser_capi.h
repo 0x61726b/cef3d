@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2017 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -63,7 +63,7 @@ typedef struct _cef_browser_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Returns the browser host object. This function can only be called in the
@@ -193,7 +193,7 @@ typedef struct _cef_run_file_dialog_callback_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Called asynchronously after the file dialog is dismissed.
@@ -216,7 +216,7 @@ typedef struct _cef_navigation_entry_visitor_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Method that will be executed. Do not keep a reference to |entry| outside of
@@ -239,7 +239,7 @@ typedef struct _cef_pdf_print_callback_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Method that will be executed when the PDF printing has completed. |path| is
@@ -260,7 +260,7 @@ typedef struct _cef_download_image_callback_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Method that will be executed when the image download has completed.
@@ -285,7 +285,7 @@ typedef struct _cef_browser_host_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Returns the hosted browser object.
@@ -448,10 +448,13 @@ typedef struct _cef_browser_host_t {
       int clearSelection);
 
   ///
-  // Open developer tools in its own window. If |inspect_element_at| is non-
-  // NULL the element at the specified (x,y) location will be inspected. The
-  // |windowInfo| parameter will be ignored if this browser is wrapped in a
-  // cef_browser_view_t.
+  // Open developer tools (DevTools) in its own browser. The DevTools browser
+  // will remain associated with this browser. If the DevTools browser is
+  // already open then it will be focused, in which case the |windowInfo|,
+  // |client| and |settings| parameters will be ignored. If |inspect_element_at|
+  // is non-NULL then the element at the specified (x,y) location will be
+  // inspected. The |windowInfo| parameter will be ignored if this browser is
+  // wrapped in a cef_browser_view_t.
   ///
   void (CEF_CALLBACK *show_dev_tools)(struct _cef_browser_host_t* self,
       const struct _cef_window_info_t* windowInfo,
@@ -460,10 +463,15 @@ typedef struct _cef_browser_host_t {
       const cef_point_t* inspect_element_at);
 
   ///
-  // Explicitly close the developer tools window if one exists for this browser
-  // instance.
+  // Explicitly close the associated DevTools browser, if any.
   ///
   void (CEF_CALLBACK *close_dev_tools)(struct _cef_browser_host_t* self);
+
+  ///
+  // Returns true (1) if this browser currently has an associated DevTools
+  // browser. Must be called on the browser process UI thread.
+  ///
+  int (CEF_CALLBACK *has_dev_tools)(struct _cef_browser_host_t* self);
 
   ///
   // Retrieve a snapshot of current navigation entries as values sent to the
@@ -610,24 +618,62 @@ typedef struct _cef_browser_host_t {
       struct _cef_browser_host_t* self, int frame_rate);
 
   ///
-  // Get the NSTextInputContext implementation for enabling IME on Mac when
-  // window rendering is disabled.
+  // Begins a new composition or updates the existing composition. Blink has a
+  // special node (a composition node) that allows the input function to change
+  // text without affecting other DOM nodes. |text| is the optional text that
+  // will be inserted into the composition node. |underlines| is an optional set
+  // of ranges that will be underlined in the resulting text.
+  // |replacement_range| is an optional range of the existing text that will be
+  // replaced. |selection_range| is an optional range of the resulting text that
+  // will be selected after insertion or replacement. The |replacement_range|
+  // value is only used on OS X.
+  //
+  // This function may be called multiple times as the composition changes. When
+  // the client is done making changes the composition should either be canceled
+  // or completed. To cancel the composition call ImeCancelComposition. To
+  // complete the composition call either ImeCommitText or
+  // ImeFinishComposingText. Completion is usually signaled when:
+  //   A. The client receives a WM_IME_COMPOSITION message with a GCS_RESULTSTR
+  //      flag (on Windows), or;
+  //   B. The client receives a "commit" signal of GtkIMContext (on Linux), or;
+  //   C. insertText of NSTextInput is called (on Mac).
+  //
+  // This function is only used when window rendering is disabled.
   ///
-  cef_text_input_context_t (CEF_CALLBACK *get_nstext_input_context)(
-      struct _cef_browser_host_t* self);
+  void (CEF_CALLBACK *ime_set_composition)(struct _cef_browser_host_t* self,
+      const cef_string_t* text, size_t underlinesCount,
+      cef_composition_underline_t const* underlines,
+      const cef_range_t* replacement_range,
+      const cef_range_t* selection_range);
 
   ///
-  // Handles a keyDown event prior to passing it through the NSTextInputClient
-  // machinery.
+  // Completes the existing composition by optionally inserting the specified
+  // |text| into the composition node. |replacement_range| is an optional range
+  // of the existing text that will be replaced. |relative_cursor_pos| is where
+  // the cursor will be positioned relative to the current cursor position. See
+  // comments on ImeSetComposition for usage. The |replacement_range| and
+  // |relative_cursor_pos| values are only used on OS X. This function is only
+  // used when window rendering is disabled.
   ///
-  void (CEF_CALLBACK *handle_key_event_before_text_input_client)(
-      struct _cef_browser_host_t* self, cef_event_handle_t keyEvent);
+  void (CEF_CALLBACK *ime_commit_text)(struct _cef_browser_host_t* self,
+      const cef_string_t* text, const cef_range_t* replacement_range,
+      int relative_cursor_pos);
 
   ///
-  // Performs any additional actions after NSTextInputClient handles the event.
+  // Completes the existing composition by applying the current composition node
+  // contents. If |keep_selection| is false (0) the current selection, if any,
+  // will be discarded. See comments on ImeSetComposition for usage. This
+  // function is only used when window rendering is disabled.
   ///
-  void (CEF_CALLBACK *handle_key_event_after_text_input_client)(
-      struct _cef_browser_host_t* self, cef_event_handle_t keyEvent);
+  void (CEF_CALLBACK *ime_finish_composing_text)(
+      struct _cef_browser_host_t* self, int keep_selection);
+
+  ///
+  // Cancels the existing composition and discards the composition node contents
+  // without applying them. See comments on ImeSetComposition for usage. This
+  // function is only used when window rendering is disabled.
+  ///
+  void (CEF_CALLBACK *ime_cancel_composition)(struct _cef_browser_host_t* self);
 
   ///
   // Call this function when the user drags the mouse into the web view (before
@@ -691,6 +737,13 @@ typedef struct _cef_browser_host_t {
   // This function is only used when window rendering is disabled.
   ///
   void (CEF_CALLBACK *drag_source_system_drag_ended)(
+      struct _cef_browser_host_t* self);
+
+  ///
+  // Returns the current visible navigation entry for this browser. This
+  // function can only be called on the UI thread.
+  ///
+  struct _cef_navigation_entry_t* (CEF_CALLBACK *get_visible_navigation_entry)(
       struct _cef_browser_host_t* self);
 } cef_browser_host_t;
 

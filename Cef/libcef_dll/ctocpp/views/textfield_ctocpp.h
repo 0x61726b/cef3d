@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
+// Copyright (c) 2017 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 //
@@ -14,18 +14,19 @@
 #define CEF_LIBCEF_DLL_CTOCPP_VIEWS_TEXTFIELD_CTOCPP_H_
 #pragma once
 
-#ifndef USING_CEF_SHARED
-#pragma message("Warning: "__FILE__" may be accessed wrapper-side only")
-#else  // USING_CEF_SHARED
+#if !defined(WRAPPING_CEF_SHARED)
+#error This file can be included wrapper-side only
+#endif
 
 #include "include/views/cef_textfield.h"
 #include "include/capi/views/cef_textfield_capi.h"
-#include "libcef_dll/ctocpp/ctocpp.h"
+#include "libcef_dll/ctocpp/ctocpp_ref_counted.h"
 
 // Wrap a C structure with a C++ class.
 // This class may be instantiated and accessed wrapper-side only.
 class CefTextfieldCToCpp
-    : public CefCToCpp<CefTextfieldCToCpp, CefTextfield, cef_textfield_t> {
+    : public CefCToCppRefCounted<CefTextfieldCToCpp, CefTextfield,
+        cef_textfield_t> {
  public:
   CefTextfieldCToCpp();
 
@@ -61,7 +62,6 @@ class CefTextfieldCToCpp
   void SetPlaceholderText(const CefString& text) OVERRIDE;
   CefString GetPlaceholderText() OVERRIDE;
   void SetPlaceholderTextColor(cef_color_t color) OVERRIDE;
-  cef_color_t GetPlaceholderTextColor() OVERRIDE;
   void SetAccessibleName(const CefString& name) OVERRIDE;
 
   // CefView methods.
@@ -79,6 +79,8 @@ class CefTextfieldCToCpp
   CefRefPtr<CefWindow> GetWindow() OVERRIDE;
   int GetID() OVERRIDE;
   void SetID(int id) OVERRIDE;
+  int GetGroupID() OVERRIDE;
+  void SetGroupID(int group_id) OVERRIDE;
   CefRefPtr<CefView> GetParentView() OVERRIDE;
   CefRefPtr<CefView> GetViewForID(int id) OVERRIDE;
   void SetBounds(const CefRect& bounds) OVERRIDE;
@@ -113,5 +115,4 @@ class CefTextfieldCToCpp
   bool ConvertPointFromView(CefRefPtr<CefView> view, CefPoint& point) OVERRIDE;
 };
 
-#endif  // USING_CEF_SHARED
 #endif  // CEF_LIBCEF_DLL_CTOCPP_VIEWS_TEXTFIELD_CTOCPP_H_

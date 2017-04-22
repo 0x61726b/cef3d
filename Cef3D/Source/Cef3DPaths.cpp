@@ -12,7 +12,7 @@
 
 #include "Cef3DPCH.h"
 
-namespace Cef3D 
+namespace Cef3D
 {
 	namespace Cef3DPrivate
 	{
@@ -21,6 +21,35 @@ namespace Cef3D
 			if (A.compare(0, B.length(), B))
 				return true;
 			return false;
+		}
+
+		bool StringEndsWith(const std::string& A, const std::string& B)
+		{
+			if (B.size() > A.size())
+				return false;
+			return std::equal(B.rbegin(), B.rend(), A.rbegin());
+		}
+
+		std::string CombinePaths(const std::string& A, const std::string& B)
+		{
+			std::string Combined;
+			if ((StringEndsWith(A, "/") || StringEndsWith(A, "\\")) && (StringStartsWith(B, "/") || (StringStartsWith(B, "\\"))))
+			{
+				Combined.append(A);
+				Combined.append(B.substr(1, B.length() - 2));
+			}
+			else
+			{
+				Combined.append(A);
+#if PLATFORM_WINDOWS
+				Combined.append("\\");
+#else
+				Combined.append("/");
+#endif
+				Combined.append(B);
+			}
+
+			return Combined;
 		}
 	}
 
@@ -42,45 +71,45 @@ namespace Cef3D
 	{
 		static std::string RootDir;
 
+		if (!RootDir.length())
+		{
+
 #if PLATFORM_WINDOWS
-		TCHAR ModulePath[MAX_PATH];
-		GetModuleFileName(GetModuleHandle(NULL), ModulePath, MAX_PATH);
+			TCHAR ModulePath[MAX_PATH];
+			GetModuleFileName(GetModuleHandle(NULL), ModulePath, MAX_PATH);
 
-		std::wstring WideModulePath = std::wstring(ModulePath);
-		RootDir = std::string(WideModulePath.begin(), WideModulePath.end());
+			std::wstring WideModulePath = std::wstring(ModulePath);
+			RootDir = std::string(WideModulePath.begin(), WideModulePath.end());
 #endif
-		// Remove the stuff
-		size_t last_slash = RootDir.find_last_of('\\');
-		if (last_slash == std::string::npos)
-			last_slash = RootDir.find_last_of('/');
+			// Remove the stuff
+			size_t last_slash = RootDir.find_last_of('\\');
+			if (last_slash == std::string::npos)
+				last_slash = RootDir.find_last_of('/');
 
-		if (last_slash != std::string::npos)
-		{
-			RootDir = RootDir.substr(0, last_slash);
-		}
-
-		// Remove this in the future
-
-		// Binaries
-		last_slash = RootDir.find_last_of('\\');
-		if (last_slash == std::string::npos)
-			last_slash = RootDir.find_last_of('/');
-
-		if (last_slash != std::string::npos)
-		{
-			RootDir = RootDir.substr(0, last_slash);
-		}
-
-		// Cef3D
-		last_slash = RootDir.find_last_of('\\');
-		if (last_slash == std::string::npos)
-			last_slash = RootDir.find_last_of('/');
-
-		if (last_slash != std::string::npos)
-		{
-			RootDir = RootDir.substr(0, last_slash);
+			if (last_slash != std::string::npos)
+			{
+				RootDir = RootDir.substr(0, last_slash);
+			}
 		}
 
 		return RootDir;
+	}
+
+	const std::string& Cef3DPaths::Shaders()
+	{
+		static std::string ShadersPath;
+		if (!ShadersPath.length())
+		{
+			ShadersPath = Cef3DPrivate::CombinePaths(Root(), "Shaders");
+		}
+		return ShadersPath;
+	}
+	const std::string& Cef3DPaths::Log()
+	{
+		return Root();
+	}
+	const std::string Cef3DPaths::Combine(const std::string & A, const std::string & B)
+	{
+		return Cef3DPrivate::CombinePaths(A, B);
 	}
 }

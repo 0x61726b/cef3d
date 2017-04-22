@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
+// Copyright (c) 2017 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 //
@@ -142,18 +142,18 @@ CefJSDialogHandlerCppToC::CefJSDialogHandlerCppToC() {
   GetStruct()->on_dialog_closed = jsdialog_handler_on_dialog_closed;
 }
 
-template<> CefRefPtr<CefJSDialogHandler> CefCppToC<CefJSDialogHandlerCppToC,
+template<> CefRefPtr<CefJSDialogHandler> CefCppToCRefCounted<CefJSDialogHandlerCppToC,
     CefJSDialogHandler, cef_jsdialog_handler_t>::UnwrapDerived(
     CefWrapperType type, cef_jsdialog_handler_t* s) {
   NOTREACHED() << "Unexpected class type: " << type;
   return NULL;
 }
 
-#ifndef NDEBUG
-template<> base::AtomicRefCount CefCppToC<CefJSDialogHandlerCppToC,
+#if DCHECK_IS_ON()
+template<> base::AtomicRefCount CefCppToCRefCounted<CefJSDialogHandlerCppToC,
     CefJSDialogHandler, cef_jsdialog_handler_t>::DebugObjCt = 0;
 #endif
 
-template<> CefWrapperType CefCppToC<CefJSDialogHandlerCppToC,
+template<> CefWrapperType CefCppToCRefCounted<CefJSDialogHandlerCppToC,
     CefJSDialogHandler, cef_jsdialog_handler_t>::kWrapperType =
     WT_JSDIALOG_HANDLER;

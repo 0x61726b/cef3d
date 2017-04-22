@@ -15,8 +15,6 @@
 
 using namespace Cef3D;
 
-MainContextImpl* GMainContext = 0;
-
 bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 {
 	// Enable High-DPI support on Windows 7 or newer.
@@ -31,7 +29,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	command_line->InitFromString("");
 #endif
 
-	GMainContext = (new MainContextImpl(command_line, true));
+	GMainContext = (new MainContext(command_line, true));
 
 	CefSettings settings;
 	settings.no_sandbox = true;
@@ -95,12 +93,12 @@ bool Cef3D_Shutdown()
 {
 	/*Cef3DBrowserApp->BrowserList.clear();*/
 	/*GMainContext->Shutdown();*/
-
-	GMainContext->Shutdown();
-	GMainContext = 0;
 	/*delete GMainContext;*/
 
-	CefShutdown();
+	GMainContext->Shutdown();
+
+	delete GMainContext;
+	GMainContext = 0;
 
 	return true;
 }

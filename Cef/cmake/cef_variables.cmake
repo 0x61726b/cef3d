@@ -215,7 +215,7 @@ endif()
 
 if(OS_MACOSX)
   # Platform-specific compiler/linker flags.
-  # See also Xcode target properties in macros.cmake.
+  # See also Xcode target properties in cef_macros.cmake.
   set(CEF_LIBTYPE SHARED)
   list(APPEND CEF_COMPILER_FLAGS
     -fno-strict-aliasing            # Avoid assumptions regarding non-aliasing of objects of different types
@@ -259,6 +259,15 @@ if(OS_MACOSX)
     -Wl,-dead_strip                 # Strip dead code
     )
 
+  include(CheckCXXCompilerFlag)
+
+  CHECK_CXX_COMPILER_FLAG(-Wno-undefined-var-template COMPILER_SUPPORTS_NO_UNDEFINED_VAR_TEMPLATE)
+  if(COMPILER_SUPPORTS_NO_UNDEFINED_VAR_TEMPLATE)
+    list(APPEND CEF_CXX_COMPILER_FLAGS
+      -Wno-undefined-var-template   # Don't warn about potentially uninstantiated static members
+      )
+  endif()
+
   # Standard libraries.
   set(CEF_STANDARD_LIBS
     -lpthread
@@ -268,7 +277,7 @@ if(OS_MACOSX)
 
   # Find the newest available base SDK.
   execute_process(COMMAND xcode-select --print-path OUTPUT_VARIABLE XCODE_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
-  foreach(OS_VERSION 10.10 10.9 10.8 10.7)
+  foreach(OS_VERSION 10.11 10.10 10.9)
     set(SDK "${XCODE_PATH}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OS_VERSION}.sdk")
     if(NOT "${CMAKE_OSX_SYSROOT}" AND EXISTS "${SDK}" AND IS_DIRECTORY "${SDK}")
       set(CMAKE_OSX_SYSROOT ${SDK})
@@ -276,7 +285,7 @@ if(OS_MACOSX)
   endforeach()
 
   # Target SDK.
-  set(CEF_TARGET_SDK               "10.7")
+  set(CEF_TARGET_SDK               "10.9")
   list(APPEND CEF_COMPILER_FLAGS
     -mmacosx-version-min=${CEF_TARGET_SDK}
   )
@@ -305,6 +314,24 @@ endif()
 #
 
 if(OS_WINDOWS)
+  # Configure use of the sandbox.
+  option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
+  if(USE_SANDBOX AND NOT MSVC_VERSION EQUAL 1900)
+    # The cef_sandbox.lib static library is currently built with VS2015. It will
+    # not link successfully with other VS versions.
+    set(USE_SANDBOX OFF)
+  endif()
+
+  # Configure use of official build compiler settings.
+  # When using an official build the "Debug" build is actually a Release build
+  # with DCHECKs enabled. In order to link the sandbox the Debug build must
+  # be configured with some Release-related compiler settings.
+  option(USE_OFFICIAL_BUILD_SANDBOX "Enable or disable use of an official build sandbox." ON)
+  if(NOT USE_SANDBOX)
+    # Don't need official build settings when the sandbox is off.
+    set(USE_OFFICIAL_BUILD_SANDBOX OFF)
+  endif()
+
   # Consumers who run into LNK4099 warnings can pass /Z7 instead (see issue #385).
   set(CEF_DEBUG_INFO_FLAG "/Zi" CACHE STRING "Optional flag specifying specific /Z flag to use")
 
@@ -326,11 +353,22 @@ if(OS_WINDOWS)
     /wd4996       # Ignore "function or variable may be unsafe" warning
     ${CEF_DEBUG_INFO_FLAG}
     )
-  list(APPEND CEF_COMPILER_FLAGS_DEBUG
-    /MTd          # Multithreaded debug runtime
-    /RTC1         # Disable optimizations
-    /Od           # Enable basic run-time checks
-    )
+  if(USE_OFFICIAL_BUILD_SANDBOX)
+    # CMake adds /RTC1, /D"_DEBUG" and a few other values by default for Debug
+    # builds. We can't link the sandbox with those values so clear the CMake
+    # defaults here.
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+
+    list(APPEND CEF_COMPILER_FLAGS_DEBUG
+      /MT           # Multithreaded release runtime
+      )
+  else()
+    list(APPEND CEF_COMPILER_FLAGS_DEBUG
+      /MTd          # Multithreaded debug runtime
+      /RTC1         # Disable optimizations
+      /Od           # Enable basic run-time checks
+      )
+  endif()
   list(APPEND CEF_COMPILER_FLAGS_RELEASE
     /MT           # Multithreaded release runtime
     /O2           # Optimize for maximum speed
@@ -341,16 +379,23 @@ if(OS_WINDOWS)
     /DEBUG        # Generate debug information
     )
   list(APPEND CEF_EXE_LINKER_FLAGS
-    /MANIFEST:NO  # No default manifest (see ADD_WINDOWS_MANIFEST macro usage)
+    /MANIFEST:NO        # No default manifest (see ADD_WINDOWS_MANIFEST macro usage)
+    /LARGEADDRESSAWARE  # Allow 32-bit processes to access 3GB of RAM
     )
   list(APPEND CEF_COMPILER_DEFINES
     WIN32 _WIN32 _WINDOWS             # Windows platform
     UNICODE _UNICODE                  # Unicode build
-    WINVER=0x0602 _WIN32_WINNT=0x602  # Targeting Windows 8
+    WINVER=0x0601 _WIN32_WINNT=0x601  # Targeting Windows 7
     NOMINMAX                          # Use the standard's templated min/max
     WIN32_LEAN_AND_MEAN               # Exclude less common API declarations
     _HAS_EXCEPTIONS=0                 # Disable exceptions
     )
+  if(USE_OFFICIAL_BUILD_SANDBOX)
+    list(APPEND CEF_COMPILER_DEFINES_DEBUG
+      NDEBUG _NDEBUG                    # Not a debug build
+      DCHECK_ALWAYS_ON=1                # DCHECKs are enabled
+      )
+  endif()
   list(APPEND CEF_COMPILER_DEFINES_RELEASE
     NDEBUG _NDEBUG                    # Not a debug build
     )
@@ -375,6 +420,7 @@ if(OS_WINDOWS)
 
   # List of CEF binary files.
   set(CEF_BINARY_FILES
+    chrome_elf.dll
     d3dcompiler_43.dll
     d3dcompiler_47.dll
     libcef.dll
@@ -383,12 +429,6 @@ if(OS_WINDOWS)
     natives_blob.bin
     snapshot_blob.bin
     )
-  if(PROJECT_ARCH STREQUAL "x86")
-    # Only used on 32-bit platforms.
-    list(APPEND CEF_BINARY_FILES
-      wow_helper.exe
-      )
-  endif()
 
   # List of CEF resource files.
   set(CEF_RESOURCE_FILES
@@ -400,14 +440,6 @@ if(OS_WINDOWS)
     icudtl.dat
     locales
     )
-
-  # Configure use of the sandbox.
-  option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
-  if(USE_SANDBOX AND NOT MSVC_VERSION EQUAL 1900)
-    # The cef_sandbox.lib static library is currently built with VS2015. It will
-    # not link successfully with other VS versions.
-    set(USE_SANDBOX OFF)
-  endif()
 
   if(USE_SANDBOX)
     list(APPEND CEF_COMPILER_DEFINES

@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2017 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -55,7 +55,7 @@ typedef struct _cef_menu_model_delegate_t {
   ///
   // Base structure.
   ///
-  cef_base_t base;
+  cef_base_ref_counted_t base;
 
   ///
   // Perform the action associated with the specified |command_id| and optional
@@ -66,10 +66,47 @@ typedef struct _cef_menu_model_delegate_t {
       cef_event_flags_t event_flags);
 
   ///
+  // Called when the user moves the mouse outside the menu and over the owning
+  // window.
+  ///
+  void (CEF_CALLBACK *mouse_outside_menu)(
+      struct _cef_menu_model_delegate_t* self,
+      struct _cef_menu_model_t* menu_model, const cef_point_t* screen_point);
+
+  ///
+  // Called on unhandled open submenu keyboard commands. |is_rtl| will be true
+  // (1) if the menu is displaying a right-to-left language.
+  ///
+  void (CEF_CALLBACK *unhandled_open_submenu)(
+      struct _cef_menu_model_delegate_t* self,
+      struct _cef_menu_model_t* menu_model, int is_rtl);
+
+  ///
+  // Called on unhandled close submenu keyboard commands. |is_rtl| will be true
+  // (1) if the menu is displaying a right-to-left language.
+  ///
+  void (CEF_CALLBACK *unhandled_close_submenu)(
+      struct _cef_menu_model_delegate_t* self,
+      struct _cef_menu_model_t* menu_model, int is_rtl);
+
+  ///
   // The menu is about to show.
   ///
   void (CEF_CALLBACK *menu_will_show)(struct _cef_menu_model_delegate_t* self,
       struct _cef_menu_model_t* menu_model);
+
+  ///
+  // The menu has closed.
+  ///
+  void (CEF_CALLBACK *menu_closed)(struct _cef_menu_model_delegate_t* self,
+      struct _cef_menu_model_t* menu_model);
+
+  ///
+  // Optionally modify a menu item label. Return true (1) if |label| was
+  // modified.
+  ///
+  int (CEF_CALLBACK *format_label)(struct _cef_menu_model_delegate_t* self,
+      struct _cef_menu_model_t* menu_model, cef_string_t* label);
 } cef_menu_model_delegate_t;
 
 

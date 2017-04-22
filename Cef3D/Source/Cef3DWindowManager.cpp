@@ -23,6 +23,7 @@ namespace Cef3D
 
 			bool OnBeforePluginLoad(const CefString& mime_type,
 				const CefString& plugin_url,
+				bool is_main_frame,
 				const CefString& top_origin_url,
 				CefRefPtr<CefWebPluginInfo> plugin_info,
 				PluginPolicy* plugin_policy) OVERRIDE {
@@ -64,12 +65,12 @@ namespace Cef3D
 		const CefRect& bounds,
 		const std::string& url) {
 		CefBrowserSettings settings;
-		MainContext::Get()->PopulateBrowserSettings(&settings);
+		GMainContext->PopulateBrowserSettings(&settings);
 
 		scoped_refptr<RootWindow> root_window =
-			RootWindow::Create(MainContext::Get()->UseViews());
+			RootWindow::Create(GMainContext->UseViews());
 		root_window->Init(this, with_controls, with_osr, bounds, settings,
-			url.empty() ? MainContext::Get()->GetMainURL() : url);
+			url.empty() ? GMainContext->GetMainURL() : url);
 
 		// Store a reference to the root window on the main thread.
 		OnRootWindowCreated(root_window);
@@ -84,10 +85,10 @@ namespace Cef3D
 		CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
 		CefBrowserSettings& settings) {
-		MainContext::Get()->PopulateBrowserSettings(&settings);
+		GMainContext->PopulateBrowserSettings(&settings);
 
 		scoped_refptr<RootWindow> root_window =
-			RootWindow::Create(MainContext::Get()->UseViews());
+			RootWindow::Create(GMainContext->UseViews());
 		root_window->InitAsPopup(this, with_controls, with_osr,
 			popupFeatures, windowInfo, client, settings);
 
@@ -144,39 +145,39 @@ namespace Cef3D
 		RootWindow* root_window) {
 		REQUIRE_MAIN_THREAD();
 
-		if (request_context_per_browser_) {
-			// Create a new request context for each browser.
-			CefRequestContextSettings settings;
+		//if (request_context_per_browser_) {
+		//	// Create a new request context for each browser.
+		//	CefRequestContextSettings settings;
 
-			CefRefPtr<CefCommandLine> command_line =
-				CefCommandLine::GetGlobalCommandLine();
-			//if (command_line->HasSwitch(switches::kCachePath)) {
-			//	if (request_context_shared_cache_) {
-			//		// Give each browser the same cache path. The resulting context objects
-			//		// will share the same storage internally.
-			//		CefString(&settings.cache_path) =
-			//			command_line->GetSwitchValue(switches::kCachePath);
-			//	}
-			//	else {
-			//		// Give each browser a unique cache path. This will create completely
-			//		// isolated context objects.
-			//		std::stringstream ss;
-			//		ss << command_line->GetSwitchValue(switches::kCachePath).ToString() <<
-			//			time(NULL);
-			//		CefString(&settings.cache_path) = ss.str();
-			//	}
-			//}
+		//	CefRefPtr<CefCommandLine> command_line =
+		//		CefCommandLine::GetGlobalCommandLine();
+		//	//if (command_line->HasSwitch(switches::kCachePath)) {
+		//	//	if (request_context_shared_cache_) {
+		//	//		// Give each browser the same cache path. The resulting context objects
+		//	//		// will share the same storage internally.
+		//	//		CefString(&settings.cache_path) =
+		//	//			command_line->GetSwitchValue(switches::kCachePath);
+		//	//	}
+		//	//	else {
+		//	//		// Give each browser a unique cache path. This will create completely
+		//	//		// isolated context objects.
+		//	//		std::stringstream ss;
+		//	//		ss << command_line->GetSwitchValue(switches::kCachePath).ToString() <<
+		//	//			time(NULL);
+		//	//		CefString(&settings.cache_path) = ss.str();
+		//	//	}
+		//	//}
 
-			return CefRequestContext::CreateContext(settings,
-				new ClientRequestContextHandler);
-		}
+		//	return CefRequestContext::CreateContext(settings,
+		//		new ClientRequestContextHandler);
+		//}
 
-		// All browsers will share the global request context.
-		if (!shared_request_context_.get()) {
-			shared_request_context_ =
-				CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(),
-					new ClientRequestContextHandler);
-		}
+		//// All browsers will share the global request context.
+		//if (!shared_request_context_.get()) {
+		//	shared_request_context_ =
+		//		CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(),
+		//			new ClientRequestContextHandler);
+		//}
 		return shared_request_context_;
 	}
 

@@ -58,7 +58,7 @@ class CefClient;
 // this class may only be called on the main thread.
 ///
 /*--cef(source=library)--*/
-class CefBrowser : public virtual CefBase {
+class CefBrowser : public virtual CefBaseRefCounted {
  public:
   ///
   // Returns the browser host object. This method can only be called in the
@@ -197,7 +197,7 @@ class CefBrowser : public virtual CefBase {
 // class will be called on the browser process UI thread.
 ///
 /*--cef(source=client)--*/
-class CefRunFileDialogCallback : public virtual CefBase {
+class CefRunFileDialogCallback : public virtual CefBaseRefCounted {
  public:
   ///
   // Called asynchronously after the file dialog is dismissed.
@@ -218,7 +218,7 @@ class CefRunFileDialogCallback : public virtual CefBase {
 // this class will be called on the browser process UI thread.
 ///
 /*--cef(source=client)--*/
-class CefNavigationEntryVisitor : public virtual CefBase {
+class CefNavigationEntryVisitor : public virtual CefBaseRefCounted {
  public:
   ///
   // Method that will be executed. Do not keep a reference to |entry| outside of
@@ -240,7 +240,7 @@ class CefNavigationEntryVisitor : public virtual CefBase {
 // will be called on the browser process UI thread.
 ///
 /*--cef(source=client)--*/
-class CefPdfPrintCallback : public virtual CefBase {
+class CefPdfPrintCallback : public virtual CefBaseRefCounted {
  public:
   ///
   // Method that will be executed when the PDF printing has completed. |path|
@@ -257,7 +257,7 @@ class CefPdfPrintCallback : public virtual CefBase {
 // class will be called on the browser process UI thread.
 ///
 /*--cef(source=client)--*/
-class CefDownloadImageCallback : public virtual CefBase {
+class CefDownloadImageCallback : public virtual CefBaseRefCounted {
  public:
   ///
   // Method that will be executed when the image download has completed.
@@ -280,7 +280,7 @@ class CefDownloadImageCallback : public virtual CefBase {
 // comments.
 ///
 /*--cef(source=library)--*/
-class CefBrowserHost : public virtual CefBase {
+class CefBrowserHost : public virtual CefBaseRefCounted {
  public:
   typedef cef_drag_operations_mask_t DragOperationsMask;
   typedef cef_file_dialog_mode_t FileDialogMode;
@@ -490,23 +490,33 @@ class CefBrowserHost : public virtual CefBase {
   virtual void StopFinding(bool clearSelection) =0;
 
   ///
-  // Open developer tools in its own window. If |inspect_element_at| is non-
-  // empty the element at the specified (x,y) location will be inspected. The
-  // |windowInfo| parameter will be ignored if this browser is wrapped in a
-  // CefBrowserView.
+  // Open developer tools (DevTools) in its own browser. The DevTools browser
+  // will remain associated with this browser. If the DevTools browser is
+  // already open then it will be focused, in which case the |windowInfo|,
+  // |client| and |settings| parameters will be ignored. If |inspect_element_at|
+  // is non-empty then the element at the specified (x,y) location will be
+  // inspected. The |windowInfo| parameter will be ignored if this browser is
+  // wrapped in a CefBrowserView.
   ///
-  /*--cef(optional_param=inspect_element_at)--*/
+  /*--cef(optional_param=windowInfo,optional_param=client,
+          optional_param=settings,optional_param=inspect_element_at)--*/
   virtual void ShowDevTools(const CefWindowInfo& windowInfo,
                             CefRefPtr<CefClient> client,
                             const CefBrowserSettings& settings,
                             const CefPoint& inspect_element_at) =0;
 
   ///
-  // Explicitly close the developer tools window if one exists for this browser
-  // instance.
+  // Explicitly close the associated DevTools browser, if any.
   ///
   /*--cef()--*/
   virtual void CloseDevTools() =0;
+
+  ///
+  // Returns true if this browser currently has an associated DevTools browser.
+  // Must be called on the browser process UI thread.
+  ///
+  /*--cef()--*/
+  virtual bool HasDevTools() =0;
 
   ///
   // Retrieve a snapshot of current navigation entries as values sent to the
@@ -659,24 +669,66 @@ class CefBrowserHost : public virtual CefBase {
   virtual void SetWindowlessFrameRate(int frame_rate) =0;
 
   ///
-  // Get the NSTextInputContext implementation for enabling IME on Mac when
-  // window rendering is disabled.
+  // Begins a new composition or updates the existing composition. Blink has a
+  // special node (a composition node) that allows the input method to change
+  // text without affecting other DOM nodes. |text| is the optional text that
+  // will be inserted into the composition node. |underlines| is an optional set
+  // of ranges that will be underlined in the resulting text.
+  // |replacement_range| is an optional range of the existing text that will be
+  // replaced. |selection_range| is an optional range of the resulting text that
+  // will be selected after insertion or replacement. The |replacement_range|
+  // value is only used on OS X.
+  //
+  // This method may be called multiple times as the composition changes. When
+  // the client is done making changes the composition should either be canceled
+  // or completed. To cancel the composition call ImeCancelComposition. To
+  // complete the composition call either ImeCommitText or
+  // ImeFinishComposingText. Completion is usually signaled when:
+  //   A. The client receives a WM_IME_COMPOSITION message with a GCS_RESULTSTR
+  //      flag (on Windows), or;
+  //   B. The client receives a "commit" signal of GtkIMContext (on Linux), or;
+  //   C. insertText of NSTextInput is called (on Mac).
+  //
+  // This method is only used when window rendering is disabled.
   ///
-  /*--cef(default_retval=NULL)--*/
-  virtual CefTextInputContext GetNSTextInputContext() =0;
+  /*--cef(optional_param=text, optional_param=underlines)--*/
+  virtual void ImeSetComposition(
+      const CefString& text,
+      const std::vector<CefCompositionUnderline>& underlines,
+      const CefRange& replacement_range,
+      const CefRange& selection_range) =0;
 
   ///
-  // Handles a keyDown event prior to passing it through the NSTextInputClient
-  // machinery.
+  // Completes the existing composition by optionally inserting the specified
+  // |text| into the composition node. |replacement_range| is an optional range
+  // of the existing text that will be replaced. |relative_cursor_pos| is where
+  // the cursor will be positioned relative to the current cursor position. See
+  // comments on ImeSetComposition for usage. The |replacement_range| and
+  // |relative_cursor_pos| values are only used on OS X.
+  // This method is only used when window rendering is disabled.
   ///
-  /*--cef()--*/
-  virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
+  /*--cef(optional_param=text)--*/
+  virtual void ImeCommitText(const CefString& text,
+                             const CefRange& replacement_range,
+                             int relative_cursor_pos) =0;
 
   ///
-  // Performs any additional actions after NSTextInputClient handles the event.
+  // Completes the existing composition by applying the current composition node
+  // contents. If |keep_selection| is false the current selection, if any, will
+  // be discarded. See comments on ImeSetComposition for usage.
+  // This method is only used when window rendering is disabled.
   ///
   /*--cef()--*/
-  virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
+  virtual void ImeFinishComposingText(bool keep_selection) =0;
+
+  ///
+  // Cancels the existing composition and discards the composition node
+  // contents without applying them. See comments on ImeSetComposition for
+  // usage.
+  // This method is only used when window rendering is disabled.
+  ///
+  /*--cef()--*/
+  virtual void ImeCancelComposition() =0;
 
   ///
   // Call this method when the user drags the mouse into the web view (before
@@ -743,6 +795,13 @@ class CefBrowserHost : public virtual CefBase {
   ///
   /*--cef()--*/
   virtual void DragSourceSystemDragEnded() =0;
+
+  ///
+  // Returns the current visible navigation entry for this browser. This method
+  // can only be called on the UI thread.
+  ///
+  /*--cef()--*/
+  virtual CefRefPtr<CefNavigationEntry> GetVisibleNavigationEntry() =0;
 };
 
 #endif  // CEF_INCLUDE_CEF_BROWSER_H_
