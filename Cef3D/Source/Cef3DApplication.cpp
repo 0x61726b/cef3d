@@ -20,63 +20,101 @@
 
 namespace Cef3D
 {
-	namespace {
-
-		class SimpleWindowDelegate : public ViewsWindow::Delegate {
-		public:
-			void OnViewsWindowCreated(CefRefPtr<ViewsWindow> window) OVERRIDE;
-			void OnViewsWindowDestroyed(CefRefPtr<ViewsWindow> window) OVERRIDE;
-			virtual void OnExit() OVERRIDE;
-		};
-
-		void SimpleWindowDelegate::OnViewsWindowCreated(CefRefPtr<ViewsWindow> window)
-		{
-
-		}
-
-		void SimpleWindowDelegate::OnViewsWindowDestroyed(CefRefPtr<ViewsWindow> window)
-		{
-
-		}
-
-		void SimpleWindowDelegate::OnExit()
-		{
-
-		}
-
-
-	}  // namespace
-}
-
-namespace Cef3D
-{
 	Cef3DApplication::Cef3DApplication()
 	{
 
 	}
 
+	void Cef3DApplication::RegisterDelegate(CefRefPtr<Delegate> Del)
+	{
+		DelegateList.insert(Del);
+	}
+
+	void Cef3DApplication::OnBeforeCommandLineProcessing(const CefString& process_type,CefRefPtr<CefCommandLine> command_line)
+	{
+		// Pass additional command-line flags to the browser process.
+		if (process_type.empty())
+		{
+			// Pass additional command-line flags when off-screen rendering is enabled.
+			if (command_line->HasSwitch("off-screen-rendering-enabled"))
+			{
+				// If the PDF extension is enabled then cc Surfaces must be disabled for
+				// PDFs to render correctly.
+				// See https://bitbucket.org/chromiumembedded/cef/issues/1689 for details.
+				if (!command_line->HasSwitch("disable-extensions") && !command_line->HasSwitch("disable-pdf-extension"))
+				{
+					command_line->AppendSwitch("disable-surfaces");
+				}
+
+				// Use software rendering and compositing (disable GPU) for increased FPS
+				// and decreased CPU usage. This will also disable WebGL so remove these
+				// switches if you need that capability.
+				// See https://bitbucket.org/chromiumembedded/cef/issues/1257 for details.
+				if (!command_line->HasSwitch("enable-gpu"))
+				{
+					command_line->AppendSwitch("disable-gpu");
+					command_line->AppendSwitch("disable-gpu-compositing");
+				}
+			}
+
+			if (command_line->HasSwitch("use-views") && !command_line->HasSwitch("top-chrome-md"))
+			{
+				// Use non-material mode on all platforms by default. Among other things
+				// this causes menu buttons to show hover state. See usage of
+				// MaterialDesignController::IsModeMaterial() in Chromium code.
+				command_line->AppendSwitchWithValue("top-chrome-md", "non-material");
+			}
+
+			DelegateSet::iterator it = DelegateList.begin();
+			for (; it != DelegateList.end(); ++it)
+				(*it)->OnBeforeCommandLineProcessing(this, command_line);
+		}
+	}
+
 	void Cef3DApplication::OnContextInitialized()
 	{
-		CEF_REQUIRE_UI_THREAD();
+		// Register cookieable schemes with the global cookie manager.
+		CefRefPtr<CefCookieManager> manager =
+			CefCookieManager::GetGlobalManager(NULL);
+		DCHECK(manager.get());
+		manager->SetSupportedSchemes(CookieableSchemes, NULL);
+
+		DelegateSet::iterator it = DelegateList.begin();
+		for (; it != DelegateList.end(); ++it)
+			(*it)->OnContextInitialized(this);
 	}
 
-	Cef3DBrowser* Cef3DApplication::GetCef3DBrowser(CefRefPtr<CefBrowser> Browser)
+	void Cef3DApplication::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
 	{
-		DCHECK(Browser);
-
-		std::map<int, Cef3DBrowser*>::iterator bit = BrowserMap.find(Browser->GetIdentifier());
-		if(bit != BrowserMap.end())
-			return bit->second;
-		return 0;
+		DelegateSet::iterator it = DelegateList.begin();
+		for (; it != DelegateList.end(); ++it)
+			(*it)->OnBeforeChildProcessLaunch(this, command_line);
 	}
 
-	RootWindow* Cef3DApplication::CreateBrowser(const Cef3DBrowserDefinition& Definition)
+	void Cef3DApplication::OnRenderProcessThreadCreated(CefRefPtr<CefListValue> extra_info)
 	{
-		CEF_REQUIRE_UI_THREAD();
+		DelegateSet::iterator it = DelegateList.begin();
+		for (; it != DelegateList.end(); ++it)
+			(*it)->OnRenderProcessThreadCreated(this, extra_info);
+	}
 
-		std::string testLoadUrl = "http://www.google.com";
-		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Definition);
+	void Cef3DApplication::OnScheduleMessagePumpWork(int64 delay)
+	{
+		
+	}
+	CefProcessType Cef3DApplication::GetProcessType(CefRefPtr<CefCommandLine> command_line)
+	{
+		if(!command_line->HasSwitch("type"))
+			return CefProcessType::ProcessBrowser;
 
-		return GMainContext->GetRootWindowManager()->CreateRootWindow(false, false, CefRect(), testLoadUrl);
+		const std::string& process_type = command_line->GetSwitchValue("type");
+		if (process_type == "renderer")
+			return CefProcessType::ProcessRenderer;
+#if PLATFORM_LINUX
+		else if (process_type == "zygote")
+			return CefProcessType::ProcessOther;
+#endif
+
+		return CefProcessType::ProcessOther;
 	}
 }

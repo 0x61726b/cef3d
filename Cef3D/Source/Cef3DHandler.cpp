@@ -24,7 +24,7 @@ namespace Cef3D
 	Cef3DHandler::Cef3DHandler(Cef3DHandlerDelegate* HandlerDelegate, bool Osr, const std::string& url)
 		: IsOsr(Osr),
 		StartupUrl(url),
-		browser_count_(0),
+		BrowserCount(0),
 		Delegate(HandlerDelegate),
 		console_log_file_("")
 	{
@@ -74,10 +74,12 @@ namespace Cef3D
 		CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefFrame> frame,
 		CefRefPtr<CefContextMenuParams> params,
-		CefRefPtr<CefMenuModel> model) {
+		CefRefPtr<CefMenuModel> model)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
-		if ((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0) {
+		if ((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0)
+		{
 			// Add a separator if the menu already has items.
 			if (model->GetCount() > 0)
 				model->AddSeparator();
@@ -87,8 +89,10 @@ namespace Cef3D
 			model->AddItem(1, "Close DevTools");
 			model->AddSeparator();
 			model->AddItem(2, "Inspect Element");
-
 		}
+
+		if (Delegate)
+			Delegate->OnBeforeContextMenu(model);
 	}
 
 
@@ -180,7 +184,7 @@ namespace Cef3D
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		browser_count_++;
+		BrowserCount++;
 
 		if (!message_router_) {
 			// Create the browser-side router for query handling.
@@ -215,7 +219,7 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 
-		if (--browser_count_ == 0) {
+		if (--BrowserCount == 0) {
 			// Remove and delete message router handlers.
 			MessageHandlerSet::const_iterator it =
 				message_handler_set_.begin();
@@ -282,7 +286,7 @@ namespace Cef3D
 		CefRefPtr<CefClient> client;
 		CefBrowserSettings settings;
 
-		if (CreatePopupWindow(browser, true, CefPopupFeatures(), windowInfo, client,
+		if (CreatePopupWindow(browser, CefPopupFeatures(), windowInfo, client,
 			settings))
 		{
 			browser->GetHost()->ShowDevTools(windowInfo, client, settings,
@@ -290,13 +294,13 @@ namespace Cef3D
 		}
 	}
 
-	void Cef3DHandler::CloseDevTools(CefRefPtr<CefBrowser> browser) {
+	void Cef3DHandler::CloseDevTools(CefRefPtr<CefBrowser> browser)
+	{
 		browser->GetHost()->CloseDevTools();
 	}
 
 	bool Cef3DHandler::CreatePopupWindow(
 		CefRefPtr<CefBrowser> browser,
-		bool is_devtools,
 		const CefPopupFeatures& popupFeatures,
 		CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
@@ -305,8 +309,7 @@ namespace Cef3D
 
 		// The popup browser will be parented to a new native window.
 		// Don't show URL bar and navigation buttons on DevTools windows.
-		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(
-			!is_devtools, IsOsr, popupFeatures, windowInfo, client, settings);
+		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(IsOsr, popupFeatures, windowInfo, client, settings);
 
 		return true;
 	}

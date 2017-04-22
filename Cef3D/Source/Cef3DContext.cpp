@@ -43,159 +43,129 @@ namespace Cef3D
 
 	}  // namespace
 
-	MainContext::MainContext() : terminate_when_all_windows_closed_(true) {
+	MainContext::MainContext()
+	{
 		DCHECK(!GMainContext);
 		GMainContext = this;
-
 	}
 
 
-	MainContext::MainContext(CefRefPtr<CefCommandLine> command_line,
-		bool terminate_when_all_windows_closed)
-		: command_line_(command_line),
-		terminate_when_all_windows_closed_(terminate_when_all_windows_closed),
-		initialized_(false),
-		shutdown_(false),
-		background_color_(CefColorSetARGB(255, 255, 255, 255)),
-		use_views_(false) {
-		DCHECK(command_line_.get());
-
-		// Set the main URL.
-		if (command_line_->HasSwitch("url"))
-			main_url_ = command_line_->GetSwitchValue("url");
-		if (main_url_.empty())
-			main_url_ = kDefaultUrl;
-
-		if (command_line_->HasSwitch("background-color")) {
-			// Parse the background color value.
-			background_color_ =
-				ParseColor(command_line_->GetSwitchValue("background-color"));
-		}
+	MainContext::MainContext(CefRefPtr<CefCommandLine> command_line)
+		: CmdLine(command_line),
+		IsInitialized(false),
+		IsShuttingDown(false),
+		UseViews(false)
+	{
+		DCHECK(CmdLine.get());
 
 		// Whether windowless (off-screen) rendering will be used.
-		use_windowless_rendering_ =
-			command_line_->HasSwitch("off-screen-rendering-enabled");
+		WindowLessRendering = CmdLine->HasSwitch("off-screen-rendering-enabled");
 
-#if defined(OS_WIN) || defined(OS_LINUX)
+#if PLATFORM_WINDOWS || PLATFORM_LINUX
 		// Whether the Views framework will be used.
-		use_views_ = true;
+		UseViews = true;
 
-		if (use_windowless_rendering_ && use_views_) {
+		if (WindowLessRendering && UseViews) {
 			LOG(ERROR) <<
 				"Windowless rendering is not supported by the Views framework.";
-			use_views_ = false;
+			UseViews = false;
 		}
-
-		if (use_views_ && command_line->HasSwitch("hide-frame") &&
-			!command_line_->HasSwitch("url")) {
-			// Use the draggable regions test as the default URL for frameless windows.
-			main_url_ = "http://tests/draggable";
-		}
-#endif  // defined(OS_WIN) || defined(OS_LINUX)
+#endif 
 	}
 
-	MainContext::~MainContext() {
+	MainContext::~MainContext()
+	{
 		// The context must either not have been initialized, or it must have also
 		// been shut down.
-		DCHECK(!initialized_ || shutdown_);
-		/*GMainContext = NULL;*/
+		DCHECK(!IsInitialized || IsShuttingDown);
 	}
+                                                
 
-	std::string MainContext::GetConsoleLogPath() {
-		return GetAppWorkingDirectory() + "console.log";
-	}
-
-	std::string MainContext::GetMainURL() {
-		return main_url_;
-	}
-
-	cef_color_t MainContext::GetBackgroundColor() {
-		return background_color_;
-	}
-
-	std::string MainContext::GetDownloadPath(const std::string& file_name)
+	std::string MainContext::GetDefaultURL()
 	{
-		return "";
+		return std::string("http://www.google.com");
 	}
 
-	std::string MainContext::GetAppWorkingDirectory()
+	bool MainContext::UseWindowlessRendering()
 	{
-		return "";
+		return WindowLessRendering;
 	}
 
-	bool MainContext::UseViews() {
-		return use_views_;
-	}
-
-	bool MainContext::UseWindowlessRendering() {
-		return use_windowless_rendering_;
-	}
-
-	void MainContext::PopulateSettings(CefSettings* settings) {
-#if defined(OS_WIN)
-		settings->multi_threaded_message_loop =
-			command_line_->HasSwitch("multi-threaded-message-loop");
+	void MainContext::PopulateSettings(CefSettings* settings)
+	{
+#if PLATFORM_WINDOWS
+		settings->multi_threaded_message_loop = CmdLine->HasSwitch("multi-threaded-message-loop");
 #endif
 
-		CefString(&settings->cache_path) =
-			command_line_->GetSwitchValue("cache-path");
+		CefString(&settings->cache_path) = CmdLine->GetSwitchValue("cache-path");
 
-		if (use_windowless_rendering_)
+		if (WindowLessRendering)
 			settings->windowless_rendering_enabled = true;
-
-		settings->background_color = background_color_;
 	}
 
-	void MainContext::PopulateBrowserSettings(CefBrowserSettings* settings) {
-		if (command_line_->HasSwitch("off-screen-frame-rate")) {
-			settings->windowless_frame_rate = atoi(command_line_->
-				GetSwitchValue("off-screen-frame-rate").ToString().c_str());
+	void MainContext::PopulateBrowserSettings(CefBrowserSettings* settings)
+	{
+		if (CmdLine->HasSwitch("off-screen-frame-rate")) {
+			settings->windowless_frame_rate = atoi(CmdLine->GetSwitchValue("off-screen-frame-rate").ToString().c_str());
 		}
 	}
 
 	void MainContext::PopulateOsrSettings(Cef3DOSRSettings* settings) {
-		settings->Transparent =
-			command_line_->HasSwitch("transparent-painting-enabled");
-		settings->ShowUpdateRects=
-			command_line_->HasSwitch("show-update-rect");
-		//settings->background_color = background_color_;
+		settings->Transparent = CmdLine->HasSwitch("transparent-painting-enabled");
+		settings->ShowUpdateRects = CmdLine->HasSwitch("show-update-rect");
 	}
 
-	RootWindowManager* MainContext::GetRootWindowManager() {
+	RootWindowManager* MainContext::GetRootWindowManager() 
+	{
 		DCHECK(InValidState());
-		return root_window_manager_.get();
+		return WndManager.get();
 	}
 
-	bool MainContext::Initialize(const CefMainArgs& args,
-		const CefSettings& settings,
-		CefRefPtr<CefApp> application,
-		void* windows_sandbox_info) {
-		DCHECK(thread_checker_.CalledOnValidThread());
-		DCHECK(!initialized_);
-		DCHECK(!shutdown_);
+	Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition& Def)
+	{
+		CEF_REQUIRE_UI_THREAD();
+
+		std::string testLoadUrl = "http://www.google.com";
+		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
+
+		RootWindow* Wnd = GMainContext->GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
+
+		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
+		Cef3DBrowserList.push_back(cef3DBrowser);
+
+		cef3DBrowser->SetRootWindow(Wnd);
+		
+		return cef3DBrowser;
+	}
+
+	bool MainContext::Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info)
+	{
+		DCHECK(ThreadChecker.CalledOnValidThread());
+		DCHECK(!IsInitialized);
+		DCHECK(!IsShuttingDown);
 
 		if (!CefInitialize(args, settings, application, windows_sandbox_info))
 			return false;
 
 		// Need to create the RootWindowManager after calling CefInitialize because
 		// TempWindowX11 uses cef_get_xdisplay().
-		root_window_manager_.reset(
-			new RootWindowManager(terminate_when_all_windows_closed_));
+		WndManager.reset(new RootWindowManager());
 
-		initialized_ = true;
+		IsInitialized = true;
 
 		return true;
 	}
 
-	void MainContext::Shutdown() {
-		DCHECK(thread_checker_.CalledOnValidThread());
-		DCHECK(initialized_);
-		DCHECK(!shutdown_);
+	void MainContext::Shutdown()
+	{
+		DCHECK(ThreadChecker.CalledOnValidThread());
+		DCHECK(IsInitialized);
+		DCHECK(!IsShuttingDown);
 
-		root_window_manager_.reset();
+		WndManager.reset();
 
 		CefShutdown();
 
-		shutdown_ = true;
+		IsShuttingDown = true;
 	}
 }

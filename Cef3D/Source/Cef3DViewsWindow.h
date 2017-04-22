@@ -39,9 +39,6 @@ namespace Cef3D
 		// Delegate methods will be called on the browser process UI thread.
 		class Delegate {
 		public:
-			// Return true if the window should show controls.
-			virtual bool WithControls() = 0;
-
 			// Return the initial window bounds.
 			virtual CefRect GetWindowBounds() = 0;
 
@@ -54,9 +51,6 @@ namespace Cef3D
 
 			// Return the Delegate for the popup window controlled by |client|.
 			virtual Delegate* GetDelegateForPopup(CefRefPtr<CefClient> client) = 0;
-
-			// Called to execute a test. See resource.h for |test_id| values.
-			virtual void OnTest(int test_id) = 0;
 
 			// Called to exit the application.
 			virtual void OnExit() = 0;
@@ -130,21 +124,13 @@ namespace Cef3D
 
 		void SetBrowserView(CefRefPtr<CefBrowserView> browser_view);
 
-		// Enable or disable a view by |id|.
-		void EnableView(int id, bool enable);
 
-		// Show/hide top controls on the Window.
-		void ShowTopControls(bool show);
+		Delegate* Del;  // Not owned by this object.
+		CefRefPtr<CefBrowserView> BrowserView;
+		bool Frameless;
+		CefRefPtr<CefWindow> Window;
 
-		Delegate* delegate_;  // Not owned by this object.
-		CefRefPtr<CefBrowserView> browser_view_;
-		bool frameless_;
-		bool with_controls_;
-		CefRefPtr<CefWindow> window_;
-
-		CefRefPtr<CefMenuModel> menu_model_;
-
-		CefSize minimum_window_size_;
+		CefSize MinWindowSize;
 
 		IMPLEMENT_REFCOUNTING(ViewsWindow);
 		DISALLOW_COPY_AND_ASSIGN(ViewsWindow);

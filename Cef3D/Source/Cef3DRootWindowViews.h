@@ -22,26 +22,17 @@ namespace Cef3D
 	// indicated.
 	class CEF3D_API RootWindowViews : public RootWindow,
 		public Cef3DHandlerDelegate,
-		public ViewsWindow::Delegate {
+		public ViewsWindow::Delegate
+	{
 	public:
 		// Constructor may be called on any thread.
 		RootWindowViews();
 		~RootWindowViews();
 
 		// RootWindow methods:
-		void Init(RootWindow::Delegate* delegate,
-			bool with_controls,
-			bool with_osr,
-			const CefRect& rect,
-			const CefBrowserSettings& settings,
-			const std::string& url) OVERRIDE;
-		void InitAsPopup(RootWindow::Delegate* delegate,
-			bool with_controls,
-			bool with_osr,
-			const CefPopupFeatures& popupFeatures,
-			CefWindowInfo& windowInfo,
-			CefRefPtr<CefClient>& client,
-			CefBrowserSettings& settings) OVERRIDE;
+		void Init(RootWindow::Delegate* delegate, bool with_osr, const CefRect& rect, const CefBrowserSettings& settings, const std::string& url) OVERRIDE;
+
+		void InitAsPopup(RootWindow::Delegate* delegate, bool with_osr, const CefPopupFeatures& popupFeatures,CefWindowInfo& windowInfo, CefRefPtr<CefClient>& client, CefBrowserSettings& settings) OVERRIDE;
 		void Show(ShowMode mode) OVERRIDE;
 		void Hide() OVERRIDE;
 		void SetBounds(int x, int y, size_t width, size_t height) OVERRIDE;
@@ -52,13 +43,11 @@ namespace Cef3D
 		WindowHandle GetWindowHandle() const OVERRIDE;
 
 		// ViewsWindow::Delegate methods:
-		bool WithControls() OVERRIDE;
 		CefRect GetWindowBounds() OVERRIDE;
 		void OnViewsWindowCreated(CefRefPtr<ViewsWindow> window) OVERRIDE;
 		void OnViewsWindowDestroyed(CefRefPtr<ViewsWindow> window) OVERRIDE;
 		ViewsWindow::Delegate* GetDelegateForPopup(
 			CefRefPtr<CefClient> client) OVERRIDE;
-		virtual void OnTest(int test_id) OVERRIDE;
 		virtual void OnExit() OVERRIDE;
 
 	protected:
@@ -70,11 +59,8 @@ namespace Cef3D
 		void OnSetTitle(const std::string& title) OVERRIDE;
 		void OnSetFavicon(CefRefPtr<CefImage> image) OVERRIDE;
 		void OnSetFullscreen(bool fullscreen) OVERRIDE;
-		void OnSetLoadingState(bool isLoading,
-			bool canGoBack,
-			bool canGoForward) OVERRIDE;
-		void OnSetDraggableRegions(
-			const std::vector<CefDraggableRegion>& regions) OVERRIDE;
+		void OnSetLoadingState(bool isLoading, bool canGoBack, bool canGoForward) OVERRIDE;
+		void OnSetDraggableRegions(const std::vector<CefDraggableRegion>& regions) OVERRIDE;
 
 	private:
 		void CreateClientHandler(const std::string& url);
@@ -91,22 +77,21 @@ namespace Cef3D
 		// After initialization all members are only accessed on the main thread
 		// unless otherwise indicated.
 		// Members set during initialization.
-		RootWindow::Delegate* delegate_;
-		bool with_controls_;
-		bool is_popup_;
-		bool is_osr_;
+		RootWindow::Delegate* Delegate;
+		bool IsPopup;
+		bool IsOsr;
 
-		CefRect initial_bounds_;
-		CefRefPtr<Cef3DHandler> client_handler_;
+		CefRect InitialBounds;
+		CefRefPtr<Cef3DHandler> ClientHandler;
 
-		bool initialized_;
-		bool window_destroyed_;
-		bool browser_destroyed_;
+		bool IsInitialized;
+		bool IsWindowDestroyed;
+		bool IsBrowserDestroyed;
 
-		CefRefPtr<CefBrowser> browser_;
+		CefRefPtr<CefBrowser> Browser;
 
 		// Only accessed on the browser process UI thread.
-		CefRefPtr<ViewsWindow> window_;
+		CefRefPtr<ViewsWindow> Window;
 
 		DISALLOW_COPY_AND_ASSIGN(RootWindowViews);
 	};

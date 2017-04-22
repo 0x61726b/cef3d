@@ -17,7 +17,8 @@ namespace Cef3D
 	enum CefProcessType
 	{
 		ProcessBrowser,
-		ProcessRenderer
+		ProcessRenderer,
+		ProcessOther
 	};
 
 	enum Cef3DLogLevel

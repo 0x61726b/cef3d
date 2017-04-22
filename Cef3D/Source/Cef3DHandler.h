@@ -58,6 +58,12 @@ namespace Cef3D
 		virtual void OnSetDraggableRegions(
 			const std::vector<CefDraggableRegion>& regions) = 0;
 
+		// Set focus to the next/previous control.
+		virtual void OnTakeFocus(bool next) {}
+
+		// Called on the UI thread before a context menu is displayed.
+		virtual void OnBeforeContextMenu(CefRefPtr<CefMenuModel> model) {}
+
 	protected:
 		virtual ~Cef3DHandlerDelegate() {}
 	};
@@ -135,7 +141,6 @@ namespace Cef3D
 
 		bool CreatePopupWindow(
 			CefRefPtr<CefBrowser> browser,
-			bool is_devtools,
 			const CefPopupFeatures& popupFeatures,
 			CefWindowInfo& windowInfo,
 			CefRefPtr<CefClient>& client,
@@ -145,7 +150,7 @@ namespace Cef3D
 		Cef3DHandlerDelegate* Delegate;
 		bool IsOsr;
 		std::string StartupUrl;
-		int browser_count_;
+		int BrowserCount;
 
 
 

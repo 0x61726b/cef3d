@@ -41,12 +41,6 @@ namespace Cef3D
 			virtual CefRefPtr<CefRequestContext> GetRequestContext(
 				RootWindow* root_window) = 0;
 
-			// Returns the default window icon.
-			virtual CefRefPtr<CefImage> GetDefaultWindowIcon() = 0;
-
-			// Called to execute a test. See resource.h for |test_id| values.
-			virtual void OnTest(RootWindow* root_window, int test_id) = 0;
-
 			// Called to exit the application.
 			virtual void OnExit(RootWindow* root_window) = 0;
 
@@ -78,12 +72,7 @@ namespace Cef3D
 		// |delegate| must be non-NULL and outlive this object.
 		// Use RootWindowManager::CreateRootWindow() instead of calling this method
 		// directly.
-		virtual void Init(RootWindow::Delegate* delegate,
-			bool with_controls,
-			bool with_osr,
-			const CefRect& bounds,
-			const CefBrowserSettings& settings,
-			const std::string& url) = 0;
+		virtual void Init(RootWindow::Delegate* delegate, bool with_osr, const CefRect& bounds, const CefBrowserSettings& settings, const std::string& url) = 0;
 
 		// Initialize as a popup window. This is used to attach a new native window to
 		// a single browser instance that will be created later. The native window
@@ -92,7 +81,6 @@ namespace Cef3D
 		// Use RootWindowManager::CreateRootWindowAsPopup() instead of calling this
 		// method directly.
 		virtual void InitAsPopup(RootWindow::Delegate* delegate,
-			bool with_controls,
 			bool with_osr,
 			const CefPopupFeatures& popupFeatures,
 			CefWindowInfo& windowInfo,

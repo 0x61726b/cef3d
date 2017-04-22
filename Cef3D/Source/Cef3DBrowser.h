@@ -70,7 +70,7 @@ namespace Cef3D
 		int NextRoutingID;
 		ProcessHandle ProcessHandle;
 
-		RootWindow* AssociatedWindow;
+		class RootWindow* AssociatedWindow;
 
 		std::string Url;
 		std::string Title;

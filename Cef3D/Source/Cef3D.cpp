@@ -29,7 +29,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	command_line->InitFromString("");
 #endif
 
-	GMainContext = (new MainContext(command_line, true));
+	GMainContext = (new MainContext(command_line));
 
 	CefSettings settings;
 	settings.no_sandbox = true;
@@ -83,10 +83,8 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& De
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Definition.Width;
 	settings.Height = Definition.Height;
-	/*RootWindow* Window = */Cef3DBrowserApp->CreateBrowser(settings);
-	/*browser->SetRootWindow(Window);*/
 	
-	return 0;
+	return GMainContext->CreateCef3DBrowser(Definition);
 }
 
 bool Cef3D_Shutdown()

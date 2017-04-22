@@ -53,12 +53,9 @@ namespace Cef3D
 
 	}  // namespace
 	// static
-	CefRefPtr<ViewsWindow> ViewsWindow::Create(
-		Delegate* delegate,
-		CefRefPtr<CefClient> client,
-		const CefString& url,
-		const CefBrowserSettings& settings,
-		CefRefPtr<CefRequestContext> request_context) {
+	CefRefPtr<ViewsWindow> ViewsWindow::Create(Delegate* delegate, CefRefPtr<CefClient> client, const CefString& url, const CefBrowserSettings& settings,
+		CefRefPtr<CefRequestContext> request_context)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		DCHECK(delegate);
 
@@ -78,139 +75,142 @@ namespace Cef3D
 		return views_window;
 	}
 
-	void ViewsWindow::Show() {
+	void ViewsWindow::Show()
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->Show();
+		if (Window)
+			Window->Show();
 	}
 
-	void ViewsWindow::Hide() {
+	void ViewsWindow::Hide()
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->Hide();
+		if (Window)
+			Window->Hide();
 	}
 
-	void ViewsWindow::Minimize() {
+	void ViewsWindow::Minimize()
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->Minimize();
+		if (Window)
+			Window->Minimize();
 	}
 
-	void ViewsWindow::Maximize() {
+	void ViewsWindow::Maximize()
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->Maximize();
+		if (Window)
+			Window->Maximize();
 	}
 
-	void ViewsWindow::SetBounds(const CefRect& bounds) {
+	void ViewsWindow::SetBounds(const CefRect& bounds)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->SetBounds(bounds);
+		if (Window)
+			Window->SetBounds(bounds);
 	}
 
-	void ViewsWindow::Close(bool force) {
+	void ViewsWindow::Close(bool force)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (!browser_view_)
+		if (!BrowserView)
 			return;
 
-		CefRefPtr<CefBrowser> browser = browser_view_->GetBrowser();
-		if (browser) {
+		CefRefPtr<CefBrowser> browser = BrowserView->GetBrowser();
+		if (browser)
+		{
 			// This will result in a call to CefWindow::Close() which will then call
 			// ViewsWindow::CanClose().
 			browser->GetHost()->CloseBrowser(force);
 		}
 	}
 
-	void ViewsWindow::SetAddress(const std::string& url) {
+	void ViewsWindow::SetAddress(const std::string& url)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (!window_ || !with_controls_)
+		if (!Window)
 			return;
 
-		CefRefPtr<CefView> view = window_->GetViewForID(ID_URL_TEXTFIELD);
+		CefRefPtr<CefView> view = Window->GetViewForID(ID_URL_TEXTFIELD);
 		if (view && view->AsTextfield())
 			view->AsTextfield()->SetText(url);
 	}
 
-	void ViewsWindow::SetTitle(const std::string& title) {
+	void ViewsWindow::SetTitle(const std::string& title)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_)
-			window_->SetTitle(title);
+		if (Window)
+			Window->SetTitle(title);
 	}
 
-	void ViewsWindow::SetFavicon(CefRefPtr<CefImage> image) {
+	void ViewsWindow::SetFavicon(CefRefPtr<CefImage> image)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
 		// Window icons should be 16 DIP in size.
 		DCHECK_EQ(std::max(image->GetWidth(), image->GetHeight()), 16U);
 
-		if (window_)
-			window_->SetWindowIcon(image);
+		if (Window)
+			Window->SetWindowIcon(image);
 	}
 
-	void ViewsWindow::SetFullscreen(bool fullscreen) {
+	void ViewsWindow::SetFullscreen(bool fullscreen)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (window_) {
-			// Hide the top controls while in full-screen mode.
-			if (with_controls_)
-				ShowTopControls(!fullscreen);
-
-			window_->SetFullscreen(fullscreen);
-		}
+		if (Window)
+			Window->SetFullscreen(fullscreen);
 	}
 
 	void ViewsWindow::SetLoadingState(bool isLoading,
 		bool canGoBack,
-		bool canGoForward) {
+		bool canGoForward)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		if (!window_ || !with_controls_)
+		if (!Window)
 			return;
-
-		EnableView(ID_BACK_BUTTON, canGoBack);
-		EnableView(ID_FORWARD_BUTTON, canGoForward);
-		EnableView(ID_RELOAD_BUTTON, !isLoading);
-		EnableView(ID_STOP_BUTTON, isLoading);
-		EnableView(ID_URL_TEXTFIELD, true);
 	}
 
 	void ViewsWindow::SetDraggableRegions(
-		const std::vector<CefDraggableRegion>& regions) {
+		const std::vector<CefDraggableRegion>& regions)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
-		if (!window_ || !browser_view_)
+		if (!Window || !BrowserView)
 			return;
 
-		std::vector<CefDraggableRegion> window_regions;
+		std::vector<CefDraggableRegion> Windowregions;
 
 		// Convert the regions from BrowserView to Window coordinates.
 		std::vector<CefDraggableRegion>::const_iterator it = regions.begin();
 		for (; it != regions.end(); ++it) {
 			CefDraggableRegion region = *it;
 			CefPoint origin = CefPoint(region.bounds.x, region.bounds.y);
-			browser_view_->ConvertPointToWindow(origin);
+			BrowserView->ConvertPointToWindow(origin);
 			region.bounds.x = origin.x;
 			region.bounds.y = origin.y;
-			window_regions.push_back(region);
+			Windowregions.push_back(region);
 		}
 
-		window_->SetDraggableRegions(window_regions);
+		Window->SetDraggableRegions(Windowregions);
 	}
 
 	int ViewsWindow::GetBrowserIdentifier()
 	{
-		DCHECK(browser_view_);
-		return browser_view_->GetBrowser()->GetIdentifier();
+		DCHECK(BrowserView);
+		return BrowserView->GetBrowser()->GetIdentifier();
 	}
 
 	bool ViewsWindow::OnPopupBrowserViewCreated(
 		CefRefPtr<CefBrowserView> browser_view,
 		CefRefPtr<CefBrowserView> popup_browser_view,
-		bool is_devtools) {
+		bool is_devtools)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
 		// The popup browser client is created in CefLifeSpanHandler::OnBeforePopup()
 		// (e.g. via RootWindowViews::InitAsPopup()). The Delegate (RootWindowViews)
 		// knows the association between |client| and itself.
-		Delegate* popup_delegate = delegate_->GetDelegateForPopup(
+		Delegate* popup_delegate = Del->GetDelegateForPopup(
 			popup_browser_view->GetBrowser()->GetHost()->GetClient());
 
 		// Create a new ViewsWindow for the popup BrowserView.
@@ -225,45 +225,15 @@ namespace Cef3D
 		return true;
 	}
 
-	void ViewsWindow::OnButtonPressed(CefRefPtr<CefButton> button) {
+	void ViewsWindow::OnButtonPressed(CefRefPtr<CefButton> button)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK(with_controls_);
-
-		if (!browser_view_)
-			return;
-
-		CefRefPtr<CefBrowser> browser = browser_view_->GetBrowser();
-		if (!browser)
-			return;
-
-		switch (button->GetID()) {
-		case ID_BACK_BUTTON:
-			browser->GoBack();
-			break;
-		case ID_FORWARD_BUTTON:
-			browser->GoForward();
-			break;
-		case ID_STOP_BUTTON:
-			browser->StopLoad();
-			break;
-		case ID_RELOAD_BUTTON:
-			browser->Reload();
-			break;
-		case ID_MENU_BUTTON:
-			break;
-		default:
-			NOTREACHED();
-			break;
-		}
 	}
 
 	void ViewsWindow::OnMenuButtonPressed(CefRefPtr<CefMenuButton> menu_button,
-		const CefPoint& screen_point) {
+		const CefPoint& screen_point)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK(with_controls_);
-		DCHECK_EQ(ID_MENU_BUTTON, menu_button->GetID());
-
-		menu_button->ShowMenu(menu_model_, screen_point, CEF_MENU_ANCHOR_TOPRIGHT);
 	}
 
 	void ViewsWindow::ExecuteCommand(CefRefPtr<CefMenuModel> menu_model,
@@ -277,147 +247,111 @@ namespace Cef3D
 		const CefKeyEvent& event)
 	{
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK_EQ(ID_URL_TEXTFIELD, textfield->GetID());
-
-		// Trigger when the return key is pressed.
-		if (window_ && browser_view_ &&
-			event.type == KEYEVENT_RAWKEYDOWN &&
-			event.windows_key_code == VK_RETURN) {
-			CefRefPtr<CefBrowser> browser = browser_view_->GetBrowser();
-			if (browser) {
-				CefRefPtr<CefView> view = window_->GetViewForID(ID_URL_TEXTFIELD);
-				if (view && view->AsTextfield()) {
-					const CefString& url = view->AsTextfield()->GetText();
-					if (!url.empty())
-						browser->GetMainFrame()->LoadURL(url);
-				}
-			}
-
-			// We handled the event.
-			return true;
-		}
 
 		return false;
 	}
 
-	void ViewsWindow::OnWindowCreated(CefRefPtr<CefWindow> window) {
+	void ViewsWindow::OnWindowCreated(CefRefPtr<CefWindow> window)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK(browser_view_);
-		DCHECK(!window_);
+		DCHECK(BrowserView);
+		DCHECK(!Window);
 		DCHECK(window);
 
-		window_ = window;
-		window_->SetID(ID_WINDOW);
+		Window = window;
+		Window->SetID(ID_WINDOW);
 
-		with_controls_ = delegate_->WithControls();
+		Del->OnViewsWindowCreated(this);
 
-		delegate_->OnViewsWindowCreated(this);
-
-		CefRect bounds = delegate_->GetWindowBounds();
+		CefRect bounds = Del->GetWindowBounds();
 		if (bounds.IsEmpty()) {
 			// Use the default size.
 			bounds.width = 800;
 			bounds.height = 600;
 		}
 
-		if (bounds.x == 0 && bounds.y == 0) {
+		if (bounds.x == 0 && bounds.y == 0)
+		{
 			// Size the Window and center it.
-			window_->CenterWindow(CefSize(bounds.width, bounds.height));
+			Window->CenterWindow(CefSize(bounds.width, bounds.height));
 		}
-		else {
+		else
+		{
 			// Set the Window bounds as specified.
-			window_->SetBounds(bounds);
+			Window->SetBounds(bounds);
 		}
 
 
 		// Add the BrowserView as the only child of the Window.
-		window_->AddChildView(browser_view_);
+		Window->AddChildView(BrowserView);
 
 		// Choose a reasonable minimum window size.
-		minimum_window_size_ = CefSize(100, 100);
+		MinWindowSize = CefSize(100, 100);
 
 		// Show the Window.
-		window_->Show();
+		Window->Show();
 
 		// Give keyboard focus to the BrowserView.
-		browser_view_->RequestFocus();
+		BrowserView->RequestFocus();
 	}
 
-	void ViewsWindow::OnWindowDestroyed(CefRefPtr<CefWindow> window) {
+	void ViewsWindow::OnWindowDestroyed(CefRefPtr<CefWindow> window)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK(window_);
+		DCHECK(Window);
 
-		delegate_->OnViewsWindowDestroyed(this);
+		Del->OnViewsWindowDestroyed(this);
 
-		browser_view_ = NULL;
-		menu_model_ = NULL;
-		window_ = NULL;
+		BrowserView = NULL;
+		Window = NULL;
 	}
 
-	bool ViewsWindow::CanClose(CefRefPtr<CefWindow> window) {
+	bool ViewsWindow::CanClose(CefRefPtr<CefWindow> window)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
 		// Allow the window to close if the browser says it's OK.
-		CefRefPtr<CefBrowser> browser = browser_view_->GetBrowser();
+		CefRefPtr<CefBrowser> browser = BrowserView->GetBrowser();
 		if (browser)
 			return browser->GetHost()->TryCloseBrowser();
 		return true;
 	}
 
-	bool ViewsWindow::IsFrameless(CefRefPtr<CefWindow> window) {
+	bool ViewsWindow::IsFrameless(CefRefPtr<CefWindow> window)
+	{
 		CEF_REQUIRE_UI_THREAD();
-		return frameless_;
+		return Frameless;
 	}
 
-	CefSize ViewsWindow::GetMinimumSize(CefRefPtr<CefView> view) {
+	CefSize ViewsWindow::GetMinimumSize(CefRefPtr<CefView> view)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
 		if (view->GetID() == ID_WINDOW)
-			return minimum_window_size_;
+			return MinWindowSize;
 
 		return CefSize();
 	}
 
 	ViewsWindow::ViewsWindow(Delegate* delegate,
 		CefRefPtr<CefBrowserView> browser_view)
-		: delegate_(delegate),
-		with_controls_(false) {
-		DCHECK(delegate_);
+		: Del(delegate)
+	{
+		DCHECK(Del);
 		if (browser_view)
 			SetBrowserView(browser_view);
 
 		CefRefPtr<CefCommandLine> command_line =
 			CefCommandLine::GetGlobalCommandLine();
-		frameless_ = false;
+		Frameless = false;
 	}
 
-	void ViewsWindow::SetBrowserView(CefRefPtr<CefBrowserView> browser_view) {
-		DCHECK(!browser_view_);
+	void ViewsWindow::SetBrowserView(CefRefPtr<CefBrowserView> browser_view)
+	{
+		DCHECK(!BrowserView);
 		DCHECK(browser_view);
 		DCHECK(browser_view->IsValid());
 		DCHECK(!browser_view->IsAttached());
-		browser_view_ = browser_view;
-	}
-
-	void ViewsWindow::EnableView(int id, bool enable)
-	{
-		if (!window_)
-			return;
-		CefRefPtr<CefView> view = window_->GetViewForID(id);
-		if (view)
-			view->SetEnabled(enable);
-	}
-
-	void ViewsWindow::ShowTopControls(bool show) {
-		if (!window_ || !with_controls_)
-			return;
-
-		// Change the visibility of the panel that contains the buttons.
-		CefRefPtr<CefView> parent_view =
-			window_->GetViewForID(ID_BACK_BUTTON)->GetParentView();
-		if (parent_view->IsVisible() != show) {
-			parent_view->SetVisible(show);
-			parent_view->InvalidateLayout();
-		}
+		BrowserView = browser_view;
 	}
 }

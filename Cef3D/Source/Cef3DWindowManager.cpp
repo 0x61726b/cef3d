@@ -43,34 +43,31 @@ namespace Cef3D
 	}
 
 
-	RootWindowManager::RootWindowManager(bool terminate_when_all_windows_closed)
-		: terminate_when_all_windows_closed_(terminate_when_all_windows_closed) {
+	RootWindowManager::RootWindowManager()
+	{
 		CefRefPtr<CefCommandLine> command_line =
 			CefCommandLine::GetGlobalCommandLine();
 		DCHECK(command_line.get());
-		request_context_per_browser_ =
-			command_line->HasSwitch("request-context-per-browser");
-		request_context_shared_cache_ =
-			command_line->HasSwitch("request-context-shared-cache");
+		RequestContextPerBrowser = command_line->HasSwitch("request-context-per-browser");
+		RequestContextSharedCache = command_line->HasSwitch("request-context-shared-cache");
 	}
 
-	RootWindowManager::~RootWindowManager() {
+	RootWindowManager::~RootWindowManager()
+	{
 		// All root windows should already have been destroyed.
-		DCHECK(root_windows_.empty());
+		DCHECK(WindowList.empty());
 	}
 
 	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindow(
-		bool with_controls,
 		bool with_osr,
 		const CefRect& bounds,
 		const std::string& url) {
 		CefBrowserSettings settings;
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window =
-			RootWindow::Create(GMainContext->UseViews());
-		root_window->Init(this, with_controls, with_osr, bounds, settings,
-			url.empty() ? GMainContext->GetMainURL() : url);
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(GMainContext->IsUsingViews());
+		root_window->Init(this, with_osr, bounds, settings,
+			url.empty() ? GMainContext->GetDefaultURL() : url);
 
 		// Store a reference to the root window on the main thread.
 		OnRootWindowCreated(root_window);
@@ -78,18 +75,14 @@ namespace Cef3D
 		return root_window;
 	}
 
-	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindowAsPopup(
-		bool with_controls,
-		bool with_osr,
-		const CefPopupFeatures& popupFeatures,
-		CefWindowInfo& windowInfo,
+	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindowAsPopup(bool with_osr, const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
-		CefBrowserSettings& settings) {
+		CefBrowserSettings& settings)
+	{
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window =
-			RootWindow::Create(GMainContext->UseViews());
-		root_window->InitAsPopup(this, with_controls, with_osr,
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(GMainContext->IsUsingViews());
+		root_window->InitAsPopup(this, with_osr,
 			popupFeatures, windowInfo, client, settings);
 
 		// Store a reference to the root window on the main thread.
@@ -98,12 +91,13 @@ namespace Cef3D
 		return root_window;
 	}
 
-	scoped_refptr<RootWindow> RootWindowManager::GetWindowForBrowser(
-		int browser_id) {
+	scoped_refptr<RootWindow> RootWindowManager::GetWindowForBrowser(int browser_id)
+	{
 		REQUIRE_MAIN_THREAD();
 
-		RootWindowSet::const_iterator it = root_windows_.begin();
-		for (; it != root_windows_.end(); ++it) {
+		RootWindowSet::const_iterator it = WindowList.begin();
+		for (; it != WindowList.end(); ++it)
+		{
 			CefRefPtr<CefBrowser> browser = (*it)->GetBrowser();
 			if (browser.get() && browser->GetIdentifier() == browser_id)
 				return *it;
@@ -111,7 +105,8 @@ namespace Cef3D
 		return NULL;
 	}
 
-	void RootWindowManager::CloseAllWindows(bool force) {
+	void RootWindowManager::CloseAllWindows(bool force)
+	{
 		if (!CURRENTLY_ON_MAIN_THREAD()) {
 			// Execute this method on the main thread.
 			MAIN_POST_CLOSURE(
@@ -120,17 +115,19 @@ namespace Cef3D
 			return;
 		}
 
-		if (root_windows_.empty())
+		if (WindowList.empty())
 			return;
 
-		RootWindowSet::const_iterator it = root_windows_.begin();
-		for (; it != root_windows_.end(); ++it)
+		RootWindowSet::const_iterator it = WindowList.begin();
+		for (; it != WindowList.end(); ++it)
 			(*it)->Close(force);
 	}
 
 	void RootWindowManager::OnRootWindowCreated(
-		scoped_refptr<RootWindow> root_window) {
-		if (!CURRENTLY_ON_MAIN_THREAD()) {
+		scoped_refptr<RootWindow> root_window)
+	{
+		if (!CURRENTLY_ON_MAIN_THREAD())
+		{
 			// Execute this method on the main thread.
 			MAIN_POST_CLOSURE(
 				base::Bind(&RootWindowManager::OnRootWindowCreated,
@@ -138,66 +135,53 @@ namespace Cef3D
 			return;
 		}
 
-		root_windows_.insert(root_window);
+		WindowList.insert(root_window);
 	}
 
 	CefRefPtr<CefRequestContext> RootWindowManager::GetRequestContext(
 		RootWindow* root_window) {
 		REQUIRE_MAIN_THREAD();
 
-		//if (request_context_per_browser_) {
-		//	// Create a new request context for each browser.
-		//	CefRequestContextSettings settings;
+		if (RequestContextPerBrowser)
+		{
+			// Create a new request context for each browser.
+			CefRequestContextSettings settings;
 
-		//	CefRefPtr<CefCommandLine> command_line =
-		//		CefCommandLine::GetGlobalCommandLine();
-		//	//if (command_line->HasSwitch(switches::kCachePath)) {
-		//	//	if (request_context_shared_cache_) {
-		//	//		// Give each browser the same cache path. The resulting context objects
-		//	//		// will share the same storage internally.
-		//	//		CefString(&settings.cache_path) =
-		//	//			command_line->GetSwitchValue(switches::kCachePath);
-		//	//	}
-		//	//	else {
-		//	//		// Give each browser a unique cache path. This will create completely
-		//	//		// isolated context objects.
-		//	//		std::stringstream ss;
-		//	//		ss << command_line->GetSwitchValue(switches::kCachePath).ToString() <<
-		//	//			time(NULL);
-		//	//		CefString(&settings.cache_path) = ss.str();
-		//	//	}
-		//	//}
+			CefRefPtr<CefCommandLine> command_line =
+				CefCommandLine::GetGlobalCommandLine();
+			if (command_line->HasSwitch("cache-path"))
+			{
+				if (RequestContextSharedCache)
+				{
+					// Give each browser the same cache path. The resulting context objects
+					// will share the same storage internally.
+					CefString(&settings.cache_path) =
+						command_line->GetSwitchValue("cache-path");
+				}
+				else
+				{
+					// Give each browser a unique cache path. This will create completely
+					// isolated context objects.
+					std::stringstream ss;
+					ss << command_line->GetSwitchValue("cache-path").ToString() <<
+						time(NULL);
+					CefString(&settings.cache_path) = ss.str();
+				}
+			}
 
-		//	return CefRequestContext::CreateContext(settings,
-		//		new ClientRequestContextHandler);
-		//}
+			return CefRequestContext::CreateContext(settings,new ClientRequestContextHandler);
+		}
 
-		//// All browsers will share the global request context.
-		//if (!shared_request_context_.get()) {
-		//	shared_request_context_ =
-		//		CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(),
-		//			new ClientRequestContextHandler);
-		//}
-		return shared_request_context_;
+		// All browsers will share the global request context.
+		if (!SharedRequestContext.get())
+		{
+			SharedRequestContext = CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler);
+		}
+		return SharedRequestContext;
 	}
 
-	CefRefPtr<CefImage> RootWindowManager::GetDefaultWindowIcon() {
-		REQUIRE_MAIN_THREAD();
-
-		//if (!default_window_icon_) {
-		//	// Create the Image and load resources at different scale factors.
-		//	default_window_icon_ = LoadImageIcon("window_icon");
-		//}
-		return default_window_icon_;
-	}
-
-	void RootWindowManager::OnTest(RootWindow* root_window, int test_id) {
-		REQUIRE_MAIN_THREAD();
-
-		
-	}
-
-	void RootWindowManager::OnExit(RootWindow* root_window) {
+	void RootWindowManager::OnExit(RootWindow* root_window)
+	{
 		REQUIRE_MAIN_THREAD();
 
 		CloseAllWindows(false);
@@ -206,13 +190,13 @@ namespace Cef3D
 	void RootWindowManager::OnRootWindowDestroyed(RootWindow* root_window) {
 		REQUIRE_MAIN_THREAD();
 
-		RootWindowSet::iterator it = root_windows_.find(root_window);
-		DCHECK(it != root_windows_.end());
-		if (it != root_windows_.end())
-			root_windows_.erase(it);
+		RootWindowSet::iterator it = WindowList.find(root_window);
+		DCHECK(it != WindowList.end());
+		if (it != WindowList.end())
+			WindowList.erase(it);
 
-		if (terminate_when_all_windows_closed_ && root_windows_.empty()) {
-			// Quit the main message loop after all windows have closed.
+		if (true && WindowList.empty())
+		{
 			CefQuitMessageLoop();
 		}
 	}
