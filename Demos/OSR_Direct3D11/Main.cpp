@@ -11,8 +11,7 @@
 //---------------------------------------------------------------------------
 
 #include <Cef3D.h>
-#include <Cef3DFileSystem.h>
-#include <Cef3DPaths.h>
+
 
 #include <Windows.h>
 #include <d3d11.h>
@@ -33,6 +32,9 @@ ID3D11VertexShader *pVS;               // the pointer to the vertex shader
 ID3D11PixelShader *pPS;                // the pointer to the pixel shader
 ID3D11Buffer *pVBuffer;                // the pointer to the vertex buffer
 ID3D11Buffer* pVsConstantBuffer;
+ID3D11Texture2D* pOffscreenTex;
+ID3D11ShaderResourceView* pOffscreenTexSRV;
+ID3D11SamplerState* pOffScreenSampler;
 
 HWND TopWindow = 0;
 
@@ -124,7 +126,7 @@ bool InitD3D(int Width,int Height, HWND window)
 	scd.BufferDesc.Height = Height;                 
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     
 	scd.OutputWindow = window;                               
-	scd.SampleDesc.Count = 4;                              
+	scd.SampleDesc.Count = 1;                              
 	scd.Windowed = TRUE;                                   
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
@@ -231,6 +233,50 @@ bool InitD3D(int Width,int Height, HWND window)
 	if (FAILED(hr))
 		return false;
 
+	// Create offscreen texture
+	D3D11_TEXTURE2D_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
+
+	desc.Width = Width;
+	desc.Height = Height;
+	desc.MipLevels = desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+
+	hr = dev->CreateTexture2D(&desc, NULL, &pOffscreenTex);
+	if (FAILED(hr))
+		return false;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = desc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	hr = dev->CreateShaderResourceView(pOffscreenTex, &srvDesc, &pOffscreenTexSRV);
+
+	if (FAILED(hr))
+		return false;
+
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = dev->CreateSamplerState(&sampDesc, &pOffScreenSampler);
+
+	if (FAILED(hr))
+		return false;
+
+
 	return true;
 }
 
@@ -301,6 +347,11 @@ void Frame()
 
 	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// Bind offscreen texture
+	devcon->PSSetShaderResources(0, 1, &pOffscreenTexSRV);
+	// Bind the sampler
+	devcon->PSSetSamplers(0, 1, &pOffScreenSampler);
+
 	devcon->Draw(3, 0);
 
 	swapchain->Present(1, 0);
@@ -353,9 +404,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	if (!InitD3D(WinWidth, WinHeight, TopWindow))
 		return -1;
 
+	bool isSubProcessed = true;
+
+	Cef3D::Cef3DDefinition definition;
+	definition.UseChildProcess = isSubProcessed;
+
+	bool init = Cef3D_Init(definition);
+
+	if (!init)
+		return -1;
+
+	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(WinWidth, WinHeight,Cef3D::Cef3DBrowserType::Offscreen);
+	UNREFERENCED_PARAMETER(browser1);
+
 	PumpMessageLoop();
 
 	Cleanup();
+	Cef3D_Shutdown();
 
 	return 0;
 }

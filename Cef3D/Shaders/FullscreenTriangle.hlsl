@@ -1,3 +1,4 @@
+
 struct PS_INPUT
 {
 	float4 position	    : SV_POSITION;
@@ -13,6 +14,8 @@ cbuffer camera_vs : register(b0)
     float pad0          : packoffset(c8.w);
 }
 
+Texture2D offScreenText : register(t0);
+SamplerState offScreenSampler : register(s0);
 
 PS_INPUT fs_triangle_vs(in float3 pos : POSITION)
 {
@@ -29,5 +32,6 @@ PS_INPUT fs_triangle_vs(in float3 pos : POSITION)
 
 float4 fs_triangle_ps(PS_INPUT input) : SV_Target
 {
-    return float4(input.view_ray,1.0f);
+    float4 s = offScreenText.Sample(offScreenSampler,input.tex_coord);
+    return s;
 }

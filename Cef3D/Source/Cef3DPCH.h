@@ -24,10 +24,12 @@
 #include "Cef3DRenderer.h"
 
 #include "Cef3DBrowser.h"
+#include "Cef3DGenericBrowserWindow.h"
 #include "Cef3DRootWindow.h"
 #include "Cef3DViewsWindow.h"
 #include "Cef3DRootWindowViews.h"
 #include "Cef3DTempWindow.h"
 #include "Cef3DWindowManager.h"
+#include "Cef3DOsrHandler.h"
 #include "Cef3DContext.h"
 #include "Cef3DGlobals.h"

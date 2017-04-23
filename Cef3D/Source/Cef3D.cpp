@@ -32,6 +32,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	GMainContext = (new MainContext(command_line));
 
 	CefSettings settings;
+	settings.windowless_rendering_enabled = true;
 	settings.no_sandbox = true;
 
 	if (Definition.UseChildProcess)
@@ -70,6 +71,7 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrow
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Width;
 	settings.Height = Height;
+	settings.Type = Type;
 
 	return Cef3D_CreateBrowser(settings);
 }

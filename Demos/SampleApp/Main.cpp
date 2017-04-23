@@ -13,51 +13,6 @@
 #include <Cef3D.h>
 #include <Windows.h>
 
-//int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
-//{
-//	UNREFERENCED_PARAMETER(hPrevInstance);
-//	UNREFERENCED_PARAMETER(lpCmdLine);
-//
-//	CefMainArgs main_args(hInInstance);
-//
-//	CefRefPtr<CefCommandLine> command_line = CefCommandLine::CreateCommandLine();
-//	command_line->InitFromString(::GetCommandLineW());
-//
-//	using namespace Cef3D;
-//
-//	CefRefPtr<CefApp> app;
-//	if(!command_line->HasSwitch("type"))
-//		app = (new Cef3D::Cef3DApplication);
-//	else
-//	{
-//		const std::string& process_type = command_line->GetSwitchValue("type");
-//		if (process_type == "renderer")
-//			app = new Cef3D::Cef3DRenderer();
-//	}
-//	int exit_code = CefExecuteProcess(main_args, app, 0);
-//	if (exit_code >= 0)
-//		return exit_code;
-//
-//	GMainContext = (new MainContext(command_line, true));
-//
-//	CefSettings settings;
-//	GMainContext->PopulateSettings(&settings);
-//
-//	//CefString(&settings.browser_subprocess_path).FromASCII("D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64\\CefSubProcess.exe");
-//
-//
-//	GMainContext->Initialize(main_args, settings, app, 0);
-//
-//	GMainContext->GetRootWindowManager()->CreateRootWindow(false, false, CefRect(), "http://google.com");
-//
-//	CefRunMessageLoop();
-//
-//	GMainContext->Shutdown();
-//
-//	delete GMainContext;
-//
-//	return 0;
-//}
 
 int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
 {

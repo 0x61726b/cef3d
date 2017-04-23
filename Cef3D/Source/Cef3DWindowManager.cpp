@@ -61,7 +61,8 @@ namespace Cef3D
 	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindow(
 		bool with_osr,
 		const CefRect& bounds,
-		const std::string& url) {
+		const std::string& url)
+	{
 		CefBrowserSettings settings;
 		GMainContext->PopulateBrowserSettings(&settings);
 

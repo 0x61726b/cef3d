@@ -57,6 +57,11 @@
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>
+
+#if defined(FORCEINLINE)
+#undef FORCEINLINE
+#endif
+#define FORCEINLINE inline
 #endif
 
 #if PLATFORM_WINDOWS

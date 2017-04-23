@@ -14,7 +14,44 @@
 
 namespace Cef3D
 {
+	namespace {
 
+		class ClientRequestContextHandler : public CefRequestContextHandler {
+		public:
+			ClientRequestContextHandler() {}
+
+			bool OnBeforePluginLoad(const CefString& mime_type,
+				const CefString& plugin_url,
+				bool is_main_frame,
+				const CefString& top_origin_url,
+				CefRefPtr<CefWebPluginInfo> plugin_info,
+				PluginPolicy* plugin_policy) OVERRIDE {
+				// Always allow the PDF plugin to load.
+				if (*plugin_policy != PLUGIN_POLICY_ALLOW &&
+					mime_type == "application/pdf") {
+					*plugin_policy = PLUGIN_POLICY_ALLOW;
+					return true;
+				}
+
+				return false;
+			}
+
+		private:
+			IMPLEMENT_REFCOUNTING(ClientRequestContextHandler);
+		};
+	}
+
+	class TestDel :
+		public Cef3DGenericBrowserWindow::Delegate
+	{
+	public:
+		TestDel() { }
+
+		virtual void OnBrowserCreated(Cef3DBrowser* browser)
+		{
+
+		}
+	};
 	namespace {
 
 		// The default URL to load in a browser window.
@@ -125,18 +162,62 @@ namespace Cef3D
 	{
 		CEF_REQUIRE_UI_THREAD();
 
-		std::string testLoadUrl = "http://www.google.com";
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
-
-		RootWindow* Wnd = GMainContext->GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
-
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
-		Cef3DBrowserList.push_back(cef3DBrowser);
 
-		cef3DBrowser->SetRootWindow(Wnd);
+		std::string testLoadUrl = "http://www.google.com";
+		if (Def.Type == Cef3DBrowserType::Normal)
+		{
+			RootWindow* Wnd = GMainContext->GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
+			cef3DBrowser->SetRootWindow(Wnd);
+		}
+		else
+		{
+			// Create browser
+			CefWindowInfo windowInfo;
+			windowInfo.SetAsWindowless(NULL, true);
+			Cef3DGenericBrowserWindow* browserWindow(new Cef3DGenericBrowserWindow(new TestDel()));
+			Cef3DOsrBrowser* osrWindow(new Cef3DOsrBrowser);
+
+			CefRefPtr<Cef3DOsrHandler> handler(new Cef3DOsrHandler(browserWindow, osrWindow, testLoadUrl));
+
+			browserWindow->client_handler_ = handler;
+			
+			/*CefRefPtr<CefBrowser> browser = */CefBrowserHost::CreateBrowser(windowInfo, handler, testLoadUrl, settings,
+				/*CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler)*/0);
+			/*(browser);*/
+		}
+		Cef3DBrowserList.push_back(cef3DBrowser);
 		
 		return cef3DBrowser;
 	}
+
+	//Cef3DBrowser * MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate)
+	//{
+	//	return nullptr;
+	//}
+
+	//Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate, Cef3DOsrHandler::OsrDelegate * OsrDelegate)
+	//{
+	//	CEF_REQUIRE_UI_THREAD();
+
+	//	CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
+	//	Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
+
+	//	std::string testLoadUrl = "http://www.google.com";
+
+	//	// Create browser
+	//	CefWindowInfo windowInfo;
+	//	if (Def.Type == Cef3DBrowserType::Offscreen)
+	//	{
+	//		Cef3DOsrHandler* handler(new Cef3DOsrHandler(HandlerDelegate, OsrDelegate, testLoadUrl));
+	//		CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(windowInfo, handler, testLoadUrl, settings, NULL);
+	//		cef3DBrowser->SetBrowserID(browser->GetIdentifier());
+	//	}
+
+	//	Cef3DBrowserList.push_back(cef3DBrowser);
+	//	return cef3DBrowser;
+	//}
 
 	bool MainContext::Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info)
 	{
