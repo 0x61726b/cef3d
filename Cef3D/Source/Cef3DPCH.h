@@ -31,5 +31,6 @@
 #include "Cef3DTempWindow.h"
 #include "Cef3DWindowManager.h"
 #include "Cef3DOsrHandler.h"
+#include "Cef3DOsrManager.h"
 #include "Cef3DContext.h"
 #include "Cef3DGlobals.h"

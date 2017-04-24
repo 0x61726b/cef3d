@@ -32,6 +32,7 @@ namespace Cef3D
 		void PopulateBrowserSettings(CefBrowserSettings* settings);
 		void PopulateOsrSettings(Cef3DOSRSettings* settings);
 		RootWindowManager* GetRootWindowManager();
+		Cef3DOsrManager* GetOsrManager();
 
 		// Cef3D methods 
 		Cef3DBrowser* CreateCef3DBrowser(const Cef3DBrowserDefinition& Def);
@@ -68,6 +69,8 @@ namespace Cef3D
 		bool UseViews;
 
 		scoped_ptr<RootWindowManager> WndManager;
+		scoped_ptr<Cef3DOsrManager> OsrManager;
+
 		std::list<Cef3DBrowser*> Cef3DBrowserList;
 		std::list<CefRefPtr<CefBrowser> > Browsers;
 

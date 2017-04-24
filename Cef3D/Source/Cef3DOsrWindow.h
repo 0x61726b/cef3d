@@ -110,9 +110,7 @@ namespace Cef3D
 			const CefRenderHandler::RectList& character_bounds) OVERRIDE;
 
 	private:
-		Cef3DOsrBrowserWindow* GetWindow();
-	private:
-		Cef3DOsrBrowserWindow* browserWindow;
+		CefRefPtr<CefBrowser> browser_;
 		Cef3DRect client_rect_;
 		Cef3DOsrDel* delegate_;
 		float device_scale_factor_;

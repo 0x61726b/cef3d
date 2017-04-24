@@ -22,7 +22,7 @@ namespace Cef3D
 
 	}
 
-	void Cef3DOsrBrowserWindow::Init(const Cef3DBrowserDefinition & Def, Cef3DBrowser* browser)
+	void Cef3DOsrBrowserWindow::Init(const Cef3DBrowserDefinition & Def)
 	{
 		std::string url = "http://google.com";
 		osrBrowser_ = new Cef3DOsrBrowser(Def.Width, Def.Height, Def.PaintDelegate);
@@ -30,11 +30,9 @@ namespace Cef3D
 
 		CefWindowInfo windowInfo;
 		windowInfo.SetAsWindowless(NULL, true);
-
-		browser_ = 0;
 		
-		browser_ = CefBrowserHost::CreateBrowserSync(windowInfo, client_handler_, url, Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def), 0);
-		browser->SetBrowserID(browser_->GetIdentifier());
+		CefRefPtr<CefBrowser> cefBorwser = CefBrowserHost::CreateBrowserSync(windowInfo, client_handler_, url, Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def), 0);
+		/*browser->SetBrowserID(cefBorwser->GetIdentifier());*/
 	}
 
 	void Cef3DOsrBrowserWindow::SetBrowser(CefRefPtr<CefBrowser> browser)

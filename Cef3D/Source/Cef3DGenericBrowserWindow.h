@@ -20,7 +20,8 @@ namespace Cef3D
 
 
 	class Cef3DOsrBrowserWindow :
-		public Cef3DHandlerDelegate
+		public Cef3DHandlerDelegate,
+		public base::RefCountedThreadSafe<Cef3DOsrBrowserWindow, DeleteOnMainThread>
 	{
 	public:
 		virtual void SetDeviceScaleFactor(float device_scale_factor);
@@ -34,7 +35,7 @@ namespace Cef3D
 		explicit Cef3DOsrBrowserWindow();
 		/*friend struct base::DefaultDeleter<BrowserWindow>;*/
 
-		void Init(const Cef3DBrowserDefinition& Def, Cef3DBrowser* browser);
+		void Init(const Cef3DBrowserDefinition& Def);
 
 		// ClientHandler::Delegate methods.
 		void OnBrowserCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;

@@ -124,6 +124,12 @@ namespace Cef3D
 		return WndManager.get();
 	}
 
+	Cef3DOsrManager* MainContext::GetOsrManager()
+	{
+		DCHECK(InValidState());
+		return OsrManager.get();
+	}
+
 	Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition& Def)
 	{
 		CEF_REQUIRE_UI_THREAD();
@@ -140,21 +146,7 @@ namespace Cef3D
 		}
 		else
 		{
-			// Create browser
-			/*CefWindowInfo windowInfo;
-			windowInfo.SetAsWindowless(NULL, true);*/
-
-			Cef3DOsrBrowserWindow* browserWindow(new Cef3DOsrBrowserWindow);
-			browserWindow->Init(Def, cef3DBrowser);
-			Browsers.push_back(browserWindow->GetBrowser());
-			//Cef3DOsrBrowser* osrWindow(new Cef3DOsrBrowser(Def.Width,Def.Height,Def.PaintDelegate));
-
-			//CefRefPtr<Cef3DOsrHandler> handler(new Cef3DOsrHandler(browserWindow, osrWindow, testLoadUrl));
-			
-			
-				/*CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler)*);
-			/*(browser);*/
-			//cef3DBrowser->SetBrowser(window);
+			cef3DBrowser->SetBrowserID(GetOsrManager()->CreateBrowser(Def));
 		}
 		Cef3DBrowserList.push_back(cef3DBrowser);
 		
@@ -224,6 +216,7 @@ namespace Cef3D
 		// Need to create the RootWindowManager after calling CefInitialize because
 		// TempWindowX11 uses cef_get_xdisplay().
 		WndManager.reset(new RootWindowManager());
+		OsrManager.reset(new Cef3DOsrManager());
 
 		IsInitialized = true;
 
@@ -237,6 +230,7 @@ namespace Cef3D
 		DCHECK(!IsShuttingDown);
 
 		WndManager.reset();
+		OsrManager.reset();
 
 		CefShutdown();
 
