@@ -29,6 +29,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	command_line->InitFromString("");
 #endif
 
+	command_line->AppendSwitch("off-screen-rendering-enabled");
 	GMainContext = (new MainContext(command_line));
 
 	CefSettings settings;
@@ -61,9 +62,12 @@ int Cef3D_SubprocessLogic()
 	return CefExecuteProcess(main_args, NULL, NULL);
 }
 
-void Cef3D_PumpMessageLoop()
+void Cef3D_PumpMessageLoop(bool isWindowless)
 {
-	CefRunMessageLoop();
+	if (isWindowless)
+		CefDoMessageLoopWork();
+	else
+		CefRunMessageLoop();
 }
 
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrowserType Type)
@@ -85,6 +89,7 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& De
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Definition.Width;
 	settings.Height = Definition.Height;
+	
 	
 	return GMainContext->CreateCef3DBrowser(Definition);
 }

@@ -40,9 +40,9 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 		rect.x = rect.y = 0;
-		rect.width = DeviceToLogical(client_rect_.right - client_rect_.left,
+		rect.width = DeviceToLogical(client_rect_.Width,
 			device_scale_factor_);
-		rect.height = DeviceToLogical(client_rect_.bottom - client_rect_.top,
+		rect.height = DeviceToLogical(client_rect_.Height,
 			device_scale_factor_);
 		return true;
 	}
@@ -92,6 +92,16 @@ namespace Cef3D
 		int height) {
 		CEF_REQUIRE_UI_THREAD();
 
+		DCHECK(delegate_);
+
+		std::vector<Cef3DRect> dirtyCef3DRects;
+		for (int i = 0; i < dirtyRects.size(); ++i)
+			dirtyCef3DRects.push_back(CefRectToCef3D(dirtyRects[i]));
+
+		Cef3DOsrRenderType cef3DType = Cef3DOsrRenderType::View;
+
+		delegate_->OnPaint(GMainContext->GetCef3DBrowser(browser), cef3DType, dirtyCef3DRects, buffer, width, height);
+		
 	}
 
 	void Cef3DOsrBrowser::OnCursorChange(
@@ -126,13 +136,12 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 	}
-	Cef3DOsrBrowser::Cef3DOsrBrowser()
+	Cef3DOsrBrowser::Cef3DOsrBrowser(int Width,int Height,Cef3DOsrDel* del)
+		: delegate_(del)
 	{
-		client_rect_.left = 0;
-		client_rect_.right = 800;
-		client_rect_.top = 0;
-		client_rect_.bottom = 600;
-
+		DCHECK(delegate_);
+		client_rect_.Width = Width;
+		client_rect_.Height = Height;
 		device_scale_factor_ = 1;
 	}
 }

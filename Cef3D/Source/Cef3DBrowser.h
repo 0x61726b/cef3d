@@ -71,6 +71,7 @@ namespace Cef3D
 		ProcessHandle ProcessHandle;
 
 		class RootWindow* AssociatedWindow;
+		CefRefPtr<CefBrowser> AssociatedBrowser;
 
 		std::string Url;
 		std::string Title;
@@ -79,8 +80,11 @@ namespace Cef3D
 		int Width;
 		int Height;
 
+		friend class MainContext;
+
 	public:
 		void SetBrowserID(int BrowserID);
 		void SetRootWindow(RootWindow* Wnd);
+		void SetBrowser(CefRefPtr<CefBrowser> browser);
 	};
 }

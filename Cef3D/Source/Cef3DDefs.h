@@ -37,6 +37,12 @@ namespace Cef3D
 		Normal
 	};
 
+	enum Cef3DOsrRenderType
+	{
+		View,
+		Popup
+	};
+
 	struct Cef3DDefinition
 	{
 		Cef3DDefinition();
@@ -57,6 +63,8 @@ namespace Cef3D
 		int Width;
 		int Height;
 		Cef3DBrowserType Type;
+
+		class Cef3DOsrDel* PaintDelegate;
 	};
 
 	struct Cef3DOSRSettings

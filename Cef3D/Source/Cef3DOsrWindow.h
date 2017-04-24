@@ -16,7 +16,8 @@
 
 namespace Cef3D
 {
-	class OsrDelegate {
+	class OsrDelegate
+	{
 	public:
 		// These methods match the CefLifeSpanHandler interface.
 		virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) = 0;
@@ -64,11 +65,32 @@ namespace Cef3D
 		virtual ~OsrDelegate() {}
 	};
 
+	class Cef3DOsrDel
+	{
+	public:
+		virtual void OnAfterCreated(Cef3DBrowser* browser) = 0;
+		virtual void OnBeforeClose(Cef3DBrowser* browser) = 0;
+
+		virtual bool GetViewRect(Cef3DBrowser* browser,
+			Cef3DRect& rect) = 0;
+
+		virtual void OnPaint(Cef3DBrowser* browser,
+			Cef3D::Cef3DOsrRenderType type,
+			const std::vector<Cef3DRect>& dirtyRects,
+			const void* buffer,
+			int width,
+			int height) = 0;
+
+	protected:
+		virtual ~Cef3DOsrDel() {}
+
+	};
+
 	class Cef3DOsrBrowser
 		: public Cef3D::OsrDelegate
 	{
 	public:
-		Cef3DOsrBrowser();
+		Cef3DOsrBrowser(int Width, int Height, Cef3DOsrDel* Delegate);
 
 
 		//OsrDelegete methods
@@ -112,6 +134,7 @@ namespace Cef3D
 	private:
 		CefRefPtr<CefBrowser> browser_;
 		Cef3DRect client_rect_;
+		Cef3DOsrDel* delegate_;
 		float device_scale_factor_;
 	};
 }

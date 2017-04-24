@@ -11,6 +11,7 @@
 //---------------------------------------------------------------------------
 
 #include <Cef3D.h>
+#include <Cef3DUtils.h>
 
 
 #include <Windows.h>
@@ -240,7 +241,7 @@ bool InitD3D(int Width,int Height, HWND window)
 	desc.Width = Width;
 	desc.Height = Height;
 	desc.MipLevels = desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	desc.SampleDesc.Count = 1;
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -265,9 +266,9 @@ bool InitD3D(int Width,int Height, HWND window)
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -386,9 +387,61 @@ void PumpMessageLoop()
 				break;
 		}
 
+		Cef3D_PumpMessageLoop(true);
 		Frame();
 	}
 }
+
+#include <Cef3DOsrWindow.h>
+
+class OsrPaintDelegate
+	: public Cef3D::Cef3DOsrDel
+{
+public:
+	virtual void OnAfterCreated(Cef3D::Cef3DBrowser* browser)
+	{
+
+	}
+
+	virtual void OnBeforeClose(Cef3D::Cef3DBrowser* browser)
+	{
+
+	}
+
+	virtual bool GetViewRect(Cef3D::Cef3DBrowser* browser,
+		Cef3D::Cef3DRect& rect)
+	{
+		return true;
+	}
+
+	virtual void OnPaint(Cef3D::Cef3DBrowser* browser,
+		Cef3D::Cef3DOsrRenderType type,
+		const std::vector<Cef3D::Cef3DRect>& dirtyRects,
+		const void* buffer,
+		int width,
+		int height)
+	{
+		unsigned rowSize = width * 4;
+		unsigned rowStart = 0;
+		unsigned char* src = (unsigned char*)buffer;
+
+		// Update the d3d11 texture
+		D3D11_MAPPED_SUBRESOURCE mappedData;
+		mappedData.pData = 0;
+
+		HRESULT hr = devcon->Map(pOffscreenTex, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
+
+		if (FAILED(hr) || !mappedData.pData)
+			return;
+
+		for (int row = 0; row < height; ++row)
+			memcpy((unsigned char*)mappedData.pData + row * mappedData.RowPitch + rowStart, src + row * rowSize, rowSize);
+
+		devcon->Unmap(pOffscreenTex, 0);
+
+	}
+
+};
 
 int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
 {
@@ -414,13 +467,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	if (!init)
 		return -1;
 
-	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(WinWidth, WinHeight,Cef3D::Cef3DBrowserType::Offscreen);
+	OsrPaintDelegate* del(new OsrPaintDelegate);
+
+	Cef3D::Cef3DBrowserDefinition def;
+	def.Width = WinWidth;
+	def.Height = WinHeight;
+	def.Type = Cef3D::Cef3DBrowserType::Offscreen;
+	def.PaintDelegate = del;
+	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(def);
 	UNREFERENCED_PARAMETER(browser1);
 
 	PumpMessageLoop();
 
 	Cleanup();
 	Cef3D_Shutdown();
+
+	delete del;
+	del = 0;
 
 	return 0;
 }

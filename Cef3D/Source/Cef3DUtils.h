@@ -60,11 +60,27 @@ namespace Cef3D
 
 	struct Cef3DRect
 	{
-		long    left;
-		long    top;
-		long    right;
-		long    bottom;
+		int Width;
+		int Height;
+
+		Cef3DRect()
+		{
+			Width = -1;
+			Height = -1;
+		}
+
+		Cef3DRect(int w,int h)
+			: Width(w),
+			Height(h)
+		{
+
+		}
 	};
+
+	FORCEINLINE Cef3DRect CefRectToCef3D(const CefRect& rect)
+	{
+		return Cef3DRect(rect.width, rect.height);
+	}
 
 	FORCEINLINE int LogicalToDevice(int value, float device_scale_factor) {
 		float scaled_val = static_cast<float>(value) * device_scale_factor;
