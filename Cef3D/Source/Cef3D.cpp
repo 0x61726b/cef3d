@@ -29,25 +29,30 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	command_line->InitFromString("");
 #endif
 
-	command_line->AppendSwitch("off-screen-rendering-enabled");
+	if (Definition.OffscreenRendering)
+	{
+		command_line->AppendSwitch("off-screen-frame-rate=60");
+		command_line->AppendSwitch("off-screen-rendering-enabled");
+	}
 	GMainContext = (new MainContext(command_line));
 
 	CefSettings settings;
-	settings.windowless_rendering_enabled = true;
+	if (Definition.OffscreenRendering)
+		settings.windowless_rendering_enabled = true;
 	settings.no_sandbox = true;
 
 	if (Definition.UseChildProcess)
 	{
 		CefString(&settings.browser_subprocess_path).FromASCII(Definition.ChildProcessPath.c_str());
 	}
-	
+
 	CefString(&settings.log_file).FromASCII(Definition.LogPath.c_str());
 	settings.log_severity = Cef3D::Cef3DPrivate::Cef3DLogLevelToCef(Definition.LogLevel);
 
 	Cef3DBrowserApp = (new Cef3D::Cef3DApplication);
 
 	GMainContext->PopulateSettings(&settings);
-	
+
 	return GMainContext->Initialize(main_args, settings, Cef3DBrowserApp, NULL);
 }
 
@@ -89,8 +94,8 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& De
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Width = Definition.Width;
 	settings.Height = Definition.Height;
-	
-	
+
+
 	return GMainContext->CreateCef3DBrowser(Definition);
 }
 

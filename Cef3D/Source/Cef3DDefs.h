@@ -54,6 +54,7 @@ namespace Cef3D
 		std::list<std::string> CmdSwitches;
 
 		bool UseChildProcess;
+		bool OffscreenRendering;
 	};
 
 	struct Cef3DBrowserDefinition

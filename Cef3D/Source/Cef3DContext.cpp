@@ -16,29 +16,6 @@ namespace Cef3D
 {
 	namespace {
 
-		class ClientRequestContextHandler : public CefRequestContextHandler {
-		public:
-			ClientRequestContextHandler() {}
-
-			bool OnBeforePluginLoad(const CefString& mime_type,
-				const CefString& plugin_url,
-				bool is_main_frame,
-				const CefString& top_origin_url,
-				CefRefPtr<CefWebPluginInfo> plugin_info,
-				PluginPolicy* plugin_policy) OVERRIDE {
-				// Always allow the PDF plugin to load.
-				if (*plugin_policy != PLUGIN_POLICY_ALLOW &&
-					mime_type == "application/pdf") {
-					*plugin_policy = PLUGIN_POLICY_ALLOW;
-					return true;
-				}
-
-				return false;
-			}
-
-		private:
-			IMPLEMENT_REFCOUNTING(ClientRequestContextHandler);
-		};
 	}
 
 	class TestDel :
@@ -165,7 +142,7 @@ namespace Cef3D
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
-		std::string testLoadUrl = "https://rocketleague.tracker.network/profile/steam/76561198073353990?utm_source=recentgames&utm_medium=link&utm_campaign=recentgames";
+		std::string testLoadUrl = "https://www.youtube.com/watch?v=1UQlnT9qZvs";
 		if (Def.Type == Cef3DBrowserType::Normal)
 		{
 			RootWindow* Wnd = GMainContext->GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);

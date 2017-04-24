@@ -34,6 +34,7 @@ Cef3D::Cef3DDefinition::Cef3DDefinition()
 	LogPath = logPath;
 	LogLevel = Cef3DLogLevel::Default;
 	UserAgent = "Cef3D-Default-UA";
+	OffscreenRendering = false;
 }
 
 Cef3D::Cef3DBrowserDefinition::Cef3DBrowserDefinition()

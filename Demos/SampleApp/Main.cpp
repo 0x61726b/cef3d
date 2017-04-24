@@ -11,6 +11,7 @@
 //---------------------------------------------------------------------------
 
 #include <Cef3D.h>
+#include <Cef3DPCH.h>
 #include <Windows.h>
 
 //class TestDel :
@@ -109,11 +110,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	if (!init)
 		return -1;
 
-	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(800, 600,Cef3D::Cef3DBrowserType::Offscreen);
+	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(800, 600);
 	UNREFERENCED_PARAMETER(browser1);
 
-	Cef3D_PumpMessageLoop();
+	Cef3D_PumpMessageLoop(false);
 
+	delete browser1;
+	browser1 = 0;
 	Cef3D_Shutdown();
 
 	

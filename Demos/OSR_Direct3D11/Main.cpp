@@ -393,6 +393,7 @@ void PumpMessageLoop()
 }
 
 #include <Cef3DOsrWindow.h>
+#include <Cef3DPCH.h>
 
 class OsrPaintDelegate
 	: public Cef3D::Cef3DOsrDel
@@ -461,6 +462,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	Cef3D::Cef3DDefinition definition;
 	definition.UseChildProcess = isSubProcessed;
+	definition.OffscreenRendering = true;
 
 	bool init = Cef3D_Init(definition);
 
@@ -479,11 +481,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	PumpMessageLoop();
 
-	Cleanup();
-	Cef3D_Shutdown();
-
 	delete del;
 	del = 0;
+
+	delete browser1;
+	browser1 = 0;
+	Cleanup();
+	Cef3D_Shutdown();
 
 	return 0;
 }
