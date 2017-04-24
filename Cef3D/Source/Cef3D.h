@@ -17,6 +17,7 @@
 #include "Cef3DDefs.h"
 #include "Cef3DFileSystem.h"
 #include "Cef3DPaths.h"
+#include "Cef3DBrowser.h"
 
 namespace Cef3D
 {

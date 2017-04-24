@@ -176,7 +176,7 @@ namespace Cef3D
 		// All browsers will share the global request context.
 		if (!SharedRequestContext.get())
 		{
-			//SharedRequestContext = CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler);
+			SharedRequestContext = CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler);
 		}
 		return SharedRequestContext;
 	}

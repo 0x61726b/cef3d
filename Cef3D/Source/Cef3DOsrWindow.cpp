@@ -14,18 +14,18 @@
 
 namespace Cef3D
 {
+
 	void Cef3DOsrBrowser::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 		CEF_REQUIRE_UI_THREAD();
-		DCHECK(!browser_);
-		browser_ = browser;
+		GetWindow()->SetBrowser(browser);
 	}
 
 	void Cef3DOsrBrowser::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 		CEF_REQUIRE_UI_THREAD();
 		// Detach |this| from the ClientHandlerOsr.
-		static_cast<Cef3DOsrHandler*>(browser_->GetHost()->GetClient().get())->
+		static_cast<Cef3DOsrHandler*>(GetWindow()->GetBrowser()->GetHost()->GetClient().get())->
 			DetachOsrDelegate();
-		browser_ = NULL;
+		GetWindow()->SetBrowser(0);
 
 	}
 
@@ -143,5 +143,11 @@ namespace Cef3D
 		client_rect_.Width = Width;
 		client_rect_.Height = Height;
 		device_scale_factor_ = 1;
+	}
+
+	Cef3DOsrBrowserWindow* Cef3DOsrBrowser::GetWindow()
+	{
+		DCHECK(browserWindow);
+		return browserWindow;
 	}
 }

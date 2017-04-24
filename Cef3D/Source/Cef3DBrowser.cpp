@@ -19,42 +19,42 @@ namespace Cef3D
 	void Cef3DBrowser::LoadURL(const std::string & url)
 	{
 		Url = url;
-		AssociatedBrowser->GetMainFrame()->LoadURL(Url);
+		GMainContext->GetCefBrowser(BrowserID)->GetMainFrame()->LoadURL(Url);
 	}
 
 	void Cef3DBrowser::Back()
 	{
-		AssociatedBrowser->GoBack();
+		GMainContext->GetCefBrowser(BrowserID)->GoBack();
 	}
 
 	void Cef3DBrowser::Forward()
 	{
-		AssociatedBrowser->GoForward();
+		GMainContext->GetCefBrowser(BrowserID)->GoForward();
 	}
 
 	void Cef3DBrowser::Stop()
 	{
-		AssociatedBrowser->StopLoad();
+		GMainContext->GetCefBrowser(BrowserID)->StopLoad();
 	}
 
 	void Cef3DBrowser::Reload()
 	{
-		AssociatedBrowser->Reload();
+		GMainContext->GetCefBrowser(BrowserID)->Reload();
 	}
 
 	void Cef3DBrowser::ReloadIgnoreCache()
 	{
-		AssociatedBrowser->ReloadIgnoreCache();
+		GMainContext->GetCefBrowser(BrowserID)->ReloadIgnoreCache();
 	}
 
 	void Cef3DBrowser::Focus()
 	{
-		AssociatedBrowser->GetHost()->SetFocus(true);
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->SetFocus(true);
 	}
 
 	void Cef3DBrowser::Blur()
 	{
-		AssociatedBrowser->GetHost()->SetFocus(false);
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->SetFocus(false);
 	}
 
 	void Cef3DBrowser::PauseRendering()
@@ -68,17 +68,17 @@ namespace Cef3D
 
 	void Cef3DBrowser::Zoom()
 	{
-		AssociatedBrowser->GetHost()->SetZoomLevel(20);
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->SetZoomLevel(20);
 	}
 
 	void Cef3DBrowser::ZoomOut()
 	{
-		AssociatedBrowser->GetHost()->SetZoomLevel(-20);
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->SetZoomLevel(-20);
 	}
 
 	void Cef3DBrowser::SetZoom(int Percent)
 	{
-		AssociatedBrowser->GetHost()->SetZoomLevel(Percent);
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->SetZoomLevel(Percent);
 	}
 
 	void Cef3DBrowser::SetWidth(int W)
@@ -92,51 +92,51 @@ namespace Cef3D
 
 	void Cef3DBrowser::Undo()
 	{
-		AssociatedBrowser->GetFocusedFrame()->Undo();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->Undo();
 	}
 
 	void Cef3DBrowser::Redo()
 	{
-		AssociatedBrowser->GetFocusedFrame()->Redo();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->Redo();
 	}
 
 	void Cef3DBrowser::Cut()
 	{
-		AssociatedBrowser->GetFocusedFrame()->Cut();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->Cut();
 	}
 
 	void Cef3DBrowser::Copy()
 	{
-		AssociatedBrowser->GetFocusedFrame()->Copy();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->Copy();
 	}
 
 	void Cef3DBrowser::Paste()
 	{
-		AssociatedBrowser->GetFocusedFrame()->Paste();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->Paste();
 	}
 
 	void Cef3DBrowser::SelectAll()
 	{
-		AssociatedBrowser->GetFocusedFrame()->SelectAll();
+		GMainContext->GetCefBrowser(BrowserID)->GetFocusedFrame()->SelectAll();
 	}
 
 	double Cef3DBrowser::GetZoomLevel()
 	{
-		return AssociatedBrowser->GetHost()->GetZoomLevel();
+		return GMainContext->GetCefBrowser(BrowserID)->GetHost()->GetZoomLevel();
 	}
 	bool Cef3DBrowser::CanGoBack()
 	{
-		return AssociatedBrowser->CanGoBack();
+		return GMainContext->GetCefBrowser(BrowserID)->CanGoBack();
 	}
 
 	bool Cef3DBrowser::CanGoForward()
 	{
-		return AssociatedBrowser->CanGoForward();
+		return GMainContext->GetCefBrowser(BrowserID)->CanGoForward();
 	}
 
 	bool Cef3DBrowser::IsLoading()
 	{
-		return AssociatedBrowser->IsLoading();
+		return GMainContext->GetCefBrowser(BrowserID)->IsLoading();
 	}
 
 	bool Cef3DBrowser::IsCrashed()
@@ -147,15 +147,5 @@ namespace Cef3D
 	void Cef3DBrowser::SetBrowserID(int ID)
 	{
 		BrowserID = ID;
-	}
-	void Cef3DBrowser::SetRootWindow(RootWindow * Wnd)
-	{
-		AssociatedWindow = Wnd;
-
-		AssociatedBrowser = Wnd->GetBrowser();
-	}
-	void Cef3DBrowser::SetBrowser(CefRefPtr<CefBrowser> browser)
-	{
-		AssociatedBrowser = browser;
 	}
 }

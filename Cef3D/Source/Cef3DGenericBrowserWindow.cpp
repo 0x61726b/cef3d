@@ -17,30 +17,49 @@
 namespace Cef3D
 {
 
-	Cef3DGenericBrowserWindow::Cef3DGenericBrowserWindow(Cef3DGenericBrowserWindow::Delegate* delegate)
-		: delegate_(delegate),
+	Cef3DOsrBrowserWindow::Cef3DOsrBrowserWindow() :
 		is_closing_(false) {
-		DCHECK(delegate_);
+
 	}
 
-	void Cef3DGenericBrowserWindow::SetDeviceScaleFactor(float device_scale_factor) {
+	void Cef3DOsrBrowserWindow::Init(const Cef3DBrowserDefinition & Def, Cef3DBrowser* browser)
+	{
+		std::string url = "http://google.com";
+		osrBrowser_ = new Cef3DOsrBrowser(Def.Width, Def.Height, Def.PaintDelegate);
+		client_handler_ = new Cef3DOsrHandler(this, osrBrowser_, url);
+
+		CefWindowInfo windowInfo;
+		windowInfo.SetAsWindowless(NULL, true);
+
+		browser_ = 0;
+		
+		browser_ = CefBrowserHost::CreateBrowserSync(windowInfo, client_handler_, url, Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def), 0);
+		browser->SetBrowserID(browser_->GetIdentifier());
 	}
 
-	float Cef3DGenericBrowserWindow::GetDeviceScaleFactor() const {
+	void Cef3DOsrBrowserWindow::SetBrowser(CefRefPtr<CefBrowser> browser)
+	{
+		browser_ = browser;
+	}
+
+	void Cef3DOsrBrowserWindow::SetDeviceScaleFactor(float device_scale_factor) {
+	}
+
+	float Cef3DOsrBrowserWindow::GetDeviceScaleFactor() const {
 		return 1.0f;
 	}
 
-	CefRefPtr<CefBrowser> Cef3DGenericBrowserWindow::GetBrowser() const {
+	CefRefPtr<CefBrowser> Cef3DOsrBrowserWindow::GetBrowser() const {
 		REQUIRE_MAIN_THREAD();
 		return browser_;
 	}
 
-	bool Cef3DGenericBrowserWindow::IsClosing() const {
+	bool Cef3DOsrBrowserWindow::IsClosing() const {
 		REQUIRE_MAIN_THREAD();
 		return is_closing_;
 	}
 
-	void Cef3DGenericBrowserWindow::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
+	void Cef3DOsrBrowserWindow::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
 		REQUIRE_MAIN_THREAD();
 		DCHECK(!browser_);
 		browser_ = browser;
@@ -48,13 +67,13 @@ namespace Cef3D
 		//delegate_->OnBrowserCreated(browser);
 	}
 
-	void Cef3DGenericBrowserWindow::OnBrowserClosing(CefRefPtr<CefBrowser> browser) {
+	void Cef3DOsrBrowserWindow::OnBrowserClosing(CefRefPtr<CefBrowser> browser) {
 		REQUIRE_MAIN_THREAD();
 		DCHECK_EQ(browser->GetIdentifier(), browser_->GetIdentifier());
 		is_closing_ = true;
 	}
 
-	void Cef3DGenericBrowserWindow::OnBrowserClosed(CefRefPtr<CefBrowser> browser) {
+	void Cef3DOsrBrowserWindow::OnBrowserClosed(CefRefPtr<CefBrowser> browser) {
 		REQUIRE_MAIN_THREAD();
 		if (browser_.get()) {
 			DCHECK_EQ(browser->GetIdentifier(), browser_->GetIdentifier());
@@ -68,29 +87,29 @@ namespace Cef3D
 		//delegate_->OnBrowserWindowDestroyed();
 	}
 
-	void Cef3DGenericBrowserWindow::OnSetAddress(const std::string& url) {
+	void Cef3DOsrBrowserWindow::OnSetAddress(const std::string& url) {
 		REQUIRE_MAIN_THREAD();
 		/*delegate_->OnSetAddress(url);*/
 	}
 
-	void Cef3DGenericBrowserWindow::OnSetTitle(const std::string& title) {
+	void Cef3DOsrBrowserWindow::OnSetTitle(const std::string& title) {
 		REQUIRE_MAIN_THREAD();
 		/*delegate_->OnSetTitle(title);*/
 	}
 
-	void Cef3DGenericBrowserWindow::OnSetFullscreen(bool fullscreen) {
+	void Cef3DOsrBrowserWindow::OnSetFullscreen(bool fullscreen) {
 		REQUIRE_MAIN_THREAD();
 		/*delegate_->OnSetFullscreen(fullscreen);*/
 	}
 
-	void Cef3DGenericBrowserWindow::OnSetLoadingState(bool isLoading,
+	void Cef3DOsrBrowserWindow::OnSetLoadingState(bool isLoading,
 		bool canGoBack,
 		bool canGoForward) {
 		REQUIRE_MAIN_THREAD();
 		/*delegate_->OnSetLoadingState(isLoading, canGoBack, canGoForward);*/
 	}
 
-	void Cef3DGenericBrowserWindow::OnSetDraggableRegions(
+	void Cef3DOsrBrowserWindow::OnSetDraggableRegions(
 		const std::vector<CefDraggableRegion>& regions) {
 		REQUIRE_MAIN_THREAD();
 		/*delegate_->OnSetDraggableRegions(regions);*/

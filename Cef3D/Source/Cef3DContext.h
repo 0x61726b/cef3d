@@ -36,6 +36,7 @@ namespace Cef3D
 		// Cef3D methods 
 		Cef3DBrowser* CreateCef3DBrowser(const Cef3DBrowserDefinition& Def);
 		Cef3DBrowser* GetCef3DBrowser(CefRefPtr<CefBrowser> browser);
+		CefRefPtr<CefBrowser> GetCefBrowser(int id);
 		
 		bool Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info);
 
@@ -68,6 +69,7 @@ namespace Cef3D
 
 		scoped_ptr<RootWindowManager> WndManager;
 		std::list<Cef3DBrowser*> Cef3DBrowserList;
+		std::list<CefRefPtr<CefBrowser> > Browsers;
 
 		// Used to verify that methods are called on the correct thread.
 		base::ThreadChecker ThreadChecker;

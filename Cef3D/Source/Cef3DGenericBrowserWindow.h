@@ -16,41 +16,12 @@
 namespace Cef3D
 {
 	class Cef3DBrowser;
+	class Cef3DOsrBrowser;
 
-	class Cef3DGenericBrowserWindow :
+
+	class Cef3DOsrBrowserWindow :
 		public Cef3DHandlerDelegate
 	{
-	public:
-		class Delegate {
-		public:
-			// Called when the browser has been created.
-			virtual void OnBrowserCreated(Cef3DBrowser* browser) = 0;
-
-			//// Called when the BrowserWindow has been destroyed.
-			//virtual void OnBrowserWindowDestroyed() = 0;
-
-			//// Set the window URL address.
-			//virtual void OnSetAddress(const std::string& url) = 0;
-
-			//// Set the window title.
-			//virtual void OnSetTitle(const std::string& title) = 0;
-
-			//// Set fullscreen mode.
-			//virtual void OnSetFullscreen(bool fullscreen) = 0;
-
-			//// Set the loading state.
-			//virtual void OnSetLoadingState(bool isLoading,
-			//	bool canGoBack,
-			//	bool canGoForward) = 0;
-
-			//// Set the draggable regions.
-			//virtual void OnSetDraggableRegions(
-			//	const std::vector<CefDraggableRegion>& regions) = 0;
-
-		protected:
-			virtual ~Delegate() {}
-		};
-
 	public:
 		virtual void SetDeviceScaleFactor(float device_scale_factor);
 		virtual float GetDeviceScaleFactor() const;
@@ -60,8 +31,10 @@ namespace Cef3D
 		bool IsClosing() const;
 
 	public:
-		explicit Cef3DGenericBrowserWindow(Delegate* delegate);
+		explicit Cef3DOsrBrowserWindow();
 		/*friend struct base::DefaultDeleter<BrowserWindow>;*/
+
+		void Init(const Cef3DBrowserDefinition& Def, Cef3DBrowser* browser);
 
 		// ClientHandler::Delegate methods.
 		void OnBrowserCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
@@ -76,7 +49,12 @@ namespace Cef3D
 		void OnSetDraggableRegions(
 			const std::vector<CefDraggableRegion>& regions) OVERRIDE;
 
-		Delegate* delegate_;
+	public:
+		void SetBrowser(CefRefPtr<CefBrowser> browser);
+
+	private:
+		Cef3DOsrBrowser* osrBrowser_;
+
 		CefRefPtr<CefBrowser> browser_;
 		CefRefPtr<Cef3DHandler> client_handler_;
 		bool is_closing_;

@@ -54,6 +54,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <vector>
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>

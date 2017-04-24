@@ -18,17 +18,6 @@ namespace Cef3D
 
 	}
 
-	class TestDel :
-		public Cef3DGenericBrowserWindow::Delegate
-	{
-	public:
-		TestDel() { }
-
-		virtual void OnBrowserCreated(Cef3DBrowser* browser)
-		{
-
-		}
-	};
 	namespace {
 
 		// The default URL to load in a browser window.
@@ -145,25 +134,27 @@ namespace Cef3D
 		std::string testLoadUrl = "https://www.youtube.com/watch?v=1UQlnT9qZvs";
 		if (Def.Type == Cef3DBrowserType::Normal)
 		{
-			RootWindow* Wnd = GMainContext->GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
-			cef3DBrowser->SetRootWindow(Wnd);
+			RootWindow* Wnd = GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
+			(Wnd);
+			/*cef3DBrowser->SetRootWindow(Wnd);*/
 		}
 		else
 		{
 			// Create browser
-			CefWindowInfo windowInfo;
-			windowInfo.SetAsWindowless(NULL, true);
-			Cef3DGenericBrowserWindow* browserWindow(new Cef3DGenericBrowserWindow(new TestDel()));
-			Cef3DOsrBrowser* osrWindow(new Cef3DOsrBrowser(Def.Width,Def.Height,Def.PaintDelegate));
+			/*CefWindowInfo windowInfo;
+			windowInfo.SetAsWindowless(NULL, true);*/
 
-			CefRefPtr<Cef3DOsrHandler> handler(new Cef3DOsrHandler(browserWindow, osrWindow, testLoadUrl));
+			Cef3DOsrBrowserWindow* browserWindow(new Cef3DOsrBrowserWindow);
+			browserWindow->Init(Def, cef3DBrowser);
+			Browsers.push_back(browserWindow->GetBrowser());
+			//Cef3DOsrBrowser* osrWindow(new Cef3DOsrBrowser(Def.Width,Def.Height,Def.PaintDelegate));
 
-			browserWindow->client_handler_ = handler;
+			//CefRefPtr<Cef3DOsrHandler> handler(new Cef3DOsrHandler(browserWindow, osrWindow, testLoadUrl));
 			
-			CefRefPtr<CefBrowser> window = CefBrowserHost::CreateBrowserSync(windowInfo, handler, testLoadUrl, settings,
-				/*CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler)*/0);
+			
+				/*CefRequestContext::CreateContext(CefRequestContext::GetGlobalContext(), new ClientRequestContextHandler)*);
 			/*(browser);*/
-			cef3DBrowser->SetBrowser(window);
+			//cef3DBrowser->SetBrowser(window);
 		}
 		Cef3DBrowserList.push_back(cef3DBrowser);
 		
@@ -175,9 +166,22 @@ namespace Cef3D
 		std::list<Cef3DBrowser*>::iterator bit = Cef3DBrowserList.begin();
 		for (;bit != Cef3DBrowserList.end(); ++bit)
 		{
-			if ((*bit)->AssociatedBrowser->IsSame(browser))
-				return *bit;
+			int bid = (*bit)->GetBrowserID();
+
+			if (bid == browser->GetIdentifier())
+				return (*bit);
+			
+
 		}
+		return 0;
+	}
+
+	CefRefPtr<CefBrowser> MainContext::GetCefBrowser(int id)
+	{
+		std::list<CefRefPtr<CefBrowser> >::iterator cefBrowsers = Browsers.begin();
+		for (; cefBrowsers != Browsers.end(); ++cefBrowsers)
+			if ((*cefBrowsers)->GetIdentifier() == id)
+				return (*cefBrowsers);
 		return 0;
 	}
 

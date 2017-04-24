@@ -73,4 +73,28 @@ namespace Cef3D
 		bool Transparent;
 		bool ShowUpdateRects;
 	};
+
+	class Cef3DBrowser;
+	struct Cef3DRect;
+
+	class Cef3DOsrDel
+	{
+	public:
+		virtual void OnAfterCreated(Cef3DBrowser* browser) = 0;
+		virtual void OnBeforeClose(Cef3DBrowser* browser) = 0;
+
+		virtual bool GetViewRect(Cef3DBrowser* browser,
+			Cef3DRect& rect) = 0;
+
+		virtual void OnPaint(Cef3DBrowser* browser,
+			Cef3D::Cef3DOsrRenderType type,
+			const std::vector<Cef3DRect>& dirtyRects,
+			const void* buffer,
+			int width,
+			int height) = 0;
+
+	protected:
+		virtual ~Cef3DOsrDel() {}
+
+	};
 }
