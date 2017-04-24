@@ -202,7 +202,7 @@ bool InitD3D(int Width,int Height, HWND window)
 
 	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0, 0, -5, 0), DirectX::XMVectorSet(0, 0, 0, 0), DirectX::XMVectorSet(0, 1, 0, 0));
 	DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(60), Width / Height, 0.1f, 10.0f);
-
+	
 	DirectX::XMMATRIX VP = DirectX::XMMatrixMultiply(V, P);
 	
 	DirectX::XMVECTOR Det;
@@ -392,8 +392,8 @@ void PumpMessageLoop()
 	}
 }
 
-#include <Cef3DOsrWindow.h>
-#include <Cef3DPCH.h>
+//#include <Cef3DOsrWindow.h>
+//#include <Cef3DPCH.h>
 
 class OsrPaintDelegate
 	: public Cef3D::Cef3DOsrDel
