@@ -19,8 +19,13 @@ using namespace Cef3D;
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()
 {
-	std::string rootPath = Cef3D::Cef3DPaths::Root();
-	std::string logPath = Cef3D::Cef3DPaths::Log();
+#if MEMORY_LEAK_CHECK
+	std::string rootPath = "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64";
+	std::string logPath = "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64";
+#else
+	std::string rootPath = Cef3DPaths::Root();
+	std::string logPath = Cef3DPaths::Log();
+#endif
 	std::string subProcessPath;
 	logPath = Cef3DPaths::Combine(logPath, "Cef3D.log");
 

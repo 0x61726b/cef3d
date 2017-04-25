@@ -36,6 +36,8 @@ namespace Cef3D
 
 		DCHECK(osr_delegate_);
 		osr_delegate_ = NULL;
+
+		Cef3DHandler::DetachDelegate();
 	}
 
 	void Cef3DOsrHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
@@ -43,6 +45,8 @@ namespace Cef3D
 		if (osr_delegate_)
 			osr_delegate_->OnAfterCreated(browser);
 		Cef3DHandler::OnAfterCreated(browser);
+
+		
 	}
 
 	void Cef3DOsrHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {

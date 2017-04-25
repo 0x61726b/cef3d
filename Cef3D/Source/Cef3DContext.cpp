@@ -81,6 +81,8 @@ namespace Cef3D
 		// The context must either not have been initialized, or it must have also
 		// been shut down.
 		DCHECK(!IsInitialized || IsShuttingDown);
+
+		Cef3DBrowserList.clear();
 	}
                                                 
 
@@ -137,10 +139,9 @@ namespace Cef3D
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
-		std::string testLoadUrl = "https://www.youtube.com/watch?v=1UQlnT9qZvs";
 		if (Def.Type == Cef3DBrowserType::Normal)
 		{
-			RootWindow* Wnd = GetRootWindowManager()->CreateRootWindow(false, CefRect(), testLoadUrl);
+			RootWindow* Wnd = GetRootWindowManager()->CreateRootWindow(false, CefRect(0,0,Def.Width,Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
 			(Wnd);
 			/*cef3DBrowser->SetRootWindow(Wnd);*/
 		}
@@ -162,19 +163,16 @@ namespace Cef3D
 
 			if (bid == browser->GetIdentifier())
 				return (*bit);
-			
-
 		}
 		return 0;
 	}
 
-	CefRefPtr<CefBrowser> MainContext::GetCefBrowser(int id)
+	CefRefPtr<CefBrowser> MainContext::GetCefBrowser(int id,bool isOsr)
 	{
-		std::list<CefRefPtr<CefBrowser> >::iterator cefBrowsers = Browsers.begin();
-		for (; cefBrowsers != Browsers.end(); ++cefBrowsers)
-			if ((*cefBrowsers)->GetIdentifier() == id)
-				return (*cefBrowsers);
-		return 0;
+		if (isOsr)
+			return GetOsrManager()->GetForBrowser(id);
+		else
+			return nullptr;
 	}
 
 	//Cef3DBrowser * MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate)

@@ -21,6 +21,8 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 
+#define PROFILE 1
+
 #define D3D_SAFE_RELEASE(p) if (p) { ((IUnknown*)p)->Release();  p = 0; }
 
 
@@ -55,6 +57,9 @@ struct VsConstantBuffer
 bool CompileVertexShader(unsigned flags);
 bool CompilePixelShader(unsigned flags);
 
+class OsrPaintDelegate;
+OsrPaintDelegate* PaintListener;
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -62,6 +67,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
+
+		PaintListener->ThisBrowser->Close(true);
 		return 0;
 	} break;
 	case WM_KEYDOWN:
@@ -283,7 +290,7 @@ bool InitD3D(int Width,int Height, HWND window)
 
 bool CompileVertexShader(unsigned flags)
 {
-	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile( Cef3D::Cef3DPaths::Root() + "/Shaders/FullscreenTriangle.hlsl" );
+	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile( "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64/Shaders/FullscreenTriangle.hlsl" );
 	ID3D10Blob *VS;
 	ID3DBlob* errorMsgs = 0;
 
@@ -315,7 +322,7 @@ bool CompileVertexShader(unsigned flags)
 
 bool CompilePixelShader(unsigned flags)
 {
-	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile(Cef3D::Cef3DPaths::Root() + "/Shaders/FullscreenTriangle.hlsl");
+	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile("D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64/Shaders/FullscreenTriangle.hlsl");
 	ID3D10Blob *VS;
 	ID3DBlob* errorMsgs = 0;
 
@@ -336,6 +343,9 @@ bool CompilePixelShader(unsigned flags)
 
 void Frame()
 {
+	if (!devcon)
+		return;
+
 	float clearColor[4] = { 0,0,0,0 };
 	devcon->ClearRenderTargetView(backbuffer, clearColor);
 
@@ -360,8 +370,15 @@ void Frame()
 
 void Cleanup()
 {
+	if (!swapchain)
+		return;
+
 	swapchain->SetFullscreenState(FALSE, NULL);
 
+	D3D_SAFE_RELEASE(pOffScreenSampler);
+	D3D_SAFE_RELEASE(pOffscreenTex);
+	D3D_SAFE_RELEASE(pOffscreenTexSRV);
+	D3D_SAFE_RELEASE(pVsConstantBuffer);
 	D3D_SAFE_RELEASE(pLayout);
 	D3D_SAFE_RELEASE(pVS);
 	D3D_SAFE_RELEASE(pPS);
@@ -395,13 +412,16 @@ void PumpMessageLoop()
 //#include <Cef3DOsrWindow.h>
 //#include <Cef3DPCH.h>
 
+
+
 class OsrPaintDelegate
 	: public Cef3D::Cef3DOsrDel
 {
 public:
+	Cef3D::Cef3DBrowser* ThisBrowser;
 	virtual void OnAfterCreated(Cef3D::Cef3DBrowser* browser)
 	{
-
+		ThisBrowser = browser;
 	}
 
 	virtual void OnBeforeClose(Cef3D::Cef3DBrowser* browser)
@@ -426,6 +446,9 @@ public:
 		unsigned rowStart = 0;
 		unsigned char* src = (unsigned char*)buffer;
 
+		if (!devcon)
+			return;
+
 		// Update the d3d11 texture
 		D3D11_MAPPED_SUBRESOURCE mappedData;
 		mappedData.pData = 0;
@@ -449,45 +472,50 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	int WinWidth = 800;
-	int WinHeight = 600;
+	{
+		int WinWidth = 800;
+		int WinHeight = 600;
 
-	if (!InitWin32(WinWidth, WinHeight,300,300, hInInstance))
-		return -1;
+		if (!InitWin32(WinWidth, WinHeight, 300, 300, hInInstance))
+			return -1;
 
-	if (!InitD3D(WinWidth, WinHeight, TopWindow))
-		return -1;
+		if (!InitD3D(WinWidth, WinHeight, TopWindow))
+			return -1;
 
-	bool isSubProcessed = true;
+		bool isSubProcessed = true;
 
-	Cef3D::Cef3DDefinition definition;
-	definition.UseChildProcess = isSubProcessed;
-	definition.OffscreenRendering = true;
+		Cef3D::Cef3DDefinition definition;
+		definition.UseChildProcess = isSubProcessed;
+		definition.OffscreenRendering = true;
 
-	bool init = Cef3D_Init(definition);
+		bool init = Cef3D_Init(definition);
 
-	if (!init)
-		return -1;
+		if (!init)
+			return -1;
 
-	OsrPaintDelegate* del(new OsrPaintDelegate);
+		OsrPaintDelegate* del(new OsrPaintDelegate);
 
-	Cef3D::Cef3DBrowserDefinition def;
-	def.Width = WinWidth;
-	def.Height = WinHeight;
-	def.Type = Cef3D::Cef3DBrowserType::Offscreen;
-	def.PaintDelegate = del;
-	Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(def);
-	UNREFERENCED_PARAMETER(browser1);
+		Cef3D::Cef3DBrowserDefinition def;
+		def.Width = WinWidth;
+		def.Height = WinHeight;
+		def.Type = Cef3D::Cef3DBrowserType::Offscreen;
+		def.PaintDelegate = del;
+		Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(def);
+		UNREFERENCED_PARAMETER(browser1);
 
-	PumpMessageLoop();
+		PumpMessageLoop();
 
-	delete del;
-	del = 0;
+		delete del;
+		del = 0;
 
-	delete browser1;
-	browser1 = 0;
-	Cleanup();
-	Cef3D_Shutdown();
+		delete browser1;
+		browser1 = 0;
+		Cleanup();
+		Cef3D_Shutdown();
+	}
+	
+
+	//_CrtDumpMemoryLeaks();
 
 	return 0;
 }

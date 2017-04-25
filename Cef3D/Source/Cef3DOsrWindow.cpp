@@ -19,6 +19,8 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 		//GetWindow()->SetBrowser(browser);
 		browser_ = browser;
+
+		delegate_->OnAfterCreated(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	void Cef3DOsrBrowser::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
@@ -145,5 +147,8 @@ namespace Cef3D
 		client_rect_.Width = Width;
 		client_rect_.Height = Height;
 		device_scale_factor_ = 1;
+	}
+	Cef3DOsrBrowser::~Cef3DOsrBrowser()
+	{
 	}
 }

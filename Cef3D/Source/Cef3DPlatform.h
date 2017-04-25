@@ -78,3 +78,5 @@ typedef HANDLE ProcessHandle;
 #elif defined(__linux__) || defined(__APPLE__)
 typedef pid_t ProcessHandle;
 #endif
+
+#define MEMORY_LEAK_CHECK 1

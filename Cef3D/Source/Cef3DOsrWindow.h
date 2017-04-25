@@ -70,6 +70,7 @@ namespace Cef3D
 	{
 	public:
 		Cef3DOsrBrowser(int Width, int Height, Cef3DOsrDel* Delegate);
+		~Cef3DOsrBrowser();
 
 		//OsrDelegete methods
 		void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;

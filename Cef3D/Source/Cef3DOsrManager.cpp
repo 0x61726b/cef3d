@@ -17,11 +17,37 @@ namespace Cef3D
 	Cef3DOsrManager::Cef3DOsrManager()
 	{
 	}
+	Cef3DOsrManager::~Cef3DOsrManager()
+	{
+		CloseAllBrowsers(true);
+
+		BrowserList.clear();
+	}
 	int Cef3DOsrManager::CreateBrowser(const Cef3DBrowserDefinition & Def)
 	{
-		Cef3DOsrBrowserWindow* browserWindow(new Cef3DOsrBrowserWindow);
+		scoped_refptr<Cef3DOsrBrowserWindow> browserWindow(new Cef3DOsrBrowserWindow);
+
 		browserWindow->Init(Def);
-		BrowserList.push_back(browserWindow->GetBrowser());
+		//BrowserList.push_back(browserWindow);
+		BrowserList.insert(browserWindow);
 		return browserWindow->GetBrowser()->GetIdentifier();
+	}
+	CefRefPtr<CefBrowser> Cef3DOsrManager::GetForBrowser(int browser_id)
+	{
+		std::set<scoped_refptr<Cef3DOsrBrowserWindow> >::iterator bit = BrowserList.begin();
+		for (; bit != BrowserList.end(); ++bit)
+		{
+			if ((*bit)->GetBrowser()->GetIdentifier() == browser_id)
+				return (*bit)->GetBrowser();
+		}
+		return nullptr;
+	}
+	void Cef3DOsrManager::CloseAllBrowsers(bool force)
+	{
+		std::set<scoped_refptr<Cef3DOsrBrowserWindow> >::iterator bit = BrowserList.begin();
+		for (; bit != BrowserList.end(); ++bit)
+		{
+			(*bit)->Close(force);
+		}
 	}
 }

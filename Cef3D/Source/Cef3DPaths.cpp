@@ -12,6 +12,9 @@
 
 #include "Cef3DPCH.h"
 
+#pragma warning(push)
+#pragma warning( disable: 4172 )
+
 namespace Cef3D
 {
 	namespace Cef3DPrivate
@@ -113,3 +116,5 @@ namespace Cef3D
 		return Cef3DPrivate::CombinePaths(A, B);
 	}
 }
+
+#pragma warning( pop )

@@ -87,25 +87,14 @@ Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrow
 
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& Definition)
 {
-	//Cef3D::Cef3DBrowser* browser = new Cef3D::Cef3DBrowser;
-	//browser->SetWidth(Definition.Width);
-	//browser->SetHeight(Definition.Height);
-
-	Cef3D::Cef3DBrowserDefinition settings;
-	settings.Width = Definition.Width;
-	settings.Height = Definition.Height;
-
-
 	return GMainContext->CreateCef3DBrowser(Definition);
 }
 
 bool Cef3D_Shutdown()
 {
-	/*Cef3DBrowserApp->BrowserList.clear();*/
-	/*GMainContext->Shutdown();*/
-	/*delete GMainContext;*/
-
 	GMainContext->Shutdown();
+
+	Cef3DBrowserApp = 0;
 
 	delete GMainContext;
 	GMainContext = 0;

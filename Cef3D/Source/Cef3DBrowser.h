@@ -17,6 +17,9 @@ namespace Cef3D
 	class CEF3D_API Cef3DBrowser
 	{
 	public:
+		Cef3DBrowser();
+
+		~Cef3DBrowser();
 		Cef3DBrowserType GetType() { return Type;  }
 		ProcessHandle GetProcessHandle() { return ProcessHandle;  }
 		int GetProcessID() { return ProcessID;  }
@@ -48,6 +51,8 @@ namespace Cef3D
 		void Copy();
 		void Paste();
 		void SelectAll();
+
+		void Close(bool force);
 		/* */
 
 		double GetZoomLevel();

@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "include/base/cef_scoped_ptr.h"
 
 namespace Cef3D
 {
@@ -31,10 +32,13 @@ namespace Cef3D
 
 		bool IsClosing() const;
 
-	public:
-		explicit Cef3DOsrBrowserWindow();
-		/*friend struct base::DefaultDeleter<BrowserWindow>;*/
+		void Close(bool force);
 
+	public:
+		Cef3DOsrBrowserWindow();
+		~Cef3DOsrBrowserWindow();
+		
+	public:
 		void Init(const Cef3DBrowserDefinition& Def);
 
 		// ClientHandler::Delegate methods.
@@ -54,10 +58,15 @@ namespace Cef3D
 		void SetBrowser(CefRefPtr<CefBrowser> browser);
 
 	private:
-		Cef3DOsrBrowser* osrBrowser_;
+		scoped_ptr<Cef3DOsrBrowser> osrBrowser_;
 
 		CefRefPtr<CefBrowser> browser_;
 		CefRefPtr<Cef3DHandler> client_handler_;
 		bool is_closing_;
+
+	protected:
+		friend struct DeleteOnMainThread;
+		friend class base::RefCountedThreadSafe<Cef3DOsrBrowserWindow, DeleteOnMainThread>;
+
 	};
 }

@@ -22,17 +22,23 @@ namespace Cef3D
 
 	}
 
+	Cef3DOsrBrowserWindow::~Cef3DOsrBrowserWindow()
+	{
+		/*delete osrBrowser_;
+		osrBrowser_ = NULL;*/
+	}
+
 	void Cef3DOsrBrowserWindow::Init(const Cef3DBrowserDefinition & Def)
 	{
 		std::string url = "http://google.com";
-		osrBrowser_ = new Cef3DOsrBrowser(Def.Width, Def.Height, Def.PaintDelegate);
-		client_handler_ = new Cef3DOsrHandler(this, osrBrowser_, url);
+		osrBrowser_.reset(new Cef3DOsrBrowser(Def.Width, Def.Height, Def.PaintDelegate));
+
+		client_handler_ = new Cef3DOsrHandler(this, osrBrowser_.get(), url);
 
 		CefWindowInfo windowInfo;
 		windowInfo.SetAsWindowless(NULL, true);
 		
-		CefRefPtr<CefBrowser> cefBorwser = CefBrowserHost::CreateBrowserSync(windowInfo, client_handler_, url, Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def), 0);
-		/*browser->SetBrowserID(cefBorwser->GetIdentifier());*/
+		browser_ = CefBrowserHost::CreateBrowserSync(windowInfo, client_handler_, url, Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def), 0);
 	}
 
 	void Cef3DOsrBrowserWindow::SetBrowser(CefRefPtr<CefBrowser> browser)
@@ -55,6 +61,13 @@ namespace Cef3D
 	bool Cef3DOsrBrowserWindow::IsClosing() const {
 		REQUIRE_MAIN_THREAD();
 		return is_closing_;
+	}
+
+	void Cef3DOsrBrowserWindow::Close(bool force)
+	{
+		DCHECK(browser_);
+		DCHECK(!IsClosing());
+		browser_->GetHost()->CloseBrowser(force);
 	}
 
 	void Cef3DOsrBrowserWindow::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {

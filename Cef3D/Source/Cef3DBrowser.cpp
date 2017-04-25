@@ -16,10 +16,20 @@
 
 namespace Cef3D
 {
+	Cef3DBrowser::Cef3DBrowser()
+		: BrowserID(-1)
+	{
+
+	}
 	void Cef3DBrowser::LoadURL(const std::string & url)
 	{
 		Url = url;
 		GMainContext->GetCefBrowser(BrowserID)->GetMainFrame()->LoadURL(Url);
+	}
+
+	void Cef3DBrowser::Close(bool force)
+	{
+		GMainContext->GetCefBrowser(BrowserID)->GetHost()->CloseBrowser(force);
 	}
 
 	void Cef3DBrowser::Back()
@@ -147,5 +157,10 @@ namespace Cef3D
 	void Cef3DBrowser::SetBrowserID(int ID)
 	{
 		BrowserID = ID;
+	}
+
+	Cef3DBrowser::~Cef3DBrowser()
+	{
+
 	}
 }

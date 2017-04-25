@@ -63,6 +63,7 @@ namespace Cef3D
 
 		int Width;
 		int Height;
+		std::string DefaultUrl;
 		Cef3DBrowserType Type;
 
 		class Cef3DOsrDel* PaintDelegate;

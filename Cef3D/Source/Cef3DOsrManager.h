@@ -19,11 +19,17 @@ namespace Cef3D
 	public:
 		Cef3DOsrManager();
 
+		~Cef3DOsrManager();
+
 		int CreateBrowser(const Cef3DBrowserDefinition& Def);
 
-	private:
-		std::list<CefRefPtr<CefBrowser> > BrowserList;
+		CefRefPtr<CefBrowser> GetForBrowser(int browser_id);
 
-		DISALLOW_COPY_AND_ASSIGN(Cef3DOsrManager);
+	private:
+		std::set<scoped_refptr<Cef3DOsrBrowserWindow> > BrowserList;
+
+		void CloseAllBrowsers(bool force);
+
+		//DISALLOW_COPY_AND_ASSIGN(Cef3DOsrManager);
 	};
 }
