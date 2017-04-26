@@ -69,7 +69,9 @@ namespace Cef3D
 		void OnFocus();
 		void OnSize(bool minimized);
 		void OnMove();
+	public:
 		void OnDestroyed();
+	private:
 
 		// After initialization all members are only accessed on the main thread.
 		// Members set during initialization.

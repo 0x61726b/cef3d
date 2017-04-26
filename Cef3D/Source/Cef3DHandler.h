@@ -77,8 +77,7 @@ namespace Cef3D
 		public CefKeyboardHandler
 	{
 	public:
-		explicit Cef3DHandler(Cef3DHandlerDelegate* Delegate,bool IsOsr,const std::string& Url);
-		~Cef3DHandler();
+		Cef3DHandler(Cef3DHandlerDelegate* Delegate,bool IsOsr,const std::string& Url);
 
 		void CloseAllBrowsers(bool force_close);
 		void ShowDevTools(CefRefPtr<CefBrowser> browser, const CefPoint& inspect_element_at);
@@ -89,6 +88,7 @@ namespace Cef3D
 		CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE { return this; }
 		CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE { return this;}
 		CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE { return this; }
+		CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE { return this; }
 
 		bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) OVERRIDE;
 

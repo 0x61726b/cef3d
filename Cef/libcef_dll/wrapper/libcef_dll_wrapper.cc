@@ -393,7 +393,7 @@ CEF_GLOBAL void CefRunMessageLoop() {
 
   // Execute
   cef_run_message_loop();
-}
+ }
 
 CEF_GLOBAL void CefQuitMessageLoop() {
   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING

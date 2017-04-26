@@ -30,10 +30,6 @@ namespace Cef3D
 	{
 	}
 
-	Cef3DHandler::~Cef3DHandler()
-	{
-	}
-
 	CefRefPtr<CefBrowser> Cef3DHandler::GetCefBrowser(Cef3DBrowser* Browser)
 	{
 		DCHECK(Browser);

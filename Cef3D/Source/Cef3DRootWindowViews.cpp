@@ -229,6 +229,8 @@ namespace Cef3D
 		REQUIRE_MAIN_THREAD();
 		DCHECK(!Browser);
 		Browser = browser;
+
+		//browser->GetHost()->CloseBrowser(false);
 	}
 
 	void RootWindowViews::OnBrowserClosing(CefRefPtr<CefBrowser> browser)

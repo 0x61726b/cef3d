@@ -28,6 +28,8 @@ namespace Cef3D
 		DCHECK(!browser_);
 		browser_ = browser;
 
+		
+		
 
 	}
 
@@ -36,8 +38,10 @@ namespace Cef3D
 		// Detach |this| from the ClientHandlerOsr.
 		static_cast<Cef3DOsrHandler*>(browser_->GetHost()->GetClient().get())->
 			DetachOsrDelegate();
-		browser_ = NULL;
 
+		
+		browser_ = NULL;
+		//static_cast<RootWindowWin*>(GMainContext->GetRootWindowManager()->GetWindowForBrowser(browser->GetIdentifier()).get())->OnDestroyed();
 	}
 
 	bool OsrWindowWin::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
@@ -51,8 +55,8 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 		rect.x = rect.y = 0;
-		rect.width = client_rect.Width;
-		rect.height = client_rect.Height;
+		rect.width = 800;
+		rect.height = 600;
 
 		return true;
 	}
@@ -104,7 +108,7 @@ namespace Cef3D
 		int height) {
 		CEF_REQUIRE_UI_THREAD();
 
-
+		//browser->GetHost()->CloseBrowser(true);
 	}
 
 	void OsrWindowWin::OnCursorChange(
@@ -159,7 +163,7 @@ namespace Cef3D
 		window_info.SetAsWindowless(NULL, true);
 
 		// Create the browser asynchronously.
-		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, settings,
+		CefBrowserHost::CreateBrowserSync(window_info, handler, startup_url, settings,
 			request_context);
 	}
 

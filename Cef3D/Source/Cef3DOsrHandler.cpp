@@ -37,7 +37,7 @@ namespace Cef3D
 		DCHECK(osr_delegate_);
 		osr_delegate_ = NULL;
 
-		Cef3DHandler::DetachDelegate();
+		//Cef3DHandler::DetachDelegate();
 	}
 
 	void Cef3DOsrHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {

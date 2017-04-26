@@ -114,6 +114,8 @@ namespace Cef3D
 	void RootWindowWin::Close(bool force) {
 		REQUIRE_MAIN_THREAD();
 
+		if (browser_window_)
+			GetBrowser()->GetHost()->CloseBrowser(force);
 	}
 
 	void RootWindowWin::SetDeviceScaleFactor(float device_scale_factor) {
@@ -227,6 +229,8 @@ namespace Cef3D
 			// Make sure the browser is sized correctly.
 			OnSize(false);
 		}
+
+		
 	}
 
 	void RootWindowWin::OnBrowserWindowDestroyed() {
@@ -243,6 +247,8 @@ namespace Cef3D
 
 		browser_destroyed_ = true;
 		NotifyDestroyedIfDone();
+
+		OnDestroyed();
 	}
 
 	void RootWindowWin::OnSetAddress(const std::string& url) {

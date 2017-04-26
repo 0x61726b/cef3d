@@ -11,7 +11,7 @@
 //---------------------------------------------------------------------------
 
 #include <Cef3D.h>
-#include <Cef3DUtils.h>
+#include <Cef3DPCH.h>
 
 
 #include <Windows.h>
@@ -59,6 +59,7 @@ bool CompilePixelShader(unsigned flags);
 
 class OsrPaintDelegate;
 OsrPaintDelegate* PaintListener;
+CefRefPtr<CefBrowser> ThisBrowser;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -68,7 +69,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	{
 		PostQuitMessage(0);
 
-		PaintListener->ThisBrowser->Close(true);
+		ThisBrowser = GMainContext->GetRootWindowManager()->GetWindowForBrowser(1)->GetBrowser();
+
+		ThisBrowser->GetHost()->CloseBrowser(true);
 		return 0;
 	} break;
 	case WM_KEYDOWN:
