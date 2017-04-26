@@ -12,10 +12,57 @@
 
 #pragma once
 
-#include "Cef3DOsrWindow.h"
-
 namespace Cef3D
 {
+	// Implement this interface to receive notification of ClientHandlerOsr
+	// events. The methods of this class will be called on the CEF UI thread.
+	class OsrDelegate {
+	public:
+		// These methods match the CefLifeSpanHandler interface.
+		virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) = 0;
+		virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) = 0;
+
+		// These methods match the CefRenderHandler interface.
+		virtual bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+			CefRect& rect) = 0;
+		virtual bool GetViewRect(CefRefPtr<CefBrowser> browser,
+			CefRect& rect) = 0;
+		virtual bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
+			int viewX,
+			int viewY,
+			int& screenX,
+			int& screenY) = 0;
+		virtual bool GetScreenInfo(CefRefPtr<CefBrowser> browser,
+			CefScreenInfo& screen_info) = 0;
+		virtual void OnPopupShow(CefRefPtr<CefBrowser> browser, bool show) = 0;
+		virtual void OnPopupSize(CefRefPtr<CefBrowser> browser,
+			const CefRect& rect) = 0;
+		virtual void OnPaint(CefRefPtr<CefBrowser> browser,
+			CefRenderHandler::PaintElementType type,
+			const CefRenderHandler::RectList& dirtyRects,
+			const void* buffer,
+			int width,
+			int height) = 0;
+		virtual void OnCursorChange(
+			CefRefPtr<CefBrowser> browser,
+			CefCursorHandle cursor,
+			CefRenderHandler::CursorType type,
+			const CefCursorInfo& custom_cursor_info) = 0;
+		virtual bool StartDragging(CefRefPtr<CefBrowser> browser,
+			CefRefPtr<CefDragData> drag_data,
+			CefRenderHandler::DragOperationsMask allowed_ops,
+			int x, int y) = 0;
+		virtual void UpdateDragCursor(
+			CefRefPtr<CefBrowser> browser,
+			CefRenderHandler::DragOperation operation) = 0;
+		virtual void OnImeCompositionRangeChanged(
+			CefRefPtr<CefBrowser> browser,
+			const CefRange& selection_range,
+			const CefRenderHandler::RectList& character_bounds) = 0;
+
+	protected:
+		virtual ~OsrDelegate() {}
+	};
 	// Client handler implementation for windowless browsers. There will only ever
 	// be one browser per handler instance.
 	class Cef3DOsrHandler : public Cef3DHandler,

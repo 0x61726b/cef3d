@@ -79,4 +79,4 @@ typedef HANDLE ProcessHandle;
 typedef pid_t ProcessHandle;
 #endif
 
-#define MEMORY_LEAK_CHECK 1
+#define MEMORY_LEAK_CHECK 0

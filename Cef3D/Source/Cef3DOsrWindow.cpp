@@ -6,89 +6,97 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
-// Cef3DOsrWindow.h
-// Date: 23.04.2017
+// Cef3DBrowserWindow.h
+// Date: 26.04.2017
 //---------------------------------------------------------------------------
 
 #include "Cef3DPCH.h"
 
 namespace Cef3D
 {
-
-	void Cef3DOsrBrowser::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
-		CEF_REQUIRE_UI_THREAD();
-		//GetWindow()->SetBrowser(browser);
-		browser_ = browser;
-
-		delegate_->OnAfterCreated(GMainContext->GetCef3DBrowser(browser));
+	OsrWindowWin::OsrWindowWin(
+		const Cef3DOSRSettings& settings)
+	{
 	}
 
-	void Cef3DOsrBrowser::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
+	OsrWindowWin::~OsrWindowWin() {
+		CEF_REQUIRE_UI_THREAD();
+	}
+
+	void OsrWindowWin::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+		CEF_REQUIRE_UI_THREAD();
+		DCHECK(!browser_);
+		browser_ = browser;
+
+
+	}
+
+	void OsrWindowWin::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 		CEF_REQUIRE_UI_THREAD();
 		// Detach |this| from the ClientHandlerOsr.
 		static_cast<Cef3DOsrHandler*>(browser_->GetHost()->GetClient().get())->
 			DetachOsrDelegate();
-		//GetWindow()->SetBrowser(0);
-		browser_ = 0;
+		browser_ = NULL;
 
 	}
 
-	bool Cef3DOsrBrowser::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+	bool OsrWindowWin::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 		CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
 		return false;
 	}
 
-	bool Cef3DOsrBrowser::GetViewRect(CefRefPtr<CefBrowser> browser,
+	bool OsrWindowWin::GetViewRect(CefRefPtr<CefBrowser> browser,
 		CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
 
 		rect.x = rect.y = 0;
-		rect.width = DeviceToLogical(client_rect_.Width,
-			device_scale_factor_);
-		rect.height = DeviceToLogical(client_rect_.Height,
-			device_scale_factor_);
+		rect.width = client_rect.Width;
+		rect.height = client_rect.Height;
+
 		return true;
 	}
 
-	bool Cef3DOsrBrowser::GetScreenPoint(CefRefPtr<CefBrowser> browser,
+	bool OsrWindowWin::GetScreenPoint(CefRefPtr<CefBrowser> browser,
 		int viewX,
 		int viewY,
 		int& screenX,
 		int& screenY) {
 		CEF_REQUIRE_UI_THREAD();
 
+
 		return true;
 	}
 
-	bool Cef3DOsrBrowser::GetScreenInfo(CefRefPtr<CefBrowser> browser,
+	bool OsrWindowWin::GetScreenInfo(CefRefPtr<CefBrowser> browser,
 		CefScreenInfo& screen_info) {
 		CEF_REQUIRE_UI_THREAD();
 
-		//CefRect view_rect;
-		//GetViewRect(browser, view_rect);
+		CefRect view_rect;
+		GetViewRect(browser, view_rect);
 
-		//screen_info.device_scale_factor = device_scale_factor_;
+		screen_info.device_scale_factor = 1.0f;
 
-		//// The screen info rectangles are used by the renderer to create and position
-		//// popups. Keep popups inside the view rectangle.
-		//screen_info.rect = view_rect;
-		//screen_info.available_rect = view_rect;
+		// The screen info rectangles are used by the renderer to create and position
+		// popups. Keep popups inside the view rectangle.
+		screen_info.rect = view_rect;
+		screen_info.available_rect = view_rect;
 		return true;
 	}
 
-	void Cef3DOsrBrowser::OnPopupShow(CefRefPtr<CefBrowser> browser,
+	void OsrWindowWin::OnPopupShow(CefRefPtr<CefBrowser> browser,
 		bool show) {
 		CEF_REQUIRE_UI_THREAD();
 
+
 	}
 
-	void Cef3DOsrBrowser::OnPopupSize(CefRefPtr<CefBrowser> browser,
+	void OsrWindowWin::OnPopupSize(CefRefPtr<CefBrowser> browser,
 		const CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
 	}
 
-	void Cef3DOsrBrowser::OnPaint(CefRefPtr<CefBrowser> browser,
+	void OsrWindowWin::OnPaint(CefRefPtr<CefBrowser> browser,
 		CefRenderHandler::PaintElementType type,
 		const CefRenderHandler::RectList& dirtyRects,
 		const void* buffer,
@@ -96,59 +104,138 @@ namespace Cef3D
 		int height) {
 		CEF_REQUIRE_UI_THREAD();
 
-		DCHECK(delegate_);
 
-		std::vector<Cef3DRect> dirtyCef3DRects;
-		for (int i = 0; i < dirtyRects.size(); ++i)
-			dirtyCef3DRects.push_back(CefRectToCef3D(dirtyRects[i]));
-
-		Cef3DOsrRenderType cef3DType = Cef3DOsrRenderType::View;
-
-		delegate_->OnPaint(GMainContext->GetCef3DBrowser(browser), cef3DType, dirtyCef3DRects, buffer, width, height);
-		
 	}
 
-	void Cef3DOsrBrowser::OnCursorChange(
+	void OsrWindowWin::OnCursorChange(
 		CefRefPtr<CefBrowser> browser,
 		CefCursorHandle cursor,
 		CefRenderHandler::CursorType type,
 		const CefCursorInfo& custom_cursor_info) {
 		CEF_REQUIRE_UI_THREAD();
+
+
 	}
 
-	bool Cef3DOsrBrowser::StartDragging(
+	bool OsrWindowWin::StartDragging(
 		CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefDragData> drag_data,
 		CefRenderHandler::DragOperationsMask allowed_ops,
 		int x, int y) {
 		CEF_REQUIRE_UI_THREAD();
-
 		return false;
 	}
 
-	void Cef3DOsrBrowser::UpdateDragCursor(
+	void OsrWindowWin::UpdateDragCursor(
 		CefRefPtr<CefBrowser> browser,
 		CefRenderHandler::DragOperation operation) {
 		CEF_REQUIRE_UI_THREAD();
 
+#if defined(CEF_USE_ATL)
+		current_drag_op_ = operation;
+#endif
 	}
 
-	void Cef3DOsrBrowser::OnImeCompositionRangeChanged(
+	void OsrWindowWin::OnImeCompositionRangeChanged(
 		CefRefPtr<CefBrowser> browser,
 		const CefRange& selection_range,
 		const CefRenderHandler::RectList& character_bounds) {
 		CEF_REQUIRE_UI_THREAD();
 
+
 	}
-	Cef3DOsrBrowser::Cef3DOsrBrowser(int Width,int Height,Cef3DOsrDel* del)
-		: delegate_(del)
+
+	void OsrWindowWin::CreateBrowser(CefRefPtr<CefClient> handler, const CefBrowserSettings & settings, CefRefPtr<CefRequestContext> request_context, const std::string & startup_url)
 	{
-		DCHECK(delegate_);
-		client_rect_.Width = Width;
-		client_rect_.Height = Height;
-		device_scale_factor_ = 1;
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::CreateBrowser, this,
+				handler, settings,
+				request_context,startup_url));
+			return;
+		}
+
+		CefWindowInfo window_info;
+		window_info.SetAsWindowless(NULL, true);
+
+		// Create the browser asynchronously.
+		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, settings,
+			request_context);
 	}
-	Cef3DOsrBrowser::~Cef3DOsrBrowser()
-	{
+
+	void OsrWindowWin::Show() {
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::Show, this));
+			return;
+		}
+
+		if (!browser_)
+			return;
+
+		if (hidden_) {
+			// Set the browser as visible.
+			browser_->GetHost()->WasHidden(false);
+			hidden_ = false;
+		}
+
+		// Give focus to the browser.
+		browser_->GetHost()->SendFocusEvent(true);
+	}
+
+	void OsrWindowWin::Hide() {
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::Hide, this));
+			return;
+		}
+
+		if (!browser_)
+			return;
+
+		// Remove focus from the browser.
+		browser_->GetHost()->SendFocusEvent(false);
+
+		if (!hidden_) {
+			// Set the browser as hidden.
+			browser_->GetHost()->WasHidden(true);
+			hidden_ = true;
+		}
+	}
+
+	void OsrWindowWin::SetBounds(int x, int y, size_t width, size_t height) {
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::SetBounds, this, x, y, width,
+				height));
+			return;
+		}
+	}
+
+	void OsrWindowWin::SetFocus() {
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::SetFocus, this));
+			return;
+		}
+
+	}
+
+	void OsrWindowWin::SetDeviceScaleFactor(float device_scale_factor) {
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::SetDeviceScaleFactor, this,
+				device_scale_factor));
+			return;
+		}
+
+		if (device_scale_factor == device_scale_factor_)
+			return;
+
+		device_scale_factor_ = device_scale_factor;
+		if (browser_) {
+			browser_->GetHost()->NotifyScreenInfoChanged();
+			browser_->GetHost()->WasResized();
+		}
 	}
 }

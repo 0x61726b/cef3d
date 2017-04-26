@@ -6,73 +6,33 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
-// Cef3DOsrWindow.h
-// Date: 13.04.2017
+// Cef3DBrowserWindow.h
+// Date: 26.04.2017
 //---------------------------------------------------------------------------
 
 #pragma once
 
-#include "include/cef_render_handler.h"
-
 namespace Cef3D
 {
-	class OsrDelegate
+
+	// Represents the native parent window for an off-screen browser. This object
+	// must live on the CEF UI thread in order to handle CefRenderHandler callbacks.
+	// The methods of this class are thread-safe unless otherwise indicated.
+	class OsrWindowWin :
+		public base::RefCountedThreadSafe<OsrWindowWin, CefDeleteOnUIThread>,
+		public OsrDelegate
 	{
 	public:
-		// These methods match the CefLifeSpanHandler interface.
-		virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) = 0;
-		virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) = 0;
+		OsrWindowWin(const Cef3DOSRSettings& settings);
 
-		// These methods match the CefRenderHandler interface.
-		virtual bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
-			CefRect& rect) = 0;
-		virtual bool GetViewRect(CefRefPtr<CefBrowser> browser,
-			CefRect& rect) = 0;
-		virtual bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
-			int viewX,
-			int viewY,
-			int& screenX,
-			int& screenY) = 0;
-		virtual bool GetScreenInfo(CefRefPtr<CefBrowser> browser,
-			CefScreenInfo& screen_info) = 0;
-		virtual void OnPopupShow(CefRefPtr<CefBrowser> browser, bool show) = 0;
-		virtual void OnPopupSize(CefRefPtr<CefBrowser> browser,
-			const CefRect& rect) = 0;
-		virtual void OnPaint(CefRefPtr<CefBrowser> browser,
-			CefRenderHandler::PaintElementType type,
-			const CefRenderHandler::RectList& dirtyRects,
-			const void* buffer,
-			int width,
-			int height) = 0;
-		virtual void OnCursorChange(
-			CefRefPtr<CefBrowser> browser,
-			CefCursorHandle cursor,
-			CefRenderHandler::CursorType type,
-			const CefCursorInfo& custom_cursor_info) = 0;
-		virtual bool StartDragging(CefRefPtr<CefBrowser> browser,
-			CefRefPtr<CefDragData> drag_data,
-			CefRenderHandler::DragOperationsMask allowed_ops,
-			int x, int y) = 0;
-		virtual void UpdateDragCursor(
-			CefRefPtr<CefBrowser> browser,
-			CefRenderHandler::DragOperation operation) = 0;
-		virtual void OnImeCompositionRangeChanged(
-			CefRefPtr<CefBrowser> browser,
-			const CefRange& selection_range,
-			const CefRenderHandler::RectList& character_bounds) = 0;
+	private:
+		friend struct CefDeleteOnThread<TID_UI>;
+		friend class base::RefCountedThreadSafe<OsrWindowWin, CefDeleteOnUIThread>;
 
-	protected:
-		virtual ~OsrDelegate() {}
-	};
-
-	class Cef3DOsrBrowser
-		: public Cef3D::OsrDelegate
-	{
+		~OsrWindowWin();
 	public:
-		Cef3DOsrBrowser(int Width, int Height, Cef3DOsrDel* Delegate);
-		~Cef3DOsrBrowser();
 
-		//OsrDelegete methods
+		// ClientHandlerOsr::OsrDelegate methods.
 		void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
@@ -109,11 +69,25 @@ namespace Cef3D
 			CefRefPtr<CefBrowser> browser,
 			const CefRange& selection_range,
 			const CefRenderHandler::RectList& character_bounds) OVERRIDE;
-
 	private:
-		CefRefPtr<CefBrowser> browser_;
-		Cef3DRect client_rect_;
-		Cef3DOsrDel* delegate_;
+		bool hidden_;
 		float device_scale_factor_;
+
+	public:
+		void CreateBrowser(
+			CefRefPtr<CefClient> handler,
+			const CefBrowserSettings& settings,
+			CefRefPtr<CefRequestContext> request_context,
+			const std::string& startup_url);
+		void Show();
+		void Hide();
+		void SetBounds(int x, int y, size_t width, size_t height);
+		void SetFocus();
+		void SetDeviceScaleFactor(float device_scale_factor);
+
+		CefRefPtr<CefBrowser> browser_;
+		Cef3DRect client_rect;
+
+		DISALLOW_COPY_AND_ASSIGN(OsrWindowWin);
 	};
 }

@@ -14,14 +14,12 @@
 
 namespace Cef3D
 {
-	scoped_refptr<RootWindow> RootWindow::Create(bool use_views)
+	scoped_refptr<RootWindow> RootWindow::Create(bool isOsr)
 	{
-		if(use_views)
-			return new RootWindowViews();
+		if(isOsr)
+			return new RootWindowWin();
 		else
-		{
-			//To do
-		}
+			return new RootWindowViews();
 		return 0;
 	}
 }

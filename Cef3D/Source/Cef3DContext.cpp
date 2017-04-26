@@ -126,12 +126,6 @@ namespace Cef3D
 		return WndManager.get();
 	}
 
-	Cef3DOsrManager* MainContext::GetOsrManager()
-	{
-		DCHECK(InValidState());
-		return OsrManager.get();
-	}
-
 	Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition& Def)
 	{
 		CEF_REQUIRE_UI_THREAD();
@@ -139,16 +133,7 @@ namespace Cef3D
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
-		if (Def.Type == Cef3DBrowserType::Normal)
-		{
-			RootWindow* Wnd = GetRootWindowManager()->CreateRootWindow(false, CefRect(0,0,Def.Width,Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
-			(Wnd);
-			/*cef3DBrowser->SetRootWindow(Wnd);*/
-		}
-		else
-		{
-			cef3DBrowser->SetBrowserID(GetOsrManager()->CreateBrowser(Def));
-		}
+		GetRootWindowManager()->CreateRootWindow(Def.Type == Cef3DBrowserType::Normal ? false : true, CefRect(0, 0, Def.Width, Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
 		Cef3DBrowserList.push_back(cef3DBrowser);
 		
 		return cef3DBrowser;
@@ -169,10 +154,8 @@ namespace Cef3D
 
 	CefRefPtr<CefBrowser> MainContext::GetCefBrowser(int id,bool isOsr)
 	{
-		if (isOsr)
-			return GetOsrManager()->GetForBrowser(id);
-		else
-			return nullptr;
+		DCHECK(true);
+		return nullptr;
 	}
 
 	//Cef3DBrowser * MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate)
@@ -214,7 +197,6 @@ namespace Cef3D
 		// Need to create the RootWindowManager after calling CefInitialize because
 		// TempWindowX11 uses cef_get_xdisplay().
 		WndManager.reset(new RootWindowManager());
-		OsrManager.reset(new Cef3DOsrManager());
 
 		IsInitialized = true;
 
@@ -228,7 +210,6 @@ namespace Cef3D
 		DCHECK(!IsShuttingDown);
 
 		WndManager.reset();
-		OsrManager.reset();
 
 		CefShutdown();
 

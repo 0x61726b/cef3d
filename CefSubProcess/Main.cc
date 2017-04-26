@@ -26,6 +26,7 @@ int main(int argc,char* argv[])
 #else
 	CefMainArgs main_args(argc,argv);
 #endif
+
 	CefRefPtr<Cef3D::Cef3DRenderer> app(new Cef3D::Cef3DRenderer());
 	return CefExecuteProcess(main_args,app.get(),nullptr);
 }

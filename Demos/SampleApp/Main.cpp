@@ -73,11 +73,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!init)
 			return -1;
 
-		scoped_ptr<Cef3D::Cef3DBrowser> browser1;
+		/*scoped_ptr<Cef3D::Cef3DBrowser> browser1;
 		browser1.reset((Cef3D_CreateBrowser(1400, 900)));
 
-		//scoped_ptr<Cef3D::Cef3DBrowser> browser2;
-		//browser2.reset((Cef3D_CreateBrowser(800, 600)));
+		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
+		browser2.reset((Cef3D_CreateBrowser(800, 600)));*/
 
 		scoped_ptr<OsrPaintDelegate> PaintListener(new OsrPaintDelegate);
 
@@ -94,7 +94,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		Cef3D_Shutdown();
 	}
 	
-	//_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();
 	//VLDReportLeaks();
 
 	return 0;

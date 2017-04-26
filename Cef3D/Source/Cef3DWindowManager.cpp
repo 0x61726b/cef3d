@@ -66,7 +66,7 @@ namespace Cef3D
 		CefBrowserSettings settings;
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window = RootWindow::Create(GMainContext->IsUsingViews());
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(with_osr);
 		root_window->Init(this, with_osr, bounds, settings,
 			url.empty() ? GMainContext->GetDefaultURL() : url);
 
