@@ -55,6 +55,7 @@ namespace Cef3D
 
 		bool UseChildProcess;
 		bool OffscreenRendering;
+		bool UseCefLoop;
 	};
 
 	struct Cef3DBrowserDefinition

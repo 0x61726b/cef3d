@@ -57,10 +57,6 @@ struct VsConstantBuffer
 bool CompileVertexShader(unsigned flags);
 bool CompilePixelShader(unsigned flags);
 
-class OsrPaintDelegate;
-OsrPaintDelegate* PaintListener;
-CefRefPtr<CefBrowser> ThisBrowser;
-
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -68,10 +64,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
-
-		ThisBrowser = GMainContext->GetRootWindowManager()->GetWindowForBrowser(1)->GetBrowser();
-
-		ThisBrowser->GetHost()->CloseBrowser(true);
 		return 0;
 	} break;
 	case WM_KEYDOWN:
@@ -293,7 +285,7 @@ bool InitD3D(int Width,int Height, HWND window)
 
 bool CompileVertexShader(unsigned flags)
 {
-	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile( "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64/Shaders/FullscreenTriangle.hlsl" );
+	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile( Cef3D::Cef3DPaths::Shaders() + "/FullscreenTriangle.hlsl" );
 	ID3D10Blob *VS;
 	ID3DBlob* errorMsgs = 0;
 
@@ -325,7 +317,7 @@ bool CompileVertexShader(unsigned flags)
 
 bool CompilePixelShader(unsigned flags)
 {
-	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile("D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64/Shaders/FullscreenTriangle.hlsl");
+	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile(Cef3D::Cef3DPaths::Shaders() + "/FullscreenTriangle.hlsl");
 	ID3D10Blob *VS;
 	ID3DBlob* errorMsgs = 0;
 
@@ -496,29 +488,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!init)
 			return -1;
 
-		OsrPaintDelegate* del(new OsrPaintDelegate);
+		scoped_ptr<OsrPaintDelegate> PaintListener(new OsrPaintDelegate);
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.Width = WinWidth;
-		def.Height = WinHeight;
+		def.Width = 800;
+		def.Height = 600;
 		def.Type = Cef3D::Cef3DBrowserType::Offscreen;
-		def.PaintDelegate = del;
-		Cef3D::Cef3DBrowser* browser1 = Cef3D_CreateBrowser(def);
-		UNREFERENCED_PARAMETER(browser1);
+		def.PaintDelegate = PaintListener.get();
+		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
+		browser2.reset(Cef3D_CreateBrowser(def));
 
 		PumpMessageLoop();
 
-		delete del;
-		del = 0;
+		browser2->Close(false);
 
-		delete browser1;
-		browser1 = 0;
 		Cleanup();
 		Cef3D_Shutdown();
 	}
 	
 
-	//_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }

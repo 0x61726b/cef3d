@@ -40,16 +40,16 @@ namespace Cef3D
 		//Cef3DHandler::DetachDelegate();
 	}
 
-	void Cef3DOsrHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+	void Cef3DOsrHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (osr_delegate_)
 			osr_delegate_->OnAfterCreated(browser);
 		Cef3DHandler::OnAfterCreated(browser);
-
-		
 	}
 
-	void Cef3DOsrHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
+	void Cef3DOsrHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (osr_delegate_)
 			osr_delegate_->OnBeforeClose(browser);
@@ -57,7 +57,8 @@ namespace Cef3D
 	}
 
 	bool Cef3DOsrHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
-		CefRect& rect) {
+		CefRect& rect)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return false;
@@ -65,7 +66,8 @@ namespace Cef3D
 	}
 
 	bool Cef3DOsrHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
-		CefRect& rect) {
+		CefRect& rect)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return false;
@@ -76,7 +78,8 @@ namespace Cef3D
 		int viewX,
 		int viewY,
 		int& screenX,
-		int& screenY) {
+		int& screenY)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return false;
@@ -84,7 +87,8 @@ namespace Cef3D
 	}
 
 	bool Cef3DOsrHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
-		CefScreenInfo& screen_info) {
+		CefScreenInfo& screen_info)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return false;
@@ -92,7 +96,8 @@ namespace Cef3D
 	}
 
 	void Cef3DOsrHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
-		bool show) {
+		bool show)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return;
@@ -100,7 +105,8 @@ namespace Cef3D
 	}
 
 	void Cef3DOsrHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
-		const CefRect& rect) {
+		const CefRect& rect)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return;
@@ -112,7 +118,8 @@ namespace Cef3D
 		const RectList& dirtyRects,
 		const void* buffer,
 		int width,
-		int height) {
+		int height)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return;
@@ -123,7 +130,8 @@ namespace Cef3D
 		CefRefPtr<CefBrowser> browser,
 		CefCursorHandle cursor,
 		CursorType type,
-		const CefCursorInfo& custom_cursor_info) {
+		const CefCursorInfo& custom_cursor_info)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return;
@@ -133,7 +141,8 @@ namespace Cef3D
 	bool Cef3DOsrHandler::StartDragging(CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefDragData> drag_data,
 		CefRenderHandler::DragOperationsMask allowed_ops,
-		int x, int y) {
+		int x, int y)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return false;
@@ -141,7 +150,8 @@ namespace Cef3D
 	}
 
 	void Cef3DOsrHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
-		CefRenderHandler::DragOperation operation) {
+		CefRenderHandler::DragOperation operation)
+	{
 		CEF_REQUIRE_UI_THREAD();
 		if (!osr_delegate_)
 			return;

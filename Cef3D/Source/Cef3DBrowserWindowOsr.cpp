@@ -23,7 +23,7 @@ namespace Cef3D
 		device_scale_factor_(1.0f)
 	{
 		osr_window_ = new OsrWindowWin(settings);
-		client_handler_ = new Cef3DOsrHandler(this, osr_window_.get(), startup_url);
+		client_handler_ = new Cef3DOsrHandler(this, osr_window_, startup_url);
 	}
 
 	void BrowserWindowOsrWin::CreateBrowser(

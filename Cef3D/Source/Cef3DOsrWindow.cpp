@@ -108,7 +108,7 @@ namespace Cef3D
 		int height) {
 		CEF_REQUIRE_UI_THREAD();
 
-		//browser->GetHost()->CloseBrowser(true);
+		// cant close here, doesnt work on cefclient
 	}
 
 	void OsrWindowWin::OnCursorChange(
@@ -163,7 +163,7 @@ namespace Cef3D
 		window_info.SetAsWindowless(NULL, true);
 
 		// Create the browser asynchronously.
-		CefBrowserHost::CreateBrowserSync(window_info, handler, startup_url, settings,
+		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, settings,
 			request_context);
 	}
 

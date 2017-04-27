@@ -74,7 +74,7 @@ namespace Cef3D
 		int RoutingID;
 		int NextRoutingID;
 		ProcessHandle ProcessHandle;
-
+		class RootWindow* AssociatedWindow;
 		/*class RootWindow* AssociatedWindow;
 		CefRefPtr<CefBrowser> AssociatedBrowser;*/
 
@@ -89,6 +89,7 @@ namespace Cef3D
 
 	public:
 		void SetBrowserID(int BrowserID);
+		void SetRootWindow(RootWindow* Wnd);
 		/*void SetRootWindow(RootWindow* Wnd);
 		void SetBrowser(CefRefPtr<CefBrowser> browser);*/
 	};

@@ -38,11 +38,16 @@ namespace Cef3D
 		Cef3DBrowser* GetCef3DBrowser(CefRefPtr<CefBrowser> browser);
 		CefRefPtr<CefBrowser> GetCefBrowser(int id,bool isOsr = true);
 		
-		bool Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info);
+		bool Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info,const Cef3DDefinition& Def);
 
 		bool IsUsingViews() const
 		{
 			return UseViews;
+		}
+
+		bool IsUsingCefLoop() const
+		{
+			return UsingCefLoop;
 		}
 
 		void Shutdown();
@@ -66,6 +71,7 @@ namespace Cef3D
 		bool IsShuttingDown;
 		bool WindowLessRendering;
 		bool UseViews;
+		bool UsingCefLoop;
 
 		scoped_ptr<RootWindowManager> WndManager;
 

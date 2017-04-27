@@ -114,8 +114,6 @@ namespace Cef3D
 	void RootWindowWin::Close(bool force) {
 		REQUIRE_MAIN_THREAD();
 
-		if (browser_window_)
-			GetBrowser()->GetHost()->CloseBrowser(force);
 	}
 
 	void RootWindowWin::SetDeviceScaleFactor(float device_scale_factor) {
@@ -229,8 +227,6 @@ namespace Cef3D
 			// Make sure the browser is sized correctly.
 			OnSize(false);
 		}
-
-		
 	}
 
 	void RootWindowWin::OnBrowserWindowDestroyed() {
@@ -238,17 +234,9 @@ namespace Cef3D
 
 		browser_window_.reset();
 
-		if (!window_destroyed_) {
-			// The browser was destroyed first. This could be due to the use of
-			// off-screen rendering or execution of JavaScript window.close().
-			// Close the RootWindow.
-			Close(true);
-		}
-
 		browser_destroyed_ = true;
+		window_destroyed_ = true;
 		NotifyDestroyedIfDone();
-
-		OnDestroyed();
 	}
 
 	void RootWindowWin::OnSetAddress(const std::string& url) {

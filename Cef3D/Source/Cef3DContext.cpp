@@ -57,7 +57,8 @@ namespace Cef3D
 		: CmdLine(command_line),
 		IsInitialized(false),
 		IsShuttingDown(false),
-		UseViews(false)
+		UseViews(false),
+		UsingCefLoop(false)
 	{
 		DCHECK(CmdLine.get());
 
@@ -133,7 +134,8 @@ namespace Cef3D
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
-		GetRootWindowManager()->CreateRootWindow(Def.Type == Cef3DBrowserType::Normal ? false : true, CefRect(0, 0, Def.Width, Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
+		RootWindow* Window = GetRootWindowManager()->CreateRootWindow(Def.Type == Cef3DBrowserType::Normal ? false : true, CefRect(0, 0, Def.Width, Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
+		cef3DBrowser->SetRootWindow(Window);
 		Cef3DBrowserList.push_back(cef3DBrowser);
 		
 		return cef3DBrowser;
@@ -185,7 +187,7 @@ namespace Cef3D
 	//	return cef3DBrowser;
 	//}
 
-	bool MainContext::Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info)
+	bool MainContext::Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info, const Cef3DDefinition& Def)
 	{
 		DCHECK(ThreadChecker.CalledOnValidThread());
 		DCHECK(!IsInitialized);
@@ -199,6 +201,7 @@ namespace Cef3D
 		WndManager.reset(new RootWindowManager());
 
 		IsInitialized = true;
+		UsingCefLoop = Def.UseCefLoop;
 
 		return true;
 	}

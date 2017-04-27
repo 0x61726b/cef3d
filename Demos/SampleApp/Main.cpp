@@ -60,7 +60,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		bool isSubProcessed = true;
 		Cef3D::Cef3DDefinition definition;
 		definition.UseChildProcess = isSubProcessed;
-
+		definition.UseCefLoop = true;
 
 
 		int returnCode = Cef3D_SubprocessLogic();
@@ -73,21 +73,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!init)
 			return -1;
 
-		/*scoped_ptr<Cef3D::Cef3DBrowser> browser1;
-		browser1.reset((Cef3D_CreateBrowser(1400, 900)));
-
-		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
-		browser2.reset((Cef3D_CreateBrowser(800, 600)));*/
-
-		/*scoped_ptr<Cef3D::Cef3DBrowser> browser1;
-		browser1.reset((Cef3D_CreateBrowser(1400, 900)));*/
-
 		scoped_ptr<OsrPaintDelegate> PaintListener(new OsrPaintDelegate);
 
 		Cef3D::Cef3DBrowserDefinition def;
 		def.Width = 800;
 		def.Height = 600;
-		def.Type = Cef3D::Cef3DBrowserType::Offscreen;
+		def.Type = Cef3D::Cef3DBrowserType::Normal;
 		def.PaintDelegate = PaintListener.get();
 		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
 		browser2.reset(Cef3D_CreateBrowser(def));

@@ -43,6 +43,8 @@ namespace Cef3D
 		browser_ = browser;
 
 		delegate_->OnBrowserCreated(browser);
+
+		// cant close here, doesnt work on cefclient
 	}
 
 	void BrowserWindow::OnBrowserClosing(CefRefPtr<CefBrowser> browser) {

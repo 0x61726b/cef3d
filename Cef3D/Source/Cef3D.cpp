@@ -53,7 +53,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 
 	GMainContext->PopulateSettings(&settings);
 
-	return GMainContext->Initialize(main_args, settings, Cef3DBrowserApp, NULL);
+	return GMainContext->Initialize(main_args, settings, Cef3DBrowserApp, NULL,Definition);
 }
 
 int Cef3D_SubprocessLogic()
@@ -69,10 +69,10 @@ int Cef3D_SubprocessLogic()
 
 void Cef3D_PumpMessageLoop(bool isWindowless)
 {
-	if (isWindowless)
-		CefDoMessageLoopWork();
-	else
+	if(GMainContext->IsUsingCefLoop())
 		CefRunMessageLoop();
+	else
+		CefDoMessageLoopWork();
 }
 
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrowserType Type)

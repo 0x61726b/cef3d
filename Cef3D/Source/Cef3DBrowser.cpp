@@ -29,7 +29,7 @@ namespace Cef3D
 
 	void Cef3DBrowser::Close(bool force)
 	{
-		GMainContext->GetCefBrowser(BrowserID)->GetHost()->CloseBrowser(force);
+		AssociatedWindow->GetBrowser()->GetHost()->CloseBrowser(force);
 	}
 
 	void Cef3DBrowser::Back()
@@ -162,5 +162,11 @@ namespace Cef3D
 	Cef3DBrowser::~Cef3DBrowser()
 	{
 
+	}
+
+	void Cef3DBrowser::SetRootWindow(RootWindow* Wnd)
+	{
+		DCHECK(Wnd);
+		AssociatedWindow = Wnd;
 	}
 }
