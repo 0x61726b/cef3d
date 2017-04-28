@@ -16,39 +16,19 @@
 #include <Cef3D.h>
 #include <Cef3DPCH.h>
 #include <Windows.h>
+#include <Cef3DEventSystem.h>
 
+#include <functional>
 
-
-class OsrPaintDelegate
-	: public Cef3D::Cef3DOsrDel
+struct TestEvents
 {
-public:
-	virtual void OnAfterCreated(Cef3D::Cef3DBrowser* browser)
-	{
-	}
-
-	virtual void OnBeforeClose(Cef3D::Cef3DBrowser* browser)
-	{
-
-	}
-
-	virtual bool GetViewRect(Cef3D::Cef3DBrowser* browser,
-		Cef3D::Cef3DRect& rect)
-	{
-		return true;
-	}
-
-	virtual void OnPaint(Cef3D::Cef3DBrowser* browser,
-		Cef3D::Cef3DOsrRenderType type,
-		const std::vector<Cef3D::Cef3DRect>& dirtyRects,
-		const void* buffer,
-		int width,
-		int height)
+	void OnBrowserCreated(Cef3D::Cef3DBrowser* browser)
 	{
 
 	}
 };
 
+//
 int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -73,23 +53,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!init)
 			return -1;
 
-		scoped_ptr<OsrPaintDelegate> PaintListener(new OsrPaintDelegate);
+		TestEvents t;
+		Cef3D::Cef3DDelegates::OnBrowserCreated.Add(std::bind(&TestEvents::OnBrowserCreated, t,std::placeholders::_1));
 
-		Cef3D::Cef3DBrowserDefinition def;
-		def.Width = 800;
-		def.Height = 600;
-		def.Type = Cef3D::Cef3DBrowserType::Normal;
-		def.PaintDelegate = PaintListener.get();
 		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
-		browser2.reset(Cef3D_CreateBrowser(def));
+		browser2.reset(Cef3D_CreateBrowser(800,600));
 
 		Cef3D_PumpMessageLoop(false);
 
 		Cef3D_Shutdown();
 	}
-	
-	_CrtDumpMemoryLeaks();
-	//VLDReportLeaks();
 
 	return 0;
 }

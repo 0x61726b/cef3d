@@ -17,6 +17,8 @@
 
 namespace Cef3D
 {
+	class Cef3DBrowser;
+
 	// Views framework implementation of a top-level window in the browser process.
 	// The methods of this class must be called on the main thread unless otherwise
 	// indicated.

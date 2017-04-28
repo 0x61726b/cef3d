@@ -16,6 +16,7 @@ CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp = 0;
 Cef3D::MainContext* GMainContext = 0;
 
 using namespace Cef3D;
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserCreated;
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()
 {

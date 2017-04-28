@@ -7,23 +7,34 @@
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
 // Cef3DGlobals.h
-// Date: 13.04.2017
+// Date: 28.04.2017
 //---------------------------------------------------------------------------
 
 #pragma once
 
-extern CEF3D_API CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp;
-extern CEF3D_API Cef3D::MainContext* GMainContext;
-//extern CEF3D_API CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler;
+#include <functional>
 
 namespace Cef3D
 {
-	class Cef3DBrowser;
+	template < typename > class TMulticastDelegate;
 
-	class Cef3DDelegates
+	template <typename RType, typename... Arguments>
+	class TMulticastDelegate< RType(Arguments...) >
 	{
 	public:
-		// Browser Process Delegates
-		static TMulticastDelegate<void(Cef3DBrowser*)> OnBrowserCreated;
+		void Add(const std::function< RType(Arguments...) > fnc)
+		{
+			List.push_back(fnc);
+		}
+
+		void Broadcast(Arguments... args)
+		{
+			for (const auto& v : List)
+			{
+				v(args...);
+			}
+		}
+	private:
+		std::vector<std::function<RType(Arguments...)> > List;
 	};
 }
