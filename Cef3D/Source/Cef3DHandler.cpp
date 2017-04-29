@@ -197,6 +197,8 @@ namespace Cef3D
 			browser->GetHost()->SetMouseCursorChangeDisabled(true);
 
 		NotifyBrowserCreated(browser);
+
+		Cef3DDelegates::OnAfterCreated.Broadcast(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	bool Cef3DHandler::DoClose(CefRefPtr<CefBrowser> browser)

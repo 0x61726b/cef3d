@@ -17,6 +17,7 @@ namespace Cef3D
 	OsrWindowWin::OsrWindowWin(
 		const Cef3DOSRSettings& settings)
 	{
+		client_rect = settings.Rect;
 	}
 
 	OsrWindowWin::~OsrWindowWin() {
@@ -27,10 +28,6 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 		DCHECK(!browser_);
 		browser_ = browser;
-
-		
-		
-
 	}
 
 	void OsrWindowWin::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
@@ -41,7 +38,8 @@ namespace Cef3D
 
 		
 		browser_ = NULL;
-		//static_cast<RootWindowWin*>(GMainContext->GetRootWindowManager()->GetWindowForBrowser(browser->GetIdentifier()).get())->OnDestroyed();
+
+		//Cef3DDelegates::OnBeforeClosed.Broadcast(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	bool OsrWindowWin::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
@@ -55,8 +53,8 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 		rect.x = rect.y = 0;
-		rect.width = 800;
-		rect.height = 600;
+		rect.width = client_rect.Width;
+		rect.height = client_rect.Height;
 
 		return true;
 	}
@@ -92,12 +90,17 @@ namespace Cef3D
 		bool show) {
 		CEF_REQUIRE_UI_THREAD();
 
-
+		Cef3DDelegates::OnPopupShow.Broadcast(GMainContext->GetCef3DBrowser(browser),show);
 	}
 
 	void OsrWindowWin::OnPopupSize(CefRefPtr<CefBrowser> browser,
 		const CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
+		Cef3DRect osrRect;
+		osrRect.Width = rect.width;
+		osrRect.Height = rect.height;
+
+		Cef3DDelegates::OnPopupSize.Broadcast(GMainContext->GetCef3DBrowser(browser), osrRect);
 	}
 
 	void OsrWindowWin::OnPaint(CefRefPtr<CefBrowser> browser,
@@ -109,6 +112,21 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 		// cant close here, doesnt work on cefclient
+		Cef3DOsrRenderType osrRenderType = Cef3DOsrRenderType::View;
+		if (type == PET_POPUP)
+			osrRenderType = Cef3DOsrRenderType::Popup;
+
+		std::vector<Cef3DRect> osrDirtyRectList;
+		for (const CefRect& v : dirtyRects)
+		{
+			Cef3DRect rect;
+			rect.Width = v.width;
+			rect.Height = v.height;
+			osrDirtyRectList.push_back(rect);
+		}
+
+
+		Cef3DDelegates::OnPaint.Broadcast(GMainContext->GetCef3DBrowser(browser),osrRenderType,osrDirtyRectList,buffer,width,height);
 	}
 
 	void OsrWindowWin::OnCursorChange(

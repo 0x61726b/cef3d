@@ -151,6 +151,9 @@ namespace Cef3D
 		if (with_osr_) {
 			Cef3DOSRSettings settings;
 			GMainContext->PopulateOsrSettings(&settings);
+
+			settings.Rect.Width = start_rect_.right - start_rect_.left;
+			settings.Rect.Height = start_rect_.bottom - start_rect_.top;
 			browser_window_.reset(new BrowserWindowOsrWin(this, startup_url, settings));
 		}
 	}

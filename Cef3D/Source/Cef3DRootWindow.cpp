@@ -22,4 +22,11 @@ namespace Cef3D
 			return new RootWindowViews();
 		return 0;
 	}
+
+	bool RootWindow::IsSame(scoped_refptr<RootWindow> Wnd)
+	{
+		if (Wnd->GetBrowser()->GetIdentifier() == Wnd->GetBrowser()->GetIdentifier())
+			return true;
+		return false;
+	}
 }

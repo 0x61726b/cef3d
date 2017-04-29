@@ -141,14 +141,17 @@ namespace Cef3D
 		return cef3DBrowser;
 	}
 
-	Cef3DBrowser* Cef3D::MainContext::GetCef3DBrowser(CefRefPtr<CefBrowser> browser)
+	Cef3DBrowser* MainContext::GetCef3DBrowser(scoped_refptr<CefBrowser> browser)
+	{
+		return GetCef3DBrowser(GetRootWindowManager()->GetWindowForBrowser(browser->GetIdentifier()));
+	}
+
+	Cef3DBrowser* Cef3D::MainContext::GetCef3DBrowser(scoped_refptr<RootWindow> window)
 	{
 		std::list<Cef3DBrowser*>::iterator bit = Cef3DBrowserList.begin();
 		for (;bit != Cef3DBrowserList.end(); ++bit)
 		{
-			int bid = (*bit)->GetBrowserID();
-
-			if (bid == browser->GetIdentifier())
+			if ((*bit)->AssociatedWindow->IsSame(window))
 				return (*bit);
 		}
 		return 0;

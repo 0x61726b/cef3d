@@ -58,25 +58,6 @@ namespace Cef3D
 		}
 	}
 
-	struct Cef3DRect
-	{
-		int Width;
-		int Height;
-
-		Cef3DRect()
-		{
-			Width = -1;
-			Height = -1;
-		}
-
-		Cef3DRect(int w,int h)
-			: Width(w),
-			Height(h)
-		{
-
-		}
-	};
-
 	FORCEINLINE Cef3DRect CefRectToCef3D(const CefRect& rect)
 	{
 		return Cef3DRect(rect.width, rect.height);

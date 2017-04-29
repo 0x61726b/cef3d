@@ -35,7 +35,8 @@ namespace Cef3D
 
 		// Cef3D methods 
 		Cef3DBrowser* CreateCef3DBrowser(const Cef3DBrowserDefinition& Def);
-		Cef3DBrowser* GetCef3DBrowser(CefRefPtr<CefBrowser> browser);
+		Cef3DBrowser* GetCef3DBrowser(scoped_refptr<RootWindow> window);
+		Cef3DBrowser* GetCef3DBrowser(scoped_refptr<CefBrowser> window);
 		CefRefPtr<CefBrowser> GetCefBrowser(int id,bool isOsr = true);
 		
 		bool Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info,const Cef3DDefinition& Def);

@@ -410,27 +410,9 @@ void PumpMessageLoop()
 
 
 class OsrPaintDelegate
-	: public Cef3D::Cef3DOsrDel
 {
 public:
-	Cef3D::Cef3DBrowser* ThisBrowser;
-	virtual void OnAfterCreated(Cef3D::Cef3DBrowser* browser)
-	{
-		ThisBrowser = browser;
-	}
-
-	virtual void OnBeforeClose(Cef3D::Cef3DBrowser* browser)
-	{
-
-	}
-
-	virtual bool GetViewRect(Cef3D::Cef3DBrowser* browser,
-		Cef3D::Cef3DRect& rect)
-	{
-		return true;
-	}
-
-	virtual void OnPaint(Cef3D::Cef3DBrowser* browser,
+	void OnPaint(Cef3D::Cef3DBrowser* browser,
 		Cef3D::Cef3DOsrRenderType type,
 		const std::vector<Cef3D::Cef3DRect>& dirtyRects,
 		const void* buffer,
@@ -468,8 +450,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	{
-		int WinWidth = 800;
-		int WinHeight = 600;
+		int WinWidth = 1400;
+		int WinHeight = 900;
 
 		if (!InitWin32(WinWidth, WinHeight, 300, 300, hInInstance))
 			return -1;
@@ -491,23 +473,24 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		scoped_ptr<OsrPaintDelegate> PaintListener(new OsrPaintDelegate);
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.Width = 800;
-		def.Height = 600;
+		def.Width = WinWidth;
+		def.Height = WinHeight;
 		def.Type = Cef3D::Cef3DBrowserType::Offscreen;
-		def.PaintDelegate = PaintListener.get();
+		//def.DefaultUrl = "https://www.youtube.com/watch?v=tMGOIcZQ24A";
 		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
 		browser2.reset(Cef3D_CreateBrowser(def));
 
+		Cef3D::Cef3DDelegates::OnPaint.Add(std::bind(&OsrPaintDelegate::OnPaint, PaintListener.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5,std::placeholders::_6));
+
 		PumpMessageLoop();
 
-		browser2->Close(false);
+		browser2->Close(true);
 
 		Cleanup();
+
+		// Currently, if we close like this, Chromium might not have enough time to cleanup everything, so wait for everything to shut down before exiting our message loop
 		Cef3D_Shutdown();
 	}
-	
-
-	_CrtDumpMemoryLeaks();
 
 	return 0;
 }

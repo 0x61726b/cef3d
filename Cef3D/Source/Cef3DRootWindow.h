@@ -114,6 +114,8 @@ namespace Cef3D
 		// rendering.
 		virtual float GetDeviceScaleFactor() const = 0;
 
+		bool IsSame(scoped_refptr<RootWindow> Wnd);
+
 		// Returns the browser that this window contains, if any.
 		virtual CefRefPtr<CefBrowser> GetBrowser() const = 0;
 

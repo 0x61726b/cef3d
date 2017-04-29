@@ -34,7 +34,7 @@ namespace Cef3D
 		REQUIRE_MAIN_THREAD();
 
 		if (osr_window_)
-			osr_window_->CreateBrowser(client_handler_, settings, request_context, "http://google.com");
+			osr_window_->CreateBrowser(client_handler_, settings, request_context, client_handler_->GetURL());
 	}
 
 	void BrowserWindowOsrWin::GetPopupConfig(CefWindowHandle temp_handle,

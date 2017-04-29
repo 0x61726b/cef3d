@@ -17,6 +17,25 @@ Cef3D::MainContext* GMainContext = 0;
 
 using namespace Cef3D;
 TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserCreated;
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserClosing;
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserClosed;
+
+TMulticastDelegate<void(const std::string&)> Cef3DDelegates::OnSetAddress;
+TMulticastDelegate<void(const std::string&)> Cef3DDelegates::OnSetTitle;
+
+TMulticastDelegate<void(CefRefPtr<CefImage>)> Cef3DDelegates::OnSetFavicon;
+
+TMulticastDelegate<void(bool)> Cef3DDelegates::OnSetFullscreen;
+TMulticastDelegate<void(bool,bool,bool)> Cef3DDelegates::OnSetLoadingState;
+TMulticastDelegate<void(const std::vector<CefDraggableRegion>&)> Cef3DDelegates::OnSetDraggableRegions;
+TMulticastDelegate<void(bool)> Cef3DDelegates::OnTakeFocus;
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBeforeContextMenu;
+
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnAfterCreated;
+TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBeforeClosed;
+TMulticastDelegate<void(Cef3DBrowser*,bool)> Cef3DDelegates::OnPopupShow;
+TMulticastDelegate<void(Cef3DBrowser*,Cef3DRect)> Cef3DDelegates::OnPopupSize;
+TMulticastDelegate<void(Cef3DBrowser*, Cef3DOsrRenderType, std::vector<Cef3DRect>, const void*, int, int)> Cef3DDelegates::OnPaint;
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()
 {

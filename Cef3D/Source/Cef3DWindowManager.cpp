@@ -137,8 +137,6 @@ namespace Cef3D
 		}
 
 		WindowList.insert(root_window);
-
-		//root_window->GetBrowser()->GetHost()->CloseBrowser(false);
 	}
 
 	CefRefPtr<CefRequestContext> RootWindowManager::GetRequestContext(

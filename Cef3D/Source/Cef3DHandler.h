@@ -121,6 +121,10 @@ namespace Cef3D
 
 	public:
 		CefRefPtr<CefBrowser> GetCefBrowser(Cef3DBrowser* Browser);
+		std::string GetURL() const
+		{
+			return StartupUrl;
+		}
 
 	public:
 		void NotifyBrowserCreated(CefRefPtr<CefBrowser> browser);

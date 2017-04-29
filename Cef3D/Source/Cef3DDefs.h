@@ -12,8 +12,18 @@
 
 #pragma once
 
+#define DECLARE_MULTICAST_DELEGATE_NOPARAM(Name) TMulticastDelegate<void()> Name
+#define DECLARE_MULTICAST_DELEGATE_ONEPARAM(Name,Param0) TMulticastDelegate<void(Param0)> Name
+#define DECLARE_MULTICAST_DELEGATE_TWOPARAM(Name,Param0,Param1) TMulticastDelegate<void(Param0,Param1)> Name
+#define DECLARE_MULTICAST_DELEGATE_THREEPARAM(Name,Param0,Param1,Param2) TMulticastDelegate<void(Param0,Param1,Param2)> Name
+#define DECLARE_MULTICAST_DELEGATE_FOURPARAM(Name,Param0,Param1,Param2,Param3) TMulticastDelegate<void(Param0,Param1,Param2,Param3)> Name
+#define DECLARE_MULTICAST_DELEGATE_FIVEPARAM(Name,Param0,Param1,Param2,Param3,Param4) TMulticastDelegate<void(Param0,Param1,Param2,Param3,Param4)> Name
+#define DECLARE_MULTICAST_DELEGATE_SIXPARAM(Name,Param0,Param1,Param2,Param3,Param4,Param5) TMulticastDelegate<void(Param0,Param1,Param2,Param3,Param4,Param5)> Name
+
 namespace Cef3D
 {
+	class Cef3DBrowser;
+
 	enum CefProcessType
 	{
 		ProcessBrowser,
@@ -43,6 +53,25 @@ namespace Cef3D
 		Popup
 	};
 
+	struct Cef3DRect
+	{
+		int Width;
+		int Height;
+
+		Cef3DRect()
+		{
+			Width = -1;
+			Height = -1;
+		}
+
+		Cef3DRect(int w, int h)
+			: Width(w),
+			Height(h)
+		{
+
+		}
+	};
+
 	struct Cef3DDefinition
 	{
 		Cef3DDefinition();
@@ -66,37 +95,13 @@ namespace Cef3D
 		int Height;
 		std::string DefaultUrl;
 		Cef3DBrowserType Type;
-
-		class Cef3DOsrDel* PaintDelegate;
 	};
 
 	struct Cef3DOSRSettings
 	{
 		bool Transparent;
 		bool ShowUpdateRects;
-	};
 
-	class Cef3DBrowser;
-	struct Cef3DRect;
-
-	class Cef3DOsrDel
-	{
-	public:
-		virtual void OnAfterCreated(Cef3DBrowser* browser) = 0;
-		virtual void OnBeforeClose(Cef3DBrowser* browser) = 0;
-
-		virtual bool GetViewRect(Cef3DBrowser* browser,
-			Cef3DRect& rect) = 0;
-
-		virtual void OnPaint(Cef3DBrowser* browser,
-			Cef3D::Cef3DOsrRenderType type,
-			const std::vector<Cef3DRect>& dirtyRects,
-			const void* buffer,
-			int width,
-			int height) = 0;
-
-	protected:
-		virtual ~Cef3DOsrDel() {}
-
+		Cef3DRect Rect;
 	};
 }
