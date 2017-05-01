@@ -27,9 +27,7 @@ namespace Cef3D
 	}
 
 	void BrowserWindowOsrWin::CreateBrowser(
-		WindowHandle parent_handle,
-		const CefRect& rect,
-		const CefBrowserSettings& settings,
+		const Cef3DBrowserDefinition& settings,
 		CefRefPtr<CefRequestContext> request_context) {
 		REQUIRE_MAIN_THREAD();
 

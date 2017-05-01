@@ -58,17 +58,13 @@ namespace Cef3D
 		DCHECK(WindowList.empty());
 	}
 
-	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindow(
-		bool with_osr,
-		const CefRect& bounds,
-		const std::string& url)
+	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindow(const Cef3DBrowserDefinition& def)
 	{
 		CefBrowserSettings settings;
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window = RootWindow::Create(with_osr);
-		root_window->Init(this, with_osr, bounds, settings,
-			url.empty() ? GMainContext->GetDefaultURL() : url);
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(true);
+		root_window->Init(this, def);
 
 		// Store a reference to the root window on the main thread.
 		OnRootWindowCreated(root_window);
@@ -82,7 +78,7 @@ namespace Cef3D
 	{
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window = RootWindow::Create(GMainContext->IsUsingViews());
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(false);
 		root_window->InitAsPopup(this, with_osr,
 			popupFeatures, windowInfo, client, settings);
 

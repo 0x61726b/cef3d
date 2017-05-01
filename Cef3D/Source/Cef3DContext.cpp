@@ -134,7 +134,7 @@ namespace Cef3D
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
 		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
-		RootWindow* Window = GetRootWindowManager()->CreateRootWindow(Def.Type == Cef3DBrowserType::Normal ? false : true, CefRect(0, 0, Def.Width, Def.Height), Def.DefaultUrl.empty() ? GetDefaultURL() : Def.DefaultUrl);
+		RootWindow* Window = GetRootWindowManager()->CreateRootWindow(Def);
 		cef3DBrowser->SetRootWindow(Window);
 		Cef3DBrowserList.push_back(cef3DBrowser);
 		

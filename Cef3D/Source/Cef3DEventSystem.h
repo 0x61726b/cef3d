@@ -37,4 +37,16 @@ namespace Cef3D
 	private:
 		std::vector<std::function<RType(Arguments...)> > List;
 	};
+
+	/*
+	Used to convert functions with instances to std::function without specifying parameters
+	So instead of
+	auto fnc = std::bind(&Class::Function, instance, std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+	you can do
+	auto fnc = Cef3DBind(&Class::Function, instance)
+	*/
+	template<typename R, typename C, typename... Args>
+	std::function<R(Args...)> Cef3DBind(R(C::* func)(Args...), C* instance) {
+		return [=](Args... args) { return (instance->*func)(args...); };
+	}
 }

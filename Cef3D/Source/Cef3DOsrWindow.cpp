@@ -18,6 +18,7 @@ namespace Cef3D
 		const Cef3DOSRSettings& settings)
 	{
 		client_rect = settings.Rect;
+		IsTransparent = settings.Transparent;
 	}
 
 	OsrWindowWin::~OsrWindowWin() {
@@ -52,7 +53,8 @@ namespace Cef3D
 		CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
 
-		rect.x = rect.y = 0;
+		rect.x = client_rect.X;
+		rect.y = client_rect.Y;
 		rect.width = client_rect.Width;
 		rect.height = client_rect.Height;
 
@@ -167,7 +169,7 @@ namespace Cef3D
 
 	}
 
-	void OsrWindowWin::CreateBrowser(CefRefPtr<CefClient> handler, const CefBrowserSettings & settings, CefRefPtr<CefRequestContext> request_context, const std::string & startup_url)
+	void OsrWindowWin::CreateBrowser(CefRefPtr<CefClient> handler, const Cef3DBrowserDefinition& settings, CefRefPtr<CefRequestContext> request_context, const std::string & startup_url)
 	{
 		if (!CefCurrentlyOn(TID_UI)) {
 			// Execute this method on the UI thread.
@@ -177,11 +179,13 @@ namespace Cef3D
 			return;
 		}
 
-		CefWindowInfo window_info;
-		window_info.SetAsWindowless(NULL, true);
+		CefBrowserSettings cefSettings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(settings);
 
+		CefWindowInfo window_info;
+		window_info.SetAsWindowless(settings.ParentHandle, IsTransparent);
+		
 		// Create the browser asynchronously.
-		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, settings,
+		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, cefSettings,
 			request_context);
 	}
 
@@ -232,6 +236,11 @@ namespace Cef3D
 				height));
 			return;
 		}
+
+		client_rect.X = x;
+		client_rect.Y = y;
+		client_rect.Width = (int)width;
+		client_rect.Height = (int)height;
 	}
 
 	void OsrWindowWin::SetFocus() {

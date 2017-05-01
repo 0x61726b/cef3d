@@ -72,7 +72,7 @@ namespace Cef3D
 		// |delegate| must be non-NULL and outlive this object.
 		// Use RootWindowManager::CreateRootWindow() instead of calling this method
 		// directly.
-		virtual void Init(RootWindow::Delegate* delegate, bool with_osr, const CefRect& bounds, const CefBrowserSettings& settings, const std::string& url) = 0;
+		virtual void Init(RootWindow::Delegate* delegate, const Cef3DBrowserDefinition& def) = 0;
 
 		// Initialize as a popup window. This is used to attach a new native window to
 		// a single browser instance that will be created later. The native window

@@ -63,6 +63,11 @@ namespace Cef3D
 		return Cef3DRect(rect.width, rect.height);
 	}
 
+	FORCEINLINE CefRect Cef3DRectToCefRect(const Cef3DRect& rect)
+	{
+		return CefRect(rect.X, rect.Y, rect.Width, rect.Height);
+	}
+
 	FORCEINLINE int LogicalToDevice(int value, float device_scale_factor) {
 		float scaled_val = static_cast<float>(value) * device_scale_factor;
 		return static_cast<int>(std::floor(scaled_val));

@@ -21,6 +21,120 @@ namespace Cef3D
 	{
 
 	}
+	void Cef3DBrowser::SendMouseClickEvent(Cef3DMouseEventType type, int x, int y, unsigned modifiers,int clickCount)
+	{
+		DCHECK(AssociatedWindow);
+
+		CefRefPtr<CefBrowserHost> host = AssociatedWindow->GetBrowser()->GetHost();
+		switch (type)
+		{
+		case CEF3D_LBUTTON_DOWN:
+		case CEF3D_RBUTTON_DOWN:
+		case CEF3D_MBUTTON_DOWN:
+		{
+			CefMouseEvent mouse_event;
+			mouse_event.x = x;
+			mouse_event.y = y;
+			mouse_event.modifiers = modifiers;
+
+			CefBrowserHost::MouseButtonType btnType =
+				(type == CEF3D_LBUTTON_DOWN ? MBT_LEFT : (
+					type == CEF3D_RBUTTON_DOWN ? MBT_RIGHT : MBT_MIDDLE));
+
+			host->SendMouseClickEvent(mouse_event, btnType, false,
+				clickCount);
+			break;
+		}
+		case CEF3D_LBUTTON_UP:
+		case CEF3D_RBUTTON_UP:
+		case CEF3D_MBUTTON_UP:
+		{
+			CefMouseEvent mouse_event;
+			mouse_event.x = x;
+			mouse_event.y = y;
+			mouse_event.modifiers = modifiers;
+
+			CefBrowserHost::MouseButtonType btnType =
+				(type == CEF3D_LBUTTON_UP ? MBT_LEFT : (
+					type == CEF3D_RBUTTON_UP ? MBT_RIGHT : MBT_MIDDLE));
+
+			host->SendMouseClickEvent(mouse_event, btnType, true,
+				clickCount);
+			break;
+		}
+		case CEF3D_MOUSE_MOVE:
+		{
+			CefMouseEvent mouse_event;
+			mouse_event.x = x;
+			mouse_event.y = y;
+			mouse_event.modifiers = modifiers;
+
+			host->SendMouseMoveEvent(mouse_event, false);
+			break;
+		}
+		case CEF3D_MOUSE_LEAVE:
+		{
+			CefMouseEvent mouse_event;
+			mouse_event.x = x;
+			mouse_event.y = y;
+			mouse_event.modifiers = modifiers;
+
+			host->SendMouseMoveEvent(mouse_event, true);
+			break;
+		}
+		break;
+		default:
+			break;
+		}
+	}
+	
+	void Cef3DBrowser::SendMouseWheelEvent(int x, int y, int deltaX, int deltaY, unsigned modifiers)
+	{
+		DCHECK(AssociatedWindow);
+
+		CefRefPtr<CefBrowserHost> host = AssociatedWindow->GetBrowser()->GetHost();
+
+		CefMouseEvent mouse_event;
+		mouse_event.x = x;
+		mouse_event.y = y;
+		mouse_event.modifiers = modifiers;
+
+		host->SendMouseWheelEvent(mouse_event, deltaX, deltaY);
+	}
+
+	void Cef3DBrowser::SendKeyEvent(Cef3DKeyEventType type, int native_key, int windows_key_code,bool isSystem, unsigned modifiers)
+	{
+		CefKeyEvent event;
+		event.windows_key_code = windows_key_code;
+		event.native_key_code = native_key;
+		event.is_system_key = isSystem;
+		event.modifiers = modifiers;
+
+		switch (type)
+		{
+		case CEF3D_KEY_RAWKEYDOWN:
+			event.type = KEYEVENT_RAWKEYDOWN;
+			break;
+		case CEF3D_KEY_UP:
+			event.type = KEYEVENT_KEYUP;
+			break;
+		case CEF3D_KEY_CHAR:
+			event.type = KEYEVENT_CHAR;
+			break;
+		default:
+			DCHECK(0);
+			break;
+		}
+
+		AssociatedWindow->GetBrowser()->GetHost()->SendKeyEvent(event);
+	}
+	
+	void Cef3DBrowser::SendResize(const Cef3DRect& newRect)
+	{
+		AssociatedWindow->SetBounds(newRect.X, newRect.Y, newRect.Width, newRect.Height);
+		
+		AssociatedWindow->GetBrowser()->GetHost()->WasResized();
+	}
 	void Cef3DBrowser::LoadURL(const std::string & url)
 	{
 		Url = url;
@@ -69,7 +183,7 @@ namespace Cef3D
 
 	void Cef3DBrowser::PauseRendering()
 	{
-		
+
 	}
 
 	void Cef3DBrowser::ResumeRendering()
@@ -93,7 +207,7 @@ namespace Cef3D
 
 	void Cef3DBrowser::SetWidth(int W)
 	{
-		
+
 	}
 
 	void Cef3DBrowser::SetHeight(int H)

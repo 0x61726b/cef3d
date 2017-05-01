@@ -28,9 +28,7 @@ namespace Cef3D
 			const Cef3DOSRSettings& settings);
 
 		// BrowserWindow methods.
-		void CreateBrowser(WindowHandle parent_handle,
-			const CefRect& rect,
-			const CefBrowserSettings& settings,
+		void CreateBrowser(const Cef3DBrowserDefinition& settings,
 			CefRefPtr<CefRequestContext> request_context) OVERRIDE;
 		void GetPopupConfig(CefWindowHandle temp_handle,
 			CefWindowInfo& windowInfo,

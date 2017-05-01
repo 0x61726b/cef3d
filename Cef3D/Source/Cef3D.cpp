@@ -78,10 +78,18 @@ void Cef3D_PumpMessageLoop(bool isWindowless)
 Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrowserType Type)
 {
 	Cef3D::Cef3DBrowserDefinition settings;
-	settings.Width = Width;
-	settings.Height = Height;
+	settings.Rect = Cef3DRect(Width, Height);
 	settings.Type = Type;
 
+	return Cef3D_CreateBrowser(settings);
+}
+
+CEF3D_API Cef3D::Cef3DBrowser * Cef3D_CreateBrowser(int X, int Y, int Width, int Height, const std::string & Url, Cef3D::Cef3DBrowserType Type)
+{
+	Cef3D::Cef3DBrowserDefinition settings;
+	settings.DefaultUrl = Url;
+	settings.Rect = Cef3DRect(X, Y, Width, Height);
+	settings.Type = Type;
 	return Cef3D_CreateBrowser(settings);
 }
 

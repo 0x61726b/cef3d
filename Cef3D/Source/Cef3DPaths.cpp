@@ -15,6 +15,13 @@
 #pragma warning(push)
 #pragma warning( disable: 4172 )
 
+#define PLATFORM_SEPERATOR '/'
+
+#if PLATFORM_WINDOWS
+#undef PLATFORM_SEPERATOR
+#define PLATFORM_SEPERATOR "\\"
+#endif
+
 namespace Cef3D
 {
 	namespace Cef3DPrivate
@@ -44,11 +51,7 @@ namespace Cef3D
 			else
 			{
 				Combined.append(A);
-#if PLATFORM_WINDOWS
-				Combined.append("\\");
-#else
-				Combined.append("/");
-#endif
+				Combined.append(PLATFORM_SEPERATOR);
 				Combined.append(B);
 			}
 

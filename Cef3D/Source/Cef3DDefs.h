@@ -20,6 +20,9 @@
 #define DECLARE_MULTICAST_DELEGATE_FIVEPARAM(Name,Param0,Param1,Param2,Param3,Param4) TMulticastDelegate<void(Param0,Param1,Param2,Param3,Param4)> Name
 #define DECLARE_MULTICAST_DELEGATE_SIXPARAM(Name,Param0,Param1,Param2,Param3,Param4,Param5) TMulticastDelegate<void(Param0,Param1,Param2,Param3,Param4,Param5)> Name
 
+// See Cef3DEventSystem.h
+#define CEF3D_BIND(Fnc,Instance) Cef3DBind(Fnc,Instance)
+
 namespace Cef3D
 {
 	class Cef3DBrowser;
@@ -53,20 +56,50 @@ namespace Cef3D
 		Popup
 	};
 
+	enum Cef3DMouseEventType
+	{
+		CEF3D_LBUTTON_DOWN,
+		CEF3D_RBUTTON_DOWN,
+		CEF3D_MBUTTON_DOWN,
+		CEF3D_LBUTTON_UP,
+		CEF3D_RBUTTON_UP,
+		CEF3D_MBUTTON_UP,
+		CEF3D_MOUSE_MOVE,
+		CEF3D_MOUSE_LEAVE
+	};
+
+	enum Cef3DKeyEventType
+	{
+		CEF3D_KEY_RAWKEYDOWN,
+		CEF3D_KEY_UP,
+		CEF3D_KEY_CHAR
+	};
+
 	struct Cef3DRect
 	{
 		int Width;
 		int Height;
+		int X;
+		int Y;
 
 		Cef3DRect()
 		{
 			Width = -1;
 			Height = -1;
+			X = -1;
+			Y = -1;
 		}
 
 		Cef3DRect(int w, int h)
 			: Width(w),
 			Height(h)
+		{
+			X = 0;
+			Y = 0;
+		}
+
+		Cef3DRect(int x, int y, int w, int h)
+			: Width(w), Height(h), X(x), Y(y)
 		{
 
 		}
@@ -91,10 +124,11 @@ namespace Cef3D
 	{
 		Cef3DBrowserDefinition();
 
-		int Width;
-		int Height;
+		Cef3DRect Rect;
 		std::string DefaultUrl;
 		Cef3DBrowserType Type;
+
+		WindowHandle ParentHandle;
 	};
 
 	struct Cef3DOSRSettings

@@ -53,9 +53,8 @@ namespace Cef3D
 		};
 
 		// Create a new browser and native window.
-		virtual void CreateBrowser(WindowHandle parent_handle,
-			const CefRect& rect,
-			const CefBrowserSettings& settings,
+		virtual void CreateBrowser(
+			const Cef3DBrowserDefinition& settings,
 			CefRefPtr<CefRequestContext> request_context) = 0;
 
 		// Retrieve the configuration that will be used when creating a popup window.

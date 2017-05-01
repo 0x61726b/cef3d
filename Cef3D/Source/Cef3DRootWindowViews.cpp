@@ -33,19 +33,19 @@ namespace Cef3D
 		REQUIRE_MAIN_THREAD();
 	}
 
-	void RootWindowViews::Init(RootWindow::Delegate* delegate, bool with_osr, const CefRect& bounds, const CefBrowserSettings& settings, const std::string& url)
+	void RootWindowViews::Init(RootWindow::Delegate* delegate, const Cef3DBrowserDefinition& def)
 	{
 		DCHECK(delegate);
-		DCHECK(!with_osr);  // Windowless rendering is not supported.
+		DCHECK(def.Type != Cef3DBrowserType::Offscreen);  // Windowless rendering is not supported.
 		DCHECK(!IsInitialized);
 
 		Delegate = delegate;
-		InitialBounds = bounds;
-		CreateClientHandler(url);
+		InitialBounds = Cef3DRectToCefRect(def.Rect);
+		CreateClientHandler(def.DefaultUrl);
 		IsInitialized = true;
 
 		// Continue initialization on the main thread.
-		InitOnMainThread(settings, url);
+		InitOnMainThread(CefBrowserSettings(), def.DefaultUrl);
 	}
 
 	void RootWindowViews::InitAsPopup(RootWindow::Delegate* delegate, bool with_osr, const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,

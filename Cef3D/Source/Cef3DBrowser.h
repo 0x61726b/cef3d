@@ -26,8 +26,15 @@ namespace Cef3D
 		int GetRoutingID() { return RoutingID; }
 		int GetNextRoutingID() { return NextRoutingID; }
 
-
+		/* Input Methods */
+		void SendMouseClickEvent(Cef3DMouseEventType type, int x, int y, unsigned modifiers,int clickCount=1);
+		void SendMouseWheelEvent(int x, int y, int deltaX, int deltaY, unsigned modifiers);
+		void SendKeyEvent(Cef3DKeyEventType type,int native_key, int windows_key_code,bool isSystem,unsigned modifiers);
 		/* */
+
+		/* Resize */
+		void SendResize(const Cef3DRect& newRect);
+
 		void LoadURL(const std::string& Url);
 		void Back();
 		void Forward();

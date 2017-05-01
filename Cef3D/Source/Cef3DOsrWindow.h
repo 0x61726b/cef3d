@@ -73,10 +73,14 @@ namespace Cef3D
 		bool hidden_;
 		float device_scale_factor_;
 
+		CefRefPtr<CefBrowser> browser_;
+		Cef3DRect client_rect;
+		bool IsTransparent;
+
 	public:
 		void CreateBrowser(
 			CefRefPtr<CefClient> handler,
-			const CefBrowserSettings& settings,
+			const Cef3DBrowserDefinition& settings,
 			CefRefPtr<CefRequestContext> request_context,
 			const std::string& startup_url);
 		void Show();
@@ -84,9 +88,6 @@ namespace Cef3D
 		void SetBounds(int x, int y, size_t width, size_t height);
 		void SetFocus();
 		void SetDeviceScaleFactor(float device_scale_factor);
-
-		CefRefPtr<CefBrowser> browser_;
-		Cef3DRect client_rect;
 
 		DISALLOW_COPY_AND_ASSIGN(OsrWindowWin);
 	};

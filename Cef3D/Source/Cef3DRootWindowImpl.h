@@ -27,10 +27,7 @@ namespace Cef3D
 
 		// RootWindow methods.
 		void Init(RootWindow::Delegate* delegate,
-			bool with_osr,
-			const CefRect& rect,
-			const CefBrowserSettings& settings,
-			const std::string& url) OVERRIDE;
+			const Cef3DBrowserDefinition& def) OVERRIDE;
 		void InitAsPopup(RootWindow::Delegate* delegate,
 			bool with_osr,
 			const CefPopupFeatures& popupFeatures,
@@ -48,7 +45,7 @@ namespace Cef3D
 
 	private:
 		void CreateBrowserWindow(const std::string& startup_url);
-		void CreateRootWindow(const CefBrowserSettings& settings);
+		void CreateRootWindow(const Cef3DBrowserDefinition& def);
 
 
 		// BrowserWindow::Delegate methods.
@@ -78,7 +75,7 @@ namespace Cef3D
 		RootWindow::Delegate* delegate_;
 		bool with_osr_;
 		bool is_popup_;
-		RECT start_rect_;
+		Cef3DRect Rect;
 		scoped_ptr<BrowserWindow> browser_window_;
 		bool initialized_;
 

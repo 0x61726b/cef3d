@@ -39,13 +39,8 @@ TMulticastDelegate<void(Cef3DBrowser*, Cef3DOsrRenderType, std::vector<Cef3DRect
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()
 {
-#if MEMORY_LEAK_CHECK
-	std::string rootPath = "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64";
-	std::string logPath = "D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64";
-#else
 	std::string rootPath = Cef3DPaths::Root();
 	std::string logPath = Cef3DPaths::Log();
-#endif
 	std::string subProcessPath;
 	logPath = Cef3DPaths::Combine(logPath, "Cef3D.log");
 
@@ -65,7 +60,5 @@ Cef3D::Cef3DDefinition::Cef3DDefinition()
 
 Cef3D::Cef3DBrowserDefinition::Cef3DBrowserDefinition()
 {
-	Width = 800;
-	Height = 600;
-	Type = Cef3D::Cef3DBrowserType::Normal;
+	Type = Cef3D::Cef3DBrowserType::Offscreen;
 }

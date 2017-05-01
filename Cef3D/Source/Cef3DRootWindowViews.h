@@ -32,7 +32,7 @@ namespace Cef3D
 		~RootWindowViews();
 
 		// RootWindow methods:
-		void Init(RootWindow::Delegate* delegate, bool with_osr, const CefRect& rect, const CefBrowserSettings& settings, const std::string& url) OVERRIDE;
+		void Init(RootWindow::Delegate* delegate, const Cef3DBrowserDefinition& def) OVERRIDE;
 
 		void InitAsPopup(RootWindow::Delegate* delegate, bool with_osr, const CefPopupFeatures& popupFeatures,CefWindowInfo& windowInfo, CefRefPtr<CefClient>& client, CefBrowserSettings& settings) OVERRIDE;
 		void Show(ShowMode mode) OVERRIDE;

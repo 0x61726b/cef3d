@@ -18,7 +18,6 @@ namespace Cef3D
 		: delegate_(NULL),
 		with_osr_(false),
 		is_popup_(false),
-		start_rect_(),
 		initialized_(false),
 		window_destroyed_(false),
 		browser_destroyed_(false)
@@ -34,32 +33,25 @@ namespace Cef3D
 	}
 
 	void RootWindowWin::Init(RootWindow::Delegate* delegate,
-		bool with_osr,
-		const CefRect& bounds,
-		const CefBrowserSettings& settings,
-		const std::string& url) {
+		const Cef3DBrowserDefinition& def) {
 		DCHECK(delegate);
 		DCHECK(!initialized_);
 
 		delegate_ = delegate;
-		with_osr_ = with_osr;
+		with_osr_ = true;
+		Rect = def.Rect;
 
-		start_rect_.left = bounds.x;
-		start_rect_.top = bounds.y;
-		start_rect_.right = bounds.x + bounds.width;
-		start_rect_.bottom = bounds.y + bounds.height;
-
-		CreateBrowserWindow(url);
+		CreateBrowserWindow(def.DefaultUrl.empty() ? GMainContext->GetDefaultURL() : def.DefaultUrl);
 
 		initialized_ = true;
 
 		// Create the native root window on the main thread.
 		if (CURRENTLY_ON_MAIN_THREAD()) {
-			CreateRootWindow(settings);
+			CreateRootWindow(def);
 		}
 		else {
 			MAIN_POST_CLOSURE(
-				base::Bind(&RootWindowWin::CreateRootWindow, this, settings));
+				base::Bind(&RootWindowWin::CreateRootWindow, this, def));
 		}
 	}
 
@@ -69,31 +61,7 @@ namespace Cef3D
 		CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
 		CefBrowserSettings& settings) {
-		DCHECK(delegate);
-		DCHECK(!initialized_);
-
-		delegate_ = delegate;
-		with_osr_ = with_osr;
-		is_popup_ = true;
-
-		if (popupFeatures.xSet)
-			start_rect_.left = popupFeatures.x;
-		if (popupFeatures.ySet)
-			start_rect_.top = popupFeatures.y;
-		if (popupFeatures.widthSet)
-			start_rect_.right = start_rect_.left + popupFeatures.width;
-		if (popupFeatures.heightSet)
-			start_rect_.bottom = start_rect_.top + popupFeatures.height;
-
-		CreateBrowserWindow(std::string());
-
-		initialized_ = true;
-
-		// The new popup is initially parented to a temporary window. The native root
-		// window will be created after the browser is created and the popup window
-		// will be re-parented to it at that time.
-		browser_window_->GetPopupConfig(Cef3DTempWindow::GetWindowHandle(),
-			windowInfo, client, settings);
+		
 	}
 
 	void RootWindowWin::Show(ShowMode mode) {
@@ -108,7 +76,8 @@ namespace Cef3D
 
 	void RootWindowWin::SetBounds(int x, int y, size_t width, size_t height) {
 		REQUIRE_MAIN_THREAD();
-
+		if(browser_window_)
+			browser_window_->SetBounds(x, y, width, height);
 	}
 
 	void RootWindowWin::Close(bool force) {
@@ -152,20 +121,17 @@ namespace Cef3D
 			Cef3DOSRSettings settings;
 			GMainContext->PopulateOsrSettings(&settings);
 
-			settings.Rect.Width = start_rect_.right - start_rect_.left;
-			settings.Rect.Height = start_rect_.bottom - start_rect_.top;
+			settings.Rect = Rect;
 			browser_window_.reset(new BrowserWindowOsrWin(this, startup_url, settings));
 		}
 	}
 
-	void RootWindowWin::CreateRootWindow(const CefBrowserSettings& settings) {
+	void RootWindowWin::CreateRootWindow(const Cef3DBrowserDefinition& Def) {
 		REQUIRE_MAIN_THREAD();
-		
 
 		if (!is_popup_) {
 			// Create the browser window.
-			CefRect cef_rect(0,0,800,600);
-			browser_window_->CreateBrowser(NULL, cef_rect, settings,
+			browser_window_->CreateBrowser(Def,
 				delegate_->GetRequestContext(this));
 		}
 		else {
@@ -221,15 +187,7 @@ namespace Cef3D
 	void RootWindowWin::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
 		REQUIRE_MAIN_THREAD();
 
-		if (is_popup_) {
-			// For popup browsers create the root window once the browser has been
-			// created.
-			CreateRootWindow(CefBrowserSettings());
-		}
-		else {
-			// Make sure the browser is sized correctly.
-			OnSize(false);
-		}
+		OnSize(false);
 	}
 
 	void RootWindowWin::OnBrowserWindowDestroyed() {

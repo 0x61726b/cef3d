@@ -16,11 +16,10 @@ namespace Cef3D
 {
 	scoped_refptr<RootWindow> RootWindow::Create(bool isOsr)
 	{
-		if(isOsr)
+		if (isOsr)
 			return new RootWindowWin();
 		else
 			return new RootWindowViews();
-		return 0;
 	}
 
 	bool RootWindow::IsSame(scoped_refptr<RootWindow> Wnd)
