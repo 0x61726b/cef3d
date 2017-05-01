@@ -9,20 +9,22 @@ else()
 	set(LIBPATH "x86")
 endif()
 
-set(WINDOWS_SDK_VERSION "8.1" CACHE STRING "Specify Windows SDK version")
+set(WINDOWS_SDK_VERSION "10.0" CACHE STRING "Specify Windows SDK version")
+set(WIN10_SDK_VERSION "10.0.15063.0")
 
 set(DXSDK_HKEY "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v${WINDOWS_SDK_VERSION};InstallationFolder]")
 
 get_filename_component(DXSDK_DIR ${DXSDK_HKEY} ABSOLUTE)
 
 set(DXSDK_LIB_DIR "${DXSDK_DIR}/Lib/*/um/${LIBPATH}")
-set(DXSDK_INC_DIR "${DXSDK_DIR}/Include")
+set(DXSDK_INC_DIR "${DXSDK_DIR}/Include/${WIN10_SDK_VERSION}")
 
 find_path(D3D_INCLUDE_DIR 
 	NAMES D3D11.h
 	PATHS ${DXSDK_INC_DIR}/um
 	PATH_SUFFIXES Include/um)
     
+message(${D3D_INCLUDE_DIR})
 find_path(WINDOWS_SDK_INCLUDE_DIR
     NAMES winapifamily.h
     PATHS ${DXSDK_INC_DIR}/shared

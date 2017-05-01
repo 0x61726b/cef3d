@@ -87,6 +87,8 @@ protected:
 class Cef3DSampleRenderer
 {
 public:
+	Cef3DSampleRenderer(RendererType type) : Type(type) { }
+
 	virtual bool Init(Cef3DSampleWindow* window) = 0;
 	virtual bool InitResources() = 0;
 	virtual void Render() = 0;
@@ -97,4 +99,9 @@ public:
 		int width,
 		int height) = 0;
 	virtual bool Resize(int width, int height) = 0;
+
+public:
+	RendererType GetRendererType() { return Type; }
+protected:
+	RendererType Type;
 };

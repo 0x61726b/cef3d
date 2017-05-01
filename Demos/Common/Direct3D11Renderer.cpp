@@ -13,7 +13,7 @@
 #include "Direct3D11Renderer.h"
 
 Cef3DDirect3D11Renderer::Cef3DDirect3D11Renderer()
-	: Vsync(true)
+	: Cef3DSampleRenderer(RendererType::Direct3D11),Vsync(true)
 {
 
 }

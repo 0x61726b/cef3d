@@ -155,9 +155,6 @@ namespace Cef3D
 		CefRenderHandler::DragOperation operation) {
 		CEF_REQUIRE_UI_THREAD();
 
-#if defined(CEF_USE_ATL)
-		current_drag_op_ = operation;
-#endif
 	}
 
 	void OsrWindowWin::OnImeCompositionRangeChanged(
