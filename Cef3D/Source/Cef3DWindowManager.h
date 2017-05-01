@@ -52,7 +52,9 @@ namespace Cef3D
 
 		// RootWindow::Delegate methods.
 		CefRefPtr<CefRequestContext> GetRequestContext(RootWindow* root_window) OVERRIDE;
+	public:
 		void OnExit(RootWindow* root_window) OVERRIDE;
+	private:
 		void OnRootWindowDestroyed(RootWindow* root_window) OVERRIDE;
 
 		bool RequestContextPerBrowser;

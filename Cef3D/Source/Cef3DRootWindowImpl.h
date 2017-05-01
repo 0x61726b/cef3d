@@ -62,11 +62,11 @@ namespace Cef3D
 
 		void NotifyDestroyedIfDone();
 
-		bool OnClose();
 		void OnFocus();
 		void OnSize(bool minimized);
 		void OnMove();
 	public:
+		bool OnClose();
 		void OnDestroyed();
 	private:
 

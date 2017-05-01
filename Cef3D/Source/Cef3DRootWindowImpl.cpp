@@ -60,7 +60,8 @@ namespace Cef3D
 		const CefPopupFeatures& popupFeatures,
 		CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
-		CefBrowserSettings& settings) {
+		CefBrowserSettings& settings)
+	{
 		
 	}
 
@@ -82,7 +83,6 @@ namespace Cef3D
 
 	void RootWindowWin::Close(bool force) {
 		REQUIRE_MAIN_THREAD();
-
 	}
 
 	void RootWindowWin::SetDeviceScaleFactor(float device_scale_factor) {
@@ -135,9 +135,8 @@ namespace Cef3D
 				delegate_->GetRequestContext(this));
 		}
 		else {
-			// With popups we already have a browser window. Parent the browser window
-			// to the root window and show it in the correct location.
-			browser_window_->ShowPopup(NULL,0,0,800,600);
+			//browser_window_->ShowPopup(NULL,0,0,800,600);
+			// TO DO
 		}
 
 		// Show this window.

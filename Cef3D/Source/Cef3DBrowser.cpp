@@ -21,6 +21,12 @@ namespace Cef3D
 	{
 
 	}
+
+	void Cef3DBrowser::Invalidate()
+	{
+		AssociatedWindow->GetBrowser()->GetHost()->Invalidate(PET_VIEW);
+	}
+
 	void Cef3DBrowser::SendMouseClickEvent(Cef3DMouseEventType type, int x, int y, unsigned modifiers,int clickCount)
 	{
 		DCHECK(AssociatedWindow);
@@ -144,6 +150,11 @@ namespace Cef3D
 	void Cef3DBrowser::Close(bool force)
 	{
 		AssociatedWindow->GetBrowser()->GetHost()->CloseBrowser(force);
+	}
+
+	bool Cef3DBrowser::OnClose()
+	{
+		return ((RootWindowWin*)AssociatedWindow)->OnClose();
 	}
 
 	void Cef3DBrowser::Back()

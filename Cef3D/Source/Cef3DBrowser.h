@@ -34,6 +34,7 @@ namespace Cef3D
 
 		/* Resize */
 		void SendResize(const Cef3DRect& newRect);
+		void Invalidate();
 
 		void LoadURL(const std::string& Url);
 		void Back();
@@ -60,6 +61,7 @@ namespace Cef3D
 		void SelectAll();
 
 		void Close(bool force);
+		bool OnClose();
 		/* */
 
 		double GetZoomLevel();
