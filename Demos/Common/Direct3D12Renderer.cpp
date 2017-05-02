@@ -17,7 +17,7 @@
 //#pragma comment(lib, "d3dcompiler.lib")
 
 Cef3DDirect3D12Renderer::Cef3DDirect3D12Renderer()
-	: Cef3DSampleRenderer(RendererType::Direct3D12), Vsync(false),
+	: Cef3DSampleRenderer(RendererType::Direct3D12), Vsync(true),
 	PipelineState(0)
 {
 
@@ -73,7 +73,7 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 	swapChainDesc.Windowed = true;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
-	swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 
 	IDXGISwapChain* swapChain;
@@ -145,6 +145,16 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 
 bool Cef3DDirect3D12Renderer::InitResources()
 {
+	Viewport.Width = Window->GetWidth();
+	Viewport.Height = Window->GetHeight();
+	Viewport.TopLeftX = 0;
+	Viewport.TopLeftY = 0;
+
+	ScissorsRect.top = 0;
+	ScissorsRect.bottom = Window->GetHeight();
+
+	ScissorsRect.left = 0;
+	ScissorsRect.right = Window->GetWidth();
 	return true;
 }
 

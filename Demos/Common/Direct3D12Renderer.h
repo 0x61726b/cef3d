@@ -73,6 +73,13 @@ private:
 
 	unsigned int BufferIndex;
 
+	D3D12_VIEWPORT Viewport;
+	D3D12_RECT ScissorsRect;
+	ID3D12RootSignature* RootSig;
+
+	ID3D12Resource* VertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
 	//D3D11_VIEWPORT Viewport;
 
 	bool Vsync;
