@@ -12,12 +12,13 @@
 #include "Cef3DPCH.h"
 #include "Direct3D12Renderer.h"
 
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
+//#pragma comment(lib, "d3d12.lib")
+//#pragma comment(lib, "dxgi.lib")
+//#pragma comment(lib, "d3dcompiler.lib")
 
 Cef3DDirect3D12Renderer::Cef3DDirect3D12Renderer()
-	: Cef3DSampleRenderer(RendererType::Direct3D12), Vsync(true)
+	: Cef3DSampleRenderer(RendererType::Direct3D12), Vsync(false),
+	PipelineState(0)
 {
 
 }
@@ -28,7 +29,7 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 {
 	HRESULT hr = S_OK;
 
-	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_12_0;
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
 
 	hr = D3D12CreateDevice(NULL, featureLevel, __uuidof(ID3D12Device), (void**)&Device);
 	if (FAILED(hr))
@@ -38,9 +39,7 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 	ZeroMemory(&commandQueueDesc, sizeof(commandQueueDesc));
 
 	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	commandQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	commandQueueDesc.NodeMask = 0;
 
 	hr = Device->CreateCommandQueue(&commandQueueDesc, __uuidof(ID3D12CommandQueue), (void**)&CommandQueue);
 	if (FAILED(hr))
@@ -64,9 +63,9 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Height = window->GetWidth();
-	swapChainDesc.BufferDesc.Width = window->GetHeight();
+	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferDesc.Width = window->GetWidth();
+	swapChainDesc.BufferDesc.Height = window->GetHeight();
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -93,7 +92,7 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 	D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewHeapDesc;
 	ZeroMemory(&renderTargetViewHeapDesc, sizeof(renderTargetViewHeapDesc));
 
-	renderTargetViewHeapDesc.NumDescriptors = 1;
+	renderTargetViewHeapDesc.NumDescriptors = 2;
 	renderTargetViewHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	renderTargetViewHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
@@ -104,11 +103,23 @@ bool Cef3DDirect3D12Renderer::Init(Cef3DSampleWindow * window)
 	D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewHandle;
 	renderTargetViewHandle = RenderTargetViewHeap->GetCPUDescriptorHandleForHeapStart();
 
-	hr = SwapChain->GetBuffer(0, __uuidof(ID3D12Resource), (void**)&BackBufferRenderTarget);
+	UINT renderTargetViewDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	hr = SwapChain->GetBuffer(0, __uuidof(ID3D12Resource), (void**)&BackBufferRenderTarget[0]);
 	if (FAILED(hr))
 		return false;
 
-	Device->CreateRenderTargetView(BackBufferRenderTarget, NULL, renderTargetViewHandle);
+	Device->CreateRenderTargetView(BackBufferRenderTarget[0], NULL, renderTargetViewHandle);
+
+	renderTargetViewHandle.ptr += renderTargetViewDescriptorSize;
+
+	hr = SwapChain->GetBuffer(1, __uuidof(ID3D12Resource), (void**)&BackBufferRenderTarget[1]);
+	if (FAILED(hr))
+		return false;
+
+	Device->CreateRenderTargetView(BackBufferRenderTarget[1], NULL, renderTargetViewHandle);
+
+	BufferIndex = SwapChain->GetCurrentBackBufferIndex();
 
 	hr = Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&CommandAllocator);
 	if (FAILED(hr))
@@ -153,7 +164,7 @@ void Cef3DDirect3D12Renderer::Render()
 
 	D3D12_RESOURCE_BARRIER barrier;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = BackBufferRenderTarget;
+	barrier.Transition.pResource = BackBufferRenderTarget[BufferIndex];
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -162,9 +173,14 @@ void Cef3DDirect3D12Renderer::Render()
 
 	D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewHandle;
 	renderTargetViewHandle = RenderTargetViewHeap->GetCPUDescriptorHandleForHeapStart();
+	unsigned renderTargetViewDescriptorSize = Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	if (BufferIndex == 1)
+	{
+		renderTargetViewHandle.ptr += renderTargetViewDescriptorSize;
+	}
 	CommandList->OMSetRenderTargets(1, &renderTargetViewHandle, FALSE, NULL);
 
-	float clearColor[4] = { 0,0,0,0 };
+	float clearColor[4] = { 0,1,0,0 };
 	CommandList->ClearRenderTargetView(renderTargetViewHandle, clearColor, 0, NULL);
 
 	// 
@@ -197,6 +213,8 @@ void Cef3DDirect3D12Renderer::Present()
 		Fence->SetEventOnCompletion(fenceToWaitFor, FenceEvent);
 		WaitForSingleObject(FenceEvent, INFINITE);
 	}
+
+	BufferIndex == 0 ? BufferIndex = 1 : BufferIndex = 0;
 }
 
 void Cef3DDirect3D12Renderer::Shutdown()
@@ -213,7 +231,8 @@ void Cef3DDirect3D12Renderer::Shutdown()
 	D3D_SAFE_RELEASE(PipelineState);
 	D3D_SAFE_RELEASE(CommandList);
 	D3D_SAFE_RELEASE(CommandAllocator);
-	D3D_SAFE_RELEASE(BackBufferRenderTarget);
+	D3D_SAFE_RELEASE(BackBufferRenderTarget[0]);
+	D3D_SAFE_RELEASE(BackBufferRenderTarget[1]);
 	D3D_SAFE_RELEASE(RenderTargetViewHeap);
 	D3D_SAFE_RELEASE(SwapChain);
 	D3D_SAFE_RELEASE(CommandQueue);

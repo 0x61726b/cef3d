@@ -60,6 +60,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 				if (msg.message == WM_QUIT)
 					break;
 			}
+			renderer.Render();
+			renderer.Present();
 		}
 
     }

@@ -15,6 +15,7 @@ target_link_libraries(Cef3D.Osr.Direct3D12
                         libcef_dll_wrapper
                         ${CEF_STANDARD_LIBS}
                         ${PROJECT_SOURCE_DIR}/Cef/Debug/libcef.lib
-                        ${D3D_D3D11_LIBRARY}
+                        ${D3D_D3D12_LIBRARY}
+                        ${D3D_DXGI_LIBRARY}
                         ${D3D_D3DCompiler_LIBRARY}
                         )

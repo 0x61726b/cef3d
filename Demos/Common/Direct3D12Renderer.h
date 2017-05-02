@@ -63,13 +63,15 @@ private:
 	ID3D12Device* Device;
 	ID3D12CommandQueue* CommandQueue;
 	ID3D12DescriptorHeap* RenderTargetViewHeap;
-	ID3D12Resource* BackBufferRenderTarget;
+	ID3D12Resource* BackBufferRenderTarget[2];
 	ID3D12CommandAllocator* CommandAllocator;
 	ID3D12GraphicsCommandList* CommandList;
 	ID3D12PipelineState* PipelineState;
 	ID3D12Fence* Fence;
 	HANDLE FenceEvent;
 	unsigned long long FenceValue;
+
+	unsigned int BufferIndex;
 
 	//D3D11_VIEWPORT Viewport;
 
