@@ -5,7 +5,7 @@ find_package(DirectX)
 
 
 set(SAMPLE_APP_SRC Main.cpp)
-set(COMMON_SRC ../Common/Common.h ../Common/Direct3D12Renderer.h ../Common/Direct3D12Renderer.cpp ../Common/Win32Common.h ../Common/Win32Common.cpp)
+set(COMMON_SRC ../Common/Common.h ../Common/Direct3D12Renderer.h ../Common/Direct3D12Renderer.cpp ../Common/Win32Common.h ../Common/Win32Common.cpp ../Common/d3dx12.h)
 add_executable(Cef3D.Osr.Direct3D12 WIN32 ${SAMPLE_APP_SRC} ${COMMON_SRC})
 
 include_directories(${CMAKE_SOURCE_DIR}/Cef3D/Source ${D3D_INCLUDE_DIR} "../Common")

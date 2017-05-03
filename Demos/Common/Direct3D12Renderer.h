@@ -11,10 +11,12 @@
 //---------------------------------------------------------------------------
 
 #pragma once
-#include <DirectXMath.h>
-#include <d3dcompiler.h>
+#include <windows.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <D3Dcompiler.h>
+#include <DirectXMath.h>
+#include "d3dx12.h"
 
 #include "Win32Common.h"
 
@@ -30,8 +32,6 @@ struct VsConstantBuffer
 	DirectX::XMFLOAT3 CamPos;
 	float padding;
 };
-
-
 class Cef3DDirect3D12Renderer : public Cef3DSampleRenderer
 {
 public:
@@ -53,8 +53,8 @@ public:
 	void SetVsync(bool vsync) { Vsync = vsync; }
 
 private:
-	bool CompileFsTriangleVertexShader(unsigned flags);
-	bool CompileFsTrianglePixelShader(unsigned flags);
+	ID3DBlob* CompileFsTriangleVertexShader(unsigned flags);
+	ID3DBlob* CompileFsTrianglePixelShader(unsigned flags);
 
 	bool CompileShader(ShaderType type, unsigned flags, const char* entryPoint, const std::string& source, ID3D10Blob** outBlob);
 
@@ -63,7 +63,10 @@ private:
 	ID3D12Device* Device;
 	ID3D12CommandQueue* CommandQueue;
 	ID3D12DescriptorHeap* RenderTargetViewHeap;
+	ID3D12DescriptorHeap* ConstantBufferHeap;
+	ID3D12DescriptorHeap* OffscreenSrvHeap;
 	ID3D12Resource* BackBufferRenderTarget[2];
+	ID3D12Resource* OffscreenTexture;
 	ID3D12CommandAllocator* CommandAllocator;
 	ID3D12GraphicsCommandList* CommandList;
 	ID3D12PipelineState* PipelineState;
@@ -78,9 +81,11 @@ private:
 	ID3D12RootSignature* RootSig;
 
 	ID3D12Resource* VertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	D3D12_VERTEX_BUFFER_VIEW VertexBufferView;
 
 	//D3D11_VIEWPORT Viewport;
+	ID3D12Resource* ConstantBuffer;
+	VsConstantBuffer ConstantBufferData;
 
 	bool Vsync;
 	Cef3DSampleWindow* Window;

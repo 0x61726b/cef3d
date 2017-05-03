@@ -10,13 +10,13 @@ else()
 endif()
 
 set(WINDOWS_SDK_VERSION "10.0" CACHE STRING "Specify Windows SDK version")
-set(WIN10_SDK_VERSION "10.0.14393.0")
+set(WIN10_SDK_VERSION "10.0.15063.0")
 
 set(DXSDK_HKEY "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v${WINDOWS_SDK_VERSION};InstallationFolder]")
 
 get_filename_component(DXSDK_DIR ${DXSDK_HKEY} ABSOLUTE)
 
-set(DXSDK_LIB_DIR "${DXSDK_DIR}/Lib/*/um/${LIBPATH}")
+set(DXSDK_LIB_DIR "${DXSDK_DIR}/Lib/${WIN10_SDK_VERSION}/um/${LIBPATH}")
 set(DXSDK_INC_DIR "${DXSDK_DIR}/Include/${WIN10_SDK_VERSION}")
 
 find_path(D3D_INCLUDE_DIR 
