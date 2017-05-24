@@ -75,27 +75,27 @@ void Cef3D_PumpMessageLoop(bool isWindowless)
 		CefDoMessageLoopWork();
 }
 
-Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width, int Height, Cef3D::Cef3DBrowserType Type)
+bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser, int Width, int Height, Cef3D::Cef3DBrowserType Type)
 {
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.Rect = Cef3DRect(Width, Height);
 	settings.Type = Type;
 
-	return Cef3D_CreateBrowser(settings);
+	return Cef3D_CreateBrowser(browser, settings);
 }
 
-CEF3D_API Cef3D::Cef3DBrowser * Cef3D_CreateBrowser(int X, int Y, int Width, int Height, const std::string & Url, Cef3D::Cef3DBrowserType Type)
+bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser, int X, int Y, int Width, int Height, const std::string & Url, Cef3D::Cef3DBrowserType Type)
 {
 	Cef3D::Cef3DBrowserDefinition settings;
 	settings.DefaultUrl = Url;
 	settings.Rect = Cef3DRect(X, Y, Width, Height);
 	settings.Type = Type;
-	return Cef3D_CreateBrowser(settings);
+	return Cef3D_CreateBrowser(browser, settings);
 }
 
-Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& Definition)
+bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser, const Cef3D::Cef3DBrowserDefinition& Definition)
 {
-	return GMainContext->CreateCef3DBrowser(Definition);
+	return GMainContext->CreateCef3DBrowser(browser, Definition);
 }
 
 bool Cef3D_Shutdown()

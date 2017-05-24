@@ -17,6 +17,7 @@
 #include "Cef3DDefs.h"
 #include "Cef3DFileSystem.h"
 #include "Cef3DPaths.h"
+#include "Cef3DEventSystem.h"
 #include "Cef3DBrowser.h"
 
 namespace Cef3D
@@ -30,6 +31,6 @@ CEF3D_API bool Cef3D_Shutdown();
 CEF3D_API void Cef3D_PumpMessageLoop(bool isWindowless);
 
 
-CEF3D_API Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int Width,int Height, Cef3D::Cef3DBrowserType Type = Cef3D::Cef3DBrowserType::Offscreen);
-CEF3D_API Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(int X,int Y,int Width, int Height,const std::string& Url, Cef3D::Cef3DBrowserType Type = Cef3D::Cef3DBrowserType::Offscreen);
-CEF3D_API Cef3D::Cef3DBrowser* Cef3D_CreateBrowser(const Cef3D::Cef3DBrowserDefinition& Definition);
+CEF3D_API bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser,int Width,int Height, Cef3D::Cef3DBrowserType Type = Cef3D::Cef3DBrowserType::Offscreen);
+CEF3D_API bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser, int X,int Y,int Width, int Height,const std::string& Url, Cef3D::Cef3DBrowserType Type = Cef3D::Cef3DBrowserType::Offscreen);
+CEF3D_API bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser, const Cef3D::Cef3DBrowserDefinition& Definition);

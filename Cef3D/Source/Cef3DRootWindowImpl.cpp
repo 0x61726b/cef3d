@@ -62,7 +62,22 @@ namespace Cef3D
 		CefRefPtr<CefClient>& client,
 		CefBrowserSettings& settings)
 	{
-		
+		DCHECK(delegate);
+		DCHECK(!initialized_);
+
+		delegate_ = delegate;
+		with_osr_ = with_osr;
+		is_popup_ = true;
+
+		CreateBrowserWindow(std::string());
+
+		initialized_ = true;
+
+		// The new popup is initially parented to a temporary window. The native root
+		// window will be created after the browser is created and the popup window
+		// will be re-parented to it at that time.
+		browser_window_->GetPopupConfig(Cef3DTempWindow::GetWindowHandle(),
+			windowInfo, client, settings);
 	}
 
 	void RootWindowWin::Show(ShowMode mode) {
@@ -135,7 +150,7 @@ namespace Cef3D
 				delegate_->GetRequestContext(this));
 		}
 		else {
-			//browser_window_->ShowPopup(NULL,0,0,800,600);
+			browser_window_->ShowPopup(NULL,0,0,800,600);
 			// TO DO
 		}
 
@@ -186,7 +201,15 @@ namespace Cef3D
 	void RootWindowWin::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
 		REQUIRE_MAIN_THREAD();
 
-		OnSize(false);
+		if (is_popup_)
+		{
+			// Signal to the user that  we want to create a native window
+			CreateRootWindow(Cef3DBrowserDefinition());
+		}
+		else
+		{
+			OnSize(false);
+		}
 	}
 
 	void RootWindowWin::OnBrowserWindowDestroyed() {

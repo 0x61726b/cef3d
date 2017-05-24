@@ -198,7 +198,7 @@ namespace Cef3D
 
 		NotifyBrowserCreated(browser);
 
-		Cef3DDelegates::OnAfterCreated.Broadcast(GMainContext->GetCef3DBrowser(browser));
+		GMainContext->GetCef3DBrowser(browser)->OnAfterCreated();
 	}
 
 	bool Cef3DHandler::DoClose(CefRefPtr<CefBrowser> browser)
@@ -307,7 +307,7 @@ namespace Cef3D
 
 		// The popup browser will be parented to a new native window.
 		// Don't show URL bar and navigation buttons on DevTools windows.
-		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(false, popupFeatures, windowInfo, client, settings);
+		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(true, popupFeatures, windowInfo, client, settings);
 
 		return true;
 	}

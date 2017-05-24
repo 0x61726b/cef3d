@@ -92,7 +92,7 @@ namespace Cef3D
 		bool show) {
 		CEF_REQUIRE_UI_THREAD();
 
-		Cef3DDelegates::OnPopupShow.Broadcast(GMainContext->GetCef3DBrowser(browser),show);
+		GMainContext->GetCef3DBrowser(browser)->OnPopupShow(show);
 	}
 
 	void OsrWindowWin::OnPopupSize(CefRefPtr<CefBrowser> browser,
@@ -102,7 +102,7 @@ namespace Cef3D
 		osrRect.Width = rect.width;
 		osrRect.Height = rect.height;
 
-		Cef3DDelegates::OnPopupSize.Broadcast(GMainContext->GetCef3DBrowser(browser), osrRect);
+		GMainContext->GetCef3DBrowser(browser)->OnPopupSize(osrRect);
 	}
 
 	void OsrWindowWin::OnPaint(CefRefPtr<CefBrowser> browser,
@@ -127,8 +127,7 @@ namespace Cef3D
 			osrDirtyRectList.push_back(rect);
 		}
 
-
-		Cef3DDelegates::OnPaint.Broadcast(GMainContext->GetCef3DBrowser(browser),osrRenderType,osrDirtyRectList,buffer,width,height);
+		GMainContext->GetCef3DBrowser(browser)->OnPaint(osrRenderType, osrDirtyRectList, buffer, width, height);
 	}
 
 	void OsrWindowWin::OnCursorChange(
@@ -265,5 +264,19 @@ namespace Cef3D
 			browser_->GetHost()->NotifyScreenInfoChanged();
 			browser_->GetHost()->WasResized();
 		}
+	}
+	void OsrWindowWin::ShowPopup(WindowHandle parent_handle, int x, int y, size_t width, size_t height)
+	{
+		DCHECK(browser_);
+
+		// OnPopupShow should create the native window
+		GMainContext->GetCef3DBrowser(browser_)->OnPopupShow(true);
+		// OnPopupShow should resize the native window
+		GMainContext->GetCef3DBrowser(browser_)->OnPopupSize(Cef3DRect(x, y, (int)width, (int)height));
+		client_rect.Width = (int)width;
+		client_rect.Height = (int)height;
+		client_rect.X = x;
+		client_rect.Y = y;
+		browser_->GetHost()->WasResized();
 	}
 }

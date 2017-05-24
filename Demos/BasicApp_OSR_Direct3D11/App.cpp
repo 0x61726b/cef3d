@@ -10,16 +10,15 @@
 // Date: 1.5.2017
 //---------------------------------------------------------------------------
 #include "Cef3DPCH.h"
-#include "Direct3D11Renderer.h"
+#include "App.h"
 
-Cef3DDirect3D11Renderer::Cef3DDirect3D11Renderer()
-	: Cef3DSampleRenderer(RendererType::Direct3D11),Vsync(true)
+SampleAppDirect3D11::SampleAppDirect3D11()
 {
 
 }
 
 
-bool Cef3DDirect3D11Renderer::Init(Cef3DSampleWindow * window)
+bool SampleAppDirect3D11::Init(Cef3DSampleWindow * window)
 {
 	// Release old ones
 	if (SwapChain)
@@ -115,7 +114,7 @@ bool Cef3DDirect3D11Renderer::Init(Cef3DSampleWindow * window)
 	return true;
 }
 
-bool Cef3DDirect3D11Renderer::InitResources()
+bool SampleAppDirect3D11::InitResources()
 {
 	SimpleVertex v1 = { DirectX::XMFLOAT3(-1.f,-3.f,1.f) };
 	SimpleVertex v2 = { DirectX::XMFLOAT3(-1.f,1.f,1.f) };
@@ -239,13 +238,8 @@ bool Cef3DDirect3D11Renderer::InitResources()
 	return true;
 }
 
-void Cef3DDirect3D11Renderer::Render()
+void SampleAppDirect3D11::Render()
 {
-	/* 
-		Note that this is a sample framework, ideally you shouldn't set these states every frame.
-		Only thing that is constantly changing in our examples are the offscreen texture so everything else could be not called at all throughout the application.
-	*/
-	// Clear
 	float clearColor[4] = { 0,0,0,0 };
 	DeviceContext->ClearRenderTargetView(Backbuffer, clearColor);
 
@@ -281,12 +275,12 @@ void Cef3DDirect3D11Renderer::Render()
 	Present();
 }
 
-void Cef3DDirect3D11Renderer::Present()
+void SampleAppDirect3D11::Present()
 {
 	SwapChain->Present(Vsync ? 1 : 0, 0);
 }
 
-void Cef3DDirect3D11Renderer::Shutdown()
+void SampleAppDirect3D11::Shutdown()
 {
 	SwapChain->SetFullscreenState(FALSE, NULL);
 
@@ -304,7 +298,7 @@ void Cef3DDirect3D11Renderer::Shutdown()
 	D3D_SAFE_RELEASE(Device);
 }
 
-void Cef3DDirect3D11Renderer::UpdateOffscreenTexture(const void * buffer, int width, int height)
+void SampleAppDirect3D11::UpdateOffscreenTexture(const void * buffer, int width, int height)
 {
 	unsigned rowSize = width * 4;
 	unsigned rowStart = 0;
@@ -325,13 +319,18 @@ void Cef3DDirect3D11Renderer::UpdateOffscreenTexture(const void * buffer, int wi
 	DeviceContext->Unmap(OffscreenTex, 0);
 }
 
-bool Cef3DDirect3D11Renderer::Resize(int width, int height)
+void SampleAppDirect3D11::ShowDevTools(Cef3DSampleWindow * window)
+{
+
+}
+
+bool SampleAppDirect3D11::Resize(int width, int height)
 {
 	Window->Resize(width, height);
 	return Init(Window);
 }
 
-bool Cef3DDirect3D11Renderer::CompileFsTriangleVertexShader(unsigned flags)
+bool SampleAppDirect3D11::CompileFsTriangleVertexShader(unsigned flags)
 {
 	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile(Cef3D::Cef3DPaths::Shaders() + "/FullscreenTriangle.hlsl");
 
@@ -355,7 +354,7 @@ bool Cef3DDirect3D11Renderer::CompileFsTriangleVertexShader(unsigned flags)
 	return true;
 }
 
-bool Cef3DDirect3D11Renderer::CompileFsTrianglePixelShader(unsigned flags)
+bool SampleAppDirect3D11::CompileFsTrianglePixelShader(unsigned flags)
 {
 	std::string shaderSource = Cef3D::Cef3DFileSystem::Get().ReadFile(Cef3D::Cef3DPaths::Shaders() + "/FullscreenTriangle.hlsl");
 
@@ -370,7 +369,7 @@ bool Cef3DDirect3D11Renderer::CompileFsTrianglePixelShader(unsigned flags)
 	return true;
 }
 
-bool Cef3DDirect3D11Renderer::CompileShader(ShaderType type, unsigned flags, const char* entryPoint, const std::string& source, ID3D10Blob** outBlob)
+bool SampleAppDirect3D11::CompileShader(ShaderType type, unsigned flags, const char* entryPoint, const std::string& source, ID3D10Blob** outBlob)
 {
 	ID3DBlob* errorMsgs = 0;
 	HRESULT hr = D3DCompile(source.c_str(), source.length(), "", 0, 0,

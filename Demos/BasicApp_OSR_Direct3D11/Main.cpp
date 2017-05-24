@@ -11,8 +11,8 @@
 //---------------------------------------------------------------------------
 
 #include <Cef3D.h>
-#include <Cef3DPCH.h>
-#include "Direct3D11Renderer.h"
+//#include <Cef3DPCH.h>
+#include "App.h"
 
 
 #include <Windows.h>
@@ -22,6 +22,7 @@
 #include <d3d9.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <map>
 
 #pragma comment(lib, "windowscodecs.lib")
 
@@ -38,31 +39,61 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 Cef3D::Cef3DBrowser* OverlayBrowser = 0;
 bool MouseTracking = false;
 
-Cef3DDirect3D11Renderer Renderer;
+SampleAppDirect3D11 App;
 
+std::map<HWND, Cef3D::Cef3DBrowser*> BrowserHWNDMap;
 
-class Cef3DDelegate
+class SampleBrowser : public Cef3D::Cef3DBrowser
 {
 public:
-	void OnPaint(Cef3D::Cef3DBrowser* browser,
+	void OnPaint(
 		Cef3D::Cef3DOsrRenderType type,
 		const std::vector<Cef3D::Cef3DRect>& dirtyRects,
 		const void* buffer,
 		int width,
-		int height)
+		int height) override
 	{
-		if (OverlayBrowser)
+		if (isReady)
 		{
-			Renderer.UpdateOffscreenTexture(buffer, width, height);
-			Renderer.Render();
+			App.UpdateOffscreenTexture(buffer, width, height);
+			App.Render();
 		}
 	}
 
-	void OnBrowserCreated(Cef3D::Cef3DBrowser* browser)
+	void OnAfterCreated() override
 	{
-		if(!OverlayBrowser)
-			OverlayBrowser = browser;
+		isReady = true;
 	}
+
+	virtual void OnPopupShow(bool show)
+	{
+		if (show)
+		{
+			//class PopupWindowWndProc : public WndProcListener
+			//{
+			//public:
+			//	LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override
+			//	{
+			//		return RootWindowProc(hWnd, message, wParam, lParam);
+			//	}
+			//};
+
+			//InitWindowDefinition windowDef;
+			//windowDef.Width = 800;
+			//windowDef.Height = 600;
+			//windowDef.Instance = GetModuleHandle(NULL);
+			//windowDef.Delegate = new PopupWindowWndProc();
+
+			//Win32Window window;
+			//HWND PopupWindow = window.CreateNativeWindow(windowDef);
+			//
+		}
+	}
+
+	bool IsReady() const { return isReady; }
+private:
+	std::list<Win32Window> Popups;
+	bool isReady;
 };
 
 int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
@@ -94,10 +125,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!TopWindow)
 			return -1;
 
-		if (!Renderer.Init(&window))
+		if (!App.Init(&window))
 			return -1;
 		
-		if (!Renderer.InitResources())
+		if (!App.InitResources())
 			return -1;
 		
 		bool isSubProcessed = true;
@@ -112,22 +143,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		if (!init)
 			return -1;
 
-		scoped_ptr<Cef3DDelegate> Cef3DListener(new Cef3DDelegate);
+		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.DefaultUrl = "https://www.youtube.com/watch?v=7aE2ZkSNGyU";
+		//def.DefaultUrl = "https://www.youtube.com/watch?v=7aE2ZkSNGyU";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 
-		scoped_ptr<Cef3D::Cef3DBrowser> browser2;
-		browser2.reset(Cef3D_CreateBrowser(def));
-
-		Cef3D::Cef3DDelegates::OnPaint.Add(CEF3D_BIND(&Cef3DDelegate::OnPaint, Cef3DListener.get()));
-		Cef3D::Cef3DDelegates::OnAfterCreated.Add(CEF3D_BIND(&Cef3DDelegate::OnBrowserCreated, Cef3DListener.get()));
+		std::auto_ptr<SampleBrowser> browser2;
+		browser2.reset(new SampleBrowser());
+		if (!Cef3D_CreateBrowser(browser2.get(), def))
+			return -1;
+		
+		BrowserHWNDMap.insert(std::make_pair(TopWindow, browser2.get()));
 
 		Cef3D_PumpMessageLoop(true);
 		
-		Renderer.Shutdown();
+		App.Shutdown();
 
 		delete windowDef.Delegate;
 
@@ -140,11 +172,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	std::map<HWND,Cef3D::Cef3DBrowser*>::iterator Bit = BrowserHWNDMap.find(hWnd);
+	if (Bit != BrowserHWNDMap.end())
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	Cef3D::Cef3DBrowser* Browser = Bit->second;
+
 	switch (message)
 	{
 	case WM_DESTROY:
 	{
-		return OverlayBrowser->OnClose();
+		return Browser->OnClose();
 	} break;
 
 	case WM_PAINT:
@@ -153,8 +190,8 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 
-		if(OverlayBrowser)
-			OverlayBrowser->Invalidate();
+		if(((SampleBrowser*)Browser)->IsReady())
+			Browser->Invalidate();
 		break;
 	}
 
@@ -165,7 +202,7 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_KEYUP:
 	case WM_CHAR:
 	{
-		if (!OverlayBrowser)
+		if (!((SampleBrowser*)Browser)->IsReady())
 			break;
 
 		if (message == WM_KEYDOWN)
@@ -182,11 +219,11 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			message == WM_SYSKEYUP;
 
 		if (message == WM_KEYDOWN || message == WM_SYSKEYDOWN)
-			OverlayBrowser->SendKeyEvent(Cef3D::CEF3D_KEY_RAWKEYDOWN, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
+			Browser->SendKeyEvent(Cef3D::CEF3D_KEY_RAWKEYDOWN, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
 		else if (message == WM_KEYUP || message == WM_SYSKEYUP)
-			OverlayBrowser->SendKeyEvent(Cef3D::CEF3D_KEY_UP, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
+			Browser->SendKeyEvent(Cef3D::CEF3D_KEY_UP, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
 		else
-			OverlayBrowser->SendKeyEvent(Cef3D::CEF3D_KEY_CHAR, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
+			Browser->SendKeyEvent(Cef3D::CEF3D_KEY_CHAR, lParam, wParam, isSystemKey, GetKeyboardModifiers(wParam, lParam));
 
 		break;
 	}
@@ -202,9 +239,9 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			(message == WM_LBUTTONDOWN ? Cef3D::CEF3D_LBUTTON_DOWN : (
 				message == WM_RBUTTONDOWN ? Cef3D::CEF3D_RBUTTON_DOWN : Cef3D::CEF3D_MBUTTON_DOWN));
 
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
-			OverlayBrowser->SendMouseClickEvent(btnType, x, y, GetMouseModifiers(wParam));
+			Browser->SendMouseClickEvent(btnType, x, y, GetMouseModifiers(wParam));
 		}
 		break;
 	}
@@ -220,9 +257,9 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			(message == WM_LBUTTONUP ? Cef3D::CEF3D_LBUTTON_UP : (
 				message == WM_RBUTTONUP ? Cef3D::CEF3D_RBUTTON_UP : Cef3D::CEF3D_MBUTTON_UP));
 
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
-			OverlayBrowser->SendMouseClickEvent(btnType, x, y, GetMouseModifiers(wParam));
+			Browser->SendMouseClickEvent(btnType, x, y, GetMouseModifiers(wParam));
 		}
 		break;
 	}
@@ -241,9 +278,9 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			TrackMouseEvent(&tme);
 		}
 
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
-			OverlayBrowser->SendMouseClickEvent(Cef3D::CEF3D_MOUSE_MOVE, x, y, GetMouseModifiers(wParam));
+			Browser->SendMouseClickEvent(Cef3D::CEF3D_MOUSE_MOVE, x, y, GetMouseModifiers(wParam));
 		}
 		break;
 	}
@@ -259,13 +296,13 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			MouseTracking = false;
 		}
 
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
 			POINT p;
 			::GetCursorPos(&p);
 			::ScreenToClient(hWnd, &p);
 
-			OverlayBrowser->SendMouseClickEvent(Cef3D::CEF3D_MOUSE_LEAVE, p.x, p.y, GetMouseModifiers(wParam));
+			Browser->SendMouseClickEvent(Cef3D::CEF3D_MOUSE_LEAVE, p.x, p.y, GetMouseModifiers(wParam));
 		}
 		break;
 	}
@@ -279,15 +316,15 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		ScreenToClient(hWnd, &screen_point);
 		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
-			OverlayBrowser->SendMouseWheelEvent(screen_point.x, screen_point.y, IsKeyDown(VK_SHIFT) ? delta : 0, !IsKeyDown(VK_SHIFT) ? delta : 0, GetMouseModifiers(wParam));
+			Browser->SendMouseWheelEvent(screen_point.x, screen_point.y, IsKeyDown(VK_SHIFT) ? delta : 0, !IsKeyDown(VK_SHIFT) ? delta : 0, GetMouseModifiers(wParam));
 		}
 		break;
 	}
 	case WM_SIZE:
 	{
-		if (OverlayBrowser)
+		if (((SampleBrowser*)Browser)->IsReady())
 		{
 			RECT clientRect;
 			::GetClientRect(hWnd, &clientRect);
@@ -296,12 +333,12 @@ LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			int h = clientRect.bottom - clientRect.top;
 
 			// Re init Direct3D
-			if (!Renderer.Resize(w, h))
+			if (!App.Resize(w, h))
 			{
 				PostQuitMessage(0);
 				break;
 			}
-			OverlayBrowser->SendResize(Cef3D::Cef3DRect(clientRect.left,clientRect.top,clientRect.right - clientRect.left,clientRect.bottom - clientRect.top));
+			Browser->SendResize(Cef3D::Cef3DRect(clientRect.left,clientRect.top,clientRect.right - clientRect.left,clientRect.bottom - clientRect.top));
 		}
 		break;
 	}
@@ -331,6 +368,7 @@ void PumpMessageLoop()
 /* Input helpers for Windows */
 int GetMouseModifiers(WPARAM wparam)
 {
+	using namespace Cef3D;
 	int modifiers = 0;
 	if (wparam & MK_CONTROL)
 		modifiers |= EVENTFLAG_CONTROL_DOWN;
@@ -355,6 +393,8 @@ int GetMouseModifiers(WPARAM wparam)
 
 int GetKeyboardModifiers(WPARAM wparam, LPARAM lparam)
 {
+	using namespace Cef3D;
+
 	int modifiers = 0;
 	if (IsKeyDown(VK_SHIFT))
 		modifiers |= EVENTFLAG_SHIFT_DOWN;

@@ -34,7 +34,7 @@ namespace Cef3D
 		RootWindowManager* GetRootWindowManager();
 
 		// Cef3D methods 
-		Cef3DBrowser* CreateCef3DBrowser(const Cef3DBrowserDefinition& Def);
+		bool CreateCef3DBrowser(Cef3DBrowser* browser,const Cef3DBrowserDefinition& Def);
 		Cef3DBrowser* GetCef3DBrowser(scoped_refptr<RootWindow> window);
 		Cef3DBrowser* GetCef3DBrowser(scoped_refptr<CefBrowser> window);
 		CefRefPtr<CefBrowser> GetCefBrowser(int id,bool isOsr = true);

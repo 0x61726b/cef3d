@@ -33,10 +33,11 @@ struct VsConstantBuffer
 };
 
 
-class Cef3DDirect3D11Renderer : public Cef3DSampleRenderer
+
+class SampleAppDirect3D11 : public Cef3DSampleApp
 {
 public:
-	Cef3DDirect3D11Renderer();
+	SampleAppDirect3D11();
 
 	// Cef3DSampleRenderer interface methods
 	virtual bool Init(Cef3DSampleWindow* window) override;
@@ -44,11 +45,10 @@ public:
 	virtual void Render() override;
 	virtual void Present() override;
 	virtual void Shutdown() override;
-	virtual void UpdateOffscreenTexture(const void* buffer,
-		int width,
-		int height) override;
 	bool Resize(int width, int height) override;
+	void UpdateOffscreenTexture(const void * buffer, int width, int height);
 
+	void ShowDevTools(Cef3DSampleWindow* window);
 
 
 	void SetVsync(bool vsync) { Vsync = vsync; }

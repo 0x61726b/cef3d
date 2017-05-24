@@ -231,7 +231,7 @@ namespace Cef3D
 		Browser = browser;
 
 		
-		Cef3DDelegates::OnBrowserCreated.Broadcast(GMainContext->GetCef3DBrowser(browser));
+		//Cef3DDelegates::OnBrowserCreated.Broadcast(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	void RootWindowViews::OnBrowserClosing(CefRefPtr<CefBrowser> browser)
@@ -239,7 +239,7 @@ namespace Cef3D
 		REQUIRE_MAIN_THREAD();
 		// Nothing to do here.
 
-		Cef3DDelegates::OnBrowserClosing.Broadcast(GMainContext->GetCef3DBrowser(browser));
+		//Cef3DDelegates::OnBrowserClosing.Broadcast(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	void RootWindowViews::OnBrowserClosed(CefRefPtr<CefBrowser> browser)
@@ -257,7 +257,7 @@ namespace Cef3D
 		IsBrowserDestroyed = true;
 		NotifyDestroyedIfDone();
 
-		Cef3DDelegates::OnBrowserClosed.Broadcast(GMainContext->GetCef3DBrowser(browser));
+		//Cef3DDelegates::OnBrowserClosed.Broadcast(GMainContext->GetCef3DBrowser(browser));
 	}
 
 	void RootWindowViews::OnSetAddress(const std::string& url)
@@ -273,7 +273,7 @@ namespace Cef3D
 		if (Window)
 			Window->SetAddress(url);
 
-		Cef3DDelegates::OnSetAddress.Broadcast(url);
+		//Cef3DDelegates::OnSetAddress.Broadcast(url);
 	}
 
 	void RootWindowViews::OnSetTitle(const std::string& title)
@@ -288,7 +288,7 @@ namespace Cef3D
 		if (Window)
 			Window->SetTitle(title);
 
-		Cef3DDelegates::OnSetAddress.Broadcast(title);
+		//Cef3DDelegates::OnSetAddress.Broadcast(title);
 	}
 
 	void RootWindowViews::OnSetFavicon(CefRefPtr<CefImage> image)
@@ -304,7 +304,7 @@ namespace Cef3D
 		if (Window)
 			Window->SetFavicon(image);
 
-		Cef3DDelegates::OnSetFavicon.Broadcast(image);
+		//Cef3DDelegates::OnSetFavicon.Broadcast(image);
 	}
 
 	void RootWindowViews::OnSetFullscreen(bool fullscreen)
@@ -320,7 +320,7 @@ namespace Cef3D
 		if (Window)
 			Window->SetFullscreen(fullscreen);
 
-		Cef3DDelegates::OnSetFullscreen.Broadcast(fullscreen);
+		//Cef3DDelegates::OnSetFullscreen.Broadcast(fullscreen);
 	}
 
 	void RootWindowViews::OnSetLoadingState(bool isLoading,bool canGoBack,bool canGoForward)
@@ -334,7 +334,7 @@ namespace Cef3D
 			return;
 		}
 
-		Cef3DDelegates::OnSetLoadingState.Broadcast(isLoading,canGoBack,canGoForward);
+		//Cef3DDelegates::OnSetLoadingState.Broadcast(isLoading,canGoBack,canGoForward);
 	}
 
 	void RootWindowViews::OnSetDraggableRegions(const std::vector<CefDraggableRegion>& regions)
@@ -350,7 +350,7 @@ namespace Cef3D
 			Window->SetDraggableRegions(regions);
 
 		// Change the parameter to something non-cef
-		Cef3DDelegates::OnSetDraggableRegions.Broadcast(regions);
+		//Cef3DDelegates::OnSetDraggableRegions.Broadcast(regions);
 	}
 
 	void RootWindowViews::CreateClientHandler(const std::string& url)

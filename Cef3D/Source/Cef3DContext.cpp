@@ -127,18 +127,17 @@ namespace Cef3D
 		return WndManager.get();
 	}
 
-	Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition& Def)
+	bool MainContext::CreateCef3DBrowser(Cef3DBrowser* browser, const Cef3DBrowserDefinition& Def)
 	{
 		CEF_REQUIRE_UI_THREAD();
 
 		CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
-		Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
 
 		RootWindow* Window = GetRootWindowManager()->CreateRootWindow(Def);
-		cef3DBrowser->SetRootWindow(Window);
-		Cef3DBrowserList.push_back(cef3DBrowser);
+		browser->SetRootWindow(Window);
+		Cef3DBrowserList.push_back(browser);
 		
-		return cef3DBrowser;
+		return true;
 	}
 
 	Cef3DBrowser* MainContext::GetCef3DBrowser(scoped_refptr<CefBrowser> browser)

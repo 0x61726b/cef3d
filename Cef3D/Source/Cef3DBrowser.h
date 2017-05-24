@@ -76,6 +76,16 @@ namespace Cef3D
 
 		bool IsTransparent() { return Transparent; }
 
+		/* Delegates */
+	public:
+		virtual void OnBeforeClosed() {}
+		virtual void OnPopupShow(bool) {}
+		virtual void OnPopupSize(Cef3DRect) {}
+		virtual void OnAfterCreated() { }
+		virtual void OnPaint(Cef3DOsrRenderType, const std::vector<Cef3DRect>&, const void*, int, int) { };
+
+		virtual void OnDevToolsReady() {}
+
 	private:
 		Cef3DBrowserType Type;
 		int BrowserID;

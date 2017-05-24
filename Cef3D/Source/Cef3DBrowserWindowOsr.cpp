@@ -48,7 +48,8 @@ namespace Cef3D
 		int x, int y, size_t width, size_t height) {
 		REQUIRE_MAIN_THREAD();
 		
-		// TODO
+		if (osr_window_)
+			osr_window_->ShowPopup(parent_handle, x, y, width, height);
 	}
 
 	void BrowserWindowOsrWin::Show() {

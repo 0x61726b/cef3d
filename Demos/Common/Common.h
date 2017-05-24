@@ -12,16 +12,16 @@
 
 #pragma once
 
-#include "Cef3DPlatform.h"
+#include "Cef3D.h"
 
 class WndProcListener;
+class Cef3DSampleRenderer;
+
 
 enum RendererType
 {
-#if PLATFORM_WINDOWS
 	Direct3D11,
 	Direct3D12,
-#endif
 	OpenGL,
 	Vulkan
 };
@@ -49,6 +49,12 @@ struct InitWindowDefinition
 	HINSTANCE Instance;
 	WndProcListener* Delegate;
 #endif
+};
+
+struct TextureDefinition
+{
+	int Width;
+	int Height;
 };
 
 /* Native window interface */
@@ -84,24 +90,15 @@ protected:
 * - Render full screen triangle with the off-screen texture bound
 * - Present
 */
-class Cef3DSampleRenderer
+class Cef3DSampleApp
 {
 public:
-	Cef3DSampleRenderer(RendererType type) : Type(type) { }
+	Cef3DSampleApp() {}
 
 	virtual bool Init(Cef3DSampleWindow* window) = 0;
 	virtual bool InitResources() = 0;
 	virtual void Render() = 0;
 	virtual void Present() = 0;
 	virtual void Shutdown() = 0;
-
-	virtual void UpdateOffscreenTexture(const void* buffer,
-		int width,
-		int height) = 0;
 	virtual bool Resize(int width, int height) = 0;
-
-public:
-	RendererType GetRendererType() { return Type; }
-protected:
-	RendererType Type;
 };

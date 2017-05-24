@@ -88,6 +88,8 @@ namespace Cef3D
 		void SetBounds(int x, int y, size_t width, size_t height);
 		void SetFocus();
 		void SetDeviceScaleFactor(float device_scale_factor);
+		void ShowPopup(WindowHandle parent_handle,
+			int x, int y, size_t width, size_t height);
 
 		DISALLOW_COPY_AND_ASSIGN(OsrWindowWin);
 	};

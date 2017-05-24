@@ -78,7 +78,7 @@ namespace Cef3D
 	{
 		GMainContext->PopulateBrowserSettings(&settings);
 
-		scoped_refptr<RootWindow> root_window = RootWindow::Create(false);
+		scoped_refptr<RootWindow> root_window = RootWindow::Create(true);
 		root_window->InitAsPopup(this, with_osr,
 			popupFeatures, windowInfo, client, settings);
 
