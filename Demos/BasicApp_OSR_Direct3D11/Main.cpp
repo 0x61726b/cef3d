@@ -146,7 +146,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		//def.DefaultUrl = "https://www.youtube.com/watch?v=7aE2ZkSNGyU";
+		def.DefaultUrl = "https://greensock.com/js/speed.html";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 
@@ -173,7 +173,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 LRESULT CALLBACK RootWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	std::map<HWND,Cef3D::Cef3DBrowser*>::iterator Bit = BrowserHWNDMap.find(hWnd);
-	if (Bit != BrowserHWNDMap.end())
+	if (Bit == BrowserHWNDMap.end())
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	Cef3D::Cef3DBrowser* Browser = Bit->second;
 

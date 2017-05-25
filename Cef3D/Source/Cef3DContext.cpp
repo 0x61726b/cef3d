@@ -111,7 +111,7 @@ namespace Cef3D
 
 	void MainContext::PopulateBrowserSettings(CefBrowserSettings* settings)
 	{
-		if (CmdLine->HasSwitch("off-screen-frame-rate")) {
+		if (CmdLine->HasSwitch("off-screen-rendering-enabled")) {
 			settings->windowless_frame_rate = atoi(CmdLine->GetSwitchValue("off-screen-frame-rate").ToString().c_str());
 		}
 	}
