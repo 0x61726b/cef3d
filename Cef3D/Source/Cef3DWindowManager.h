@@ -32,7 +32,7 @@ namespace Cef3D
 		// If |with_osr| is true the window will use off-screen rendering.
 		// This method is called from ClientHandler::CreatePopupWindow() to
 		// create a new popup or DevTools window.
-		scoped_refptr<RootWindow> CreateRootWindowAsPopup(bool with_osr,const CefPopupFeatures& popupFeatures,CefWindowInfo& windowInfo,CefRefPtr<CefClient>& client,CefBrowserSettings& settings);
+		scoped_refptr<RootWindow> CreateRootWindowAsPopup(bool with_osr,const CefPopupFeatures& popupFeatures,CefWindowInfo& windowInfo,CefRefPtr<CefClient>& client,CefBrowserSettings& settings, Cef3DBrowser* cef3dBrowser);
 
 		// Returns the RootWindow associated with the specified browser ID. Must be
 		// called on the main thread.

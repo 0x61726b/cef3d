@@ -16,6 +16,8 @@ namespace Cef3D
 {
 	OsrWindowWin::OsrWindowWin(
 		const Cef3DOSRSettings& settings)
+		: renderingPopup(false),
+		isPopup(settings.IsPopup)
 	{
 		client_rect = settings.Rect;
 		IsTransparent = settings.Transparent;
@@ -40,7 +42,7 @@ namespace Cef3D
 		
 		browser_ = NULL;
 
-		//Cef3DDelegates::OnBeforeClosed.Broadcast(GMainContext->GetCef3DBrowser(browser));
+		GMainContext->GetCef3DBrowser(browser)->OnBeforeClose();
 	}
 
 	bool OsrWindowWin::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
@@ -92,17 +94,26 @@ namespace Cef3D
 		bool show) {
 		CEF_REQUIRE_UI_THREAD();
 
+		if (!show)
+		{
+			popupRect.Set(0, 0, 0, 0);
+			originalRect.Set(0, 0, 0, 0);
+
+			browser->GetHost()->Invalidate(PET_VIEW);
+		}
+
 		GMainContext->GetCef3DBrowser(browser)->OnPopupShow(show);
 	}
 
 	void OsrWindowWin::OnPopupSize(CefRefPtr<CefBrowser> browser,
 		const CefRect& rect) {
 		CEF_REQUIRE_UI_THREAD();
-		Cef3DRect osrRect;
-		osrRect.Width = rect.width;
-		osrRect.Height = rect.height;
 
-		GMainContext->GetCef3DBrowser(browser)->OnPopupSize(osrRect);
+		if (rect.width <= 0 || rect.height <= 0)
+			return;
+
+		originalRect = rect;
+		popupRect = GetPopupRectInWebView(originalRect, client_rect.Width, client_rect.Height);
 	}
 
 	void OsrWindowWin::OnPaint(CefRefPtr<CefBrowser> browser,
@@ -110,13 +121,33 @@ namespace Cef3D
 		const CefRenderHandler::RectList& dirtyRects,
 		const void* buffer,
 		int width,
-		int height) {
+		int height)
+	{
 		CEF_REQUIRE_UI_THREAD();
 
-		// cant close here, doesnt work on cefclient
-		Cef3DOsrRenderType osrRenderType = Cef3DOsrRenderType::View;
-		if (type == PET_POPUP)
-			osrRenderType = Cef3DOsrRenderType::Popup;
+		if (renderingPopup)
+		{
+			std::vector<Cef3DRect> osrDirtyRectList;
+			for (const CefRect& v : dirtyRects)
+			{
+				Cef3DRect rect;
+				rect.Width = v.width;
+				rect.Height = v.height;
+				osrDirtyRectList.push_back(rect);
+			}
+
+			GMainContext->GetCef3DBrowser(browser)->OnPaint(Cef3DOsrRenderType::Popup, osrDirtyRectList, buffer, width, height);
+			return;
+		}
+
+		Cef3DOsrRenderType osrRenderType = isPopup ? Cef3DOsrRenderType::Popup : Cef3DOsrRenderType::View;
+
+		if (type == PET_VIEW && !popupRect.IsEmpty())
+		{
+			renderingPopup = true;
+			browser->GetHost()->Invalidate(PET_POPUP);
+			renderingPopup = false;
+		}
 
 		std::vector<Cef3DRect> osrDirtyRectList;
 		for (const CefRect& v : dirtyRects)
@@ -137,7 +168,9 @@ namespace Cef3D
 		const CefCursorInfo& custom_cursor_info) {
 		CEF_REQUIRE_UI_THREAD();
 
-
+		SetClassLongPtr(NativeHandle, GCLP_HCURSOR,
+			static_cast<LONG>(reinterpret_cast<LONG_PTR>(cursor)));
+		SetCursor(cursor);
 	}
 
 	bool OsrWindowWin::StartDragging(
@@ -267,16 +300,24 @@ namespace Cef3D
 	}
 	void OsrWindowWin::ShowPopup(WindowHandle parent_handle, int x, int y, size_t width, size_t height)
 	{
+		if (!CefCurrentlyOn(TID_UI)) {
+			// Execute this method on the UI thread.
+			CefPostTask(TID_UI, base::Bind(&OsrWindowWin::ShowPopup, this,
+				parent_handle, x, y, width, height));
+			return;
+		}
+
 		DCHECK(browser_);
+		NativeHandle = parent_handle;
 
 		// OnPopupShow should create the native window
 		GMainContext->GetCef3DBrowser(browser_)->OnPopupShow(true);
 		// OnPopupShow should resize the native window
-		GMainContext->GetCef3DBrowser(browser_)->OnPopupSize(Cef3DRect(x, y, (int)width, (int)height));
 		client_rect.Width = (int)width;
 		client_rect.Height = (int)height;
 		client_rect.X = x;
 		client_rect.Y = y;
+		OnPopupSize(browser_, CefRect(x, y, (int)width, (int)height));
 		browser_->GetHost()->WasResized();
 	}
 }

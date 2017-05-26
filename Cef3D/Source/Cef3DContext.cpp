@@ -162,32 +162,10 @@ namespace Cef3D
 		return nullptr;
 	}
 
-	//Cef3DBrowser * MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate)
-	//{
-	//	return nullptr;
-	//}
-
-	//Cef3DBrowser* MainContext::CreateCef3DBrowser(const Cef3DBrowserDefinition & Def, Cef3DHandlerDelegate * HandlerDelegate, Cef3DOsrHandler::OsrDelegate * OsrDelegate)
-	//{
-	//	CEF_REQUIRE_UI_THREAD();
-
-	//	CefBrowserSettings settings = Cef3DPrivate::Cef3DBrowserDefinitionToCef(Def);
-	//	Cef3DBrowser* cef3DBrowser(new Cef3DBrowser);
-
-	//	std::string testLoadUrl = "http://www.google.com";
-
-	//	// Create browser
-	//	CefWindowInfo windowInfo;
-	//	if (Def.Type == Cef3DBrowserType::Offscreen)
-	//	{
-	//		Cef3DOsrHandler* handler(new Cef3DOsrHandler(HandlerDelegate, OsrDelegate, testLoadUrl));
-	//		CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(windowInfo, handler, testLoadUrl, settings, NULL);
-	//		cef3DBrowser->SetBrowserID(browser->GetIdentifier());
-	//	}
-
-	//	Cef3DBrowserList.push_back(cef3DBrowser);
-	//	return cef3DBrowser;
-	//}
+	void MainContext::AddCef3DBrowser(Cef3DBrowser * browser)
+	{
+		Cef3DBrowserList.push_back(browser);
+	}
 
 	bool MainContext::Initialize(const CefMainArgs& args, const CefSettings& settings, CefRefPtr<CefApp> application, void* windows_sandbox_info, const Cef3DDefinition& Def)
 	{

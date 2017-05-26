@@ -77,6 +77,12 @@ namespace Cef3D
 		Cef3DRect client_rect;
 		bool IsTransparent;
 
+		bool renderingPopup;
+		bool isPopup;
+		CefRect popupRect;
+		CefRect originalRect;
+		WindowHandle NativeHandle;
+
 	public:
 		void CreateBrowser(
 			CefRefPtr<CefClient> handler,

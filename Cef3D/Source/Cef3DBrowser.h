@@ -78,13 +78,14 @@ namespace Cef3D
 
 		/* Delegates */
 	public:
-		virtual void OnBeforeClosed() {}
+		virtual void OnBeforeClose() {}
 		virtual void OnPopupShow(bool) {}
 		virtual void OnPopupSize(Cef3DRect) {}
 		virtual void OnAfterCreated() { }
 		virtual void OnPaint(Cef3DOsrRenderType, const std::vector<Cef3DRect>&, const void*, int, int) { };
 
 		virtual void OnDevToolsReady() {}
+		virtual Cef3DBrowser* GetBrowserForPopup() { return 0; }
 
 	private:
 		Cef3DBrowserType Type;

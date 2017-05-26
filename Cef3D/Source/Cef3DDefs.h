@@ -153,6 +153,8 @@ namespace Cef3D
 	{
 		bool Transparent;
 		bool ShowUpdateRects;
+		bool IsPopup;
+
 
 		Cef3DRect Rect;
 	};

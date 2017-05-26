@@ -48,6 +48,7 @@ struct InitWindowDefinition
 #if PLATFORM_WINDOWS
 	HINSTANCE Instance;
 	WndProcListener* Delegate;
+	WNDPROC WndProc;
 #endif
 };
 
@@ -63,6 +64,7 @@ class Cef3DSampleWindow
 public:
 	virtual WindowHandle CreateNativeWindow(const InitWindowDefinition& def) = 0;
 	virtual void Resize(int newWidth,int newHeight) = 0;
+	virtual void Close() = 0;
 
 	int GetWidth() const { return Width; }
 	int GetHeight() const { return Height; }

@@ -11,11 +11,21 @@
 //---------------------------------------------------------------------------
 
 #include "Win32Common.h"
+#include <map>
+
+std::map<HWND, Win32Window*> HwndWindowMap;
 
 LRESULT CALLBACK Win32Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	Win32Window* Instance = reinterpret_cast<Win32Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	if (!Instance)
+	std::map<HWND, Win32Window* >::iterator it = HwndWindowMap.begin();
+	Win32Window* Instance = 0;
+	for (it; it != HwndWindowMap.end(); ++it)
+		if (it->first == hWnd)
+			Instance = it->second;
+	if(!Instance)
+		return DefWindowProc(hWnd, message, wParam, lParam);
+
+	if(!Instance->Delegate)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 
 	return Instance->Delegate->WindowProc(hWnd, message, wParam, lParam);
@@ -34,7 +44,7 @@ HWND Win32Window::CreateNativeWindow(const InitWindowDefinition& def)
 
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = WindowProc;
+	wc.lpfnWndProc = def.WndProc;
 	wc.hInstance = def.Instance;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.lpszClassName = className;
@@ -61,14 +71,7 @@ HWND Win32Window::CreateNativeWindow(const InitWindowDefinition& def)
 
 	Delegate = def.Delegate;
 
-	// Associate |this| with hwnd
-	SetLastError(ERROR_SUCCESS);
-	LONG_PTR result = ::SetWindowLongPtr(
-		Handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-	if (result != 0)
-		return 0;
-	//assert(result != 0 || GetLastError() == ERROR_SUCCESS);
-
+	HwndWindowMap.insert(std::make_pair(Handle, this));
 	return Handle;
 }
 
@@ -76,4 +79,10 @@ void Win32Window::Resize(int newWidth, int newHeight)
 {
 	Width = newWidth;
 	Height = newHeight;
+}
+
+void Win32Window::Close()
+{
+	::DestroyWindow(Handle);
+	Handle = NULL;
 }

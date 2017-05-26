@@ -305,9 +305,7 @@ namespace Cef3D
 		CefBrowserSettings& settings) {
 		// Note: This method will be called on multiple threads.
 
-		// The popup browser will be parented to a new native window.
-		// Don't show URL bar and navigation buttons on DevTools windows.
-		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(true, popupFeatures, windowInfo, client, settings);
+		GMainContext->GetRootWindowManager()->CreateRootWindowAsPopup(true, popupFeatures, windowInfo, client, settings, GMainContext->GetCef3DBrowser(browser)->GetBrowserForPopup());
 
 		return true;
 	}

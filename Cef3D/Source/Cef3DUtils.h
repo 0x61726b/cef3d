@@ -90,6 +90,26 @@ namespace Cef3D
 		value.y = DeviceToLogical(value.y, device_scale_factor);
 	}
 
+	FORCEINLINE CefRect GetPopupRectInWebView(const CefRect& original_rect,int view_width_,int view_height_) {
+		CefRect rc(original_rect);
+		// if x or y are negative, move them to 0.
+		if (rc.x < 0)
+			rc.x = 0;
+		if (rc.y < 0)
+			rc.y = 0;
+		// if popup goes outside the view, try to reposition origin
+		if (rc.x + rc.width > view_width_)
+			rc.x = view_width_ - rc.width;
+		if (rc.y + rc.height > view_height_)
+			rc.y = view_height_ - rc.height;
+		// if x or y became negative, move them to 0 again.
+		if (rc.x < 0)
+			rc.x = 0;
+		if (rc.y < 0)
+			rc.y = 0;
+		return rc;
+	}
+
 	struct DeleteOnMainThread {
 		template<typename T>
 		static void Destruct(const T* x) {

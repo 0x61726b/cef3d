@@ -40,10 +40,23 @@ Cef3D::Cef3DBrowser* OverlayBrowser = 0;
 bool MouseTracking = false;
 
 SampleAppDirect3D11 App;
+SampleAppDirect3D11 DevToolsApp;
 
 std::map<HWND, Cef3D::Cef3DBrowser*> BrowserHWNDMap;
 
-class SampleBrowser : public Cef3D::Cef3DBrowser
+
+class RootWindowWndProc : public WndProcListener
+{
+public:
+	LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override
+	{
+		return RootWindowProc(hWnd, message, wParam, lParam);
+	}
+};
+
+RootWindowWndProc MessageProc;
+
+class DevToolsBrowser : public Cef3D::Cef3DBrowser
 {
 public:
 	void OnPaint(
@@ -53,10 +66,16 @@ public:
 		int width,
 		int height) override
 	{
-		if (isReady)
+		if (isReady && type == Cef3D::Cef3DOsrRenderType::View)
 		{
 			App.UpdateOffscreenTexture(buffer, width, height);
 			App.Render();
+		}
+
+		if (isReady && type == Cef3D::Cef3DOsrRenderType::Popup)
+		{
+			DevToolsApp.UpdateOffscreenTexture(buffer, width, height);
+			DevToolsApp.Render();
 		}
 	}
 
@@ -69,32 +88,84 @@ public:
 	{
 		if (show)
 		{
-			//class PopupWindowWndProc : public WndProcListener
-			//{
-			//public:
-			//	LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override
-			//	{
-			//		return RootWindowProc(hWnd, message, wParam, lParam);
-			//	}
-			//};
+			InitWindowDefinition windowDef;
+			windowDef.Width = 800;
+			windowDef.Height = 600;
+			windowDef.Instance = GetModuleHandle(NULL);
+			windowDef.WndProc = RootWindowProc;
 
-			//InitWindowDefinition windowDef;
-			//windowDef.Width = 800;
-			//windowDef.Height = 600;
-			//windowDef.Instance = GetModuleHandle(NULL);
-			//windowDef.Delegate = new PopupWindowWndProc();
+			Win32Window window;
+			HWND popup = window.CreateNativeWindow(windowDef);
 
-			//Win32Window window;
-			//HWND PopupWindow = window.CreateNativeWindow(windowDef);
+			BrowserHWNDMap.insert(std::make_pair(popup, this));
+
+			if (!DevToolsApp.Init(&window))
+				return;
+
+			if (!DevToolsApp.InitResources())
+				return;
 			//
 		}
 	}
 
-	bool IsReady() const { return isReady; }
 private:
-	std::list<Win32Window> Popups;
 	bool isReady;
 };
+
+class SampleBrowser : public Cef3D::Cef3DBrowser
+{
+public:
+	~SampleBrowser()
+	{
+		delete devTools;
+		devTools = 0;
+	}
+	void OnPaint(
+		Cef3D::Cef3DOsrRenderType type,
+		const std::vector<Cef3D::Cef3DRect>& dirtyRects,
+		const void* buffer,
+		int width,
+		int height) override
+	{
+		if (isReady && type == Cef3D::Cef3DOsrRenderType::View)
+		{
+			App.UpdateOffscreenTexture(buffer, width, height);
+			App.Render();
+		}
+
+		if (isReady && type == Cef3D::Cef3DOsrRenderType::Popup)
+		{
+			DevToolsApp.UpdateOffscreenTexture(buffer, width, height);
+			DevToolsApp.Render();
+		}
+	}
+
+	void OnAfterCreated() override
+	{
+		isReady = true;
+	}
+
+	virtual Cef3DBrowser* GetBrowserForPopup() override
+	{
+		if (!devTools)
+			devTools = new DevToolsBrowser();
+		return devTools;
+	}
+
+	virtual void OnBeforeClose()
+	{
+		//for (Win32Window w : Popups)
+		//{
+		//	w.Close();
+		//}
+	}
+
+	bool IsReady() const { return isReady; }
+private:
+	DevToolsBrowser* devTools;
+	bool isReady;
+};
+
 
 int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ char* lpCmdLine, _In_ int nCmdShow)
 {
@@ -105,20 +176,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		int WinWidth = 1400;
 		int WinHeight = 900;
 
-		class RootWindowWndProc : public WndProcListener
-		{
-		public:
-			LRESULT WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override
-			{
-				return RootWindowProc(hWnd, message, wParam, lParam);
-			}
-		};
+
 
 		InitWindowDefinition windowDef;
 		windowDef.Width = WinWidth;
 		windowDef.Height = WinHeight;
 		windowDef.Instance = hInInstance;
-		windowDef.Delegate = new RootWindowWndProc();
+		windowDef.WndProc = RootWindowProc;
 
 		Win32Window window;
 		HWND TopWindow = window.CreateNativeWindow(windowDef);
@@ -146,7 +210,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.DefaultUrl = "https://greensock.com/js/speed.html";
+		//def.DefaultUrl = "https://greensock.com/js/speed.html";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 
@@ -160,8 +224,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		Cef3D_PumpMessageLoop(true);
 		
 		App.Shutdown();
-
-		delete windowDef.Delegate;
 
 		// Currently, if we close like this, Chromium might not have enough time to cleanup everything, so wait for everything to shut down before exiting our message loop
 		Cef3D_Shutdown();

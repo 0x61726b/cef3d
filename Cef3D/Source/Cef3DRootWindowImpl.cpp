@@ -135,6 +135,7 @@ namespace Cef3D
 		if (with_osr_) {
 			Cef3DOSRSettings settings;
 			GMainContext->PopulateOsrSettings(&settings);
+			settings.IsPopup = is_popup_;
 
 			settings.Rect = Rect;
 			browser_window_.reset(new BrowserWindowOsrWin(this, startup_url, settings));

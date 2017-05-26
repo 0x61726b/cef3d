@@ -74,13 +74,15 @@ namespace Cef3D
 
 	scoped_refptr<RootWindow> RootWindowManager::CreateRootWindowAsPopup(bool with_osr, const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
 		CefRefPtr<CefClient>& client,
-		CefBrowserSettings& settings)
+		CefBrowserSettings& settings, Cef3DBrowser* cef3dBrowser)
 	{
 		GMainContext->PopulateBrowserSettings(&settings);
 
 		scoped_refptr<RootWindow> root_window = RootWindow::Create(true);
 		root_window->InitAsPopup(this, with_osr,
 			popupFeatures, windowInfo, client, settings);
+		cef3dBrowser->SetRootWindow(root_window);
+		GMainContext->AddCef3DBrowser(cef3dBrowser);
 
 		// Store a reference to the root window on the main thread.
 		OnRootWindowCreated(root_window);

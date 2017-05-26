@@ -27,6 +27,7 @@ class Win32Window : public Cef3DSampleWindow
 public:
 	HWND CreateNativeWindow(const InitWindowDefinition&) override;
 	void Resize(int newWidth, int newHeight) override;
+	void Close() override;
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 

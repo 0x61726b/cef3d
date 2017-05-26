@@ -24,7 +24,7 @@ namespace Cef3D
 
 	bool RootWindow::IsSame(scoped_refptr<RootWindow> Wnd)
 	{
-		if (Wnd->GetBrowser()->GetIdentifier() == Wnd->GetBrowser()->GetIdentifier())
+		if (GetBrowser()->GetIdentifier() == Wnd->GetBrowser()->GetIdentifier())
 			return true;
 		return false;
 	}
