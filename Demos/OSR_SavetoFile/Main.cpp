@@ -82,13 +82,16 @@ public:
 		outfile.write((const char*)out.data(), out.size());
 
 		frameCount++;
+
+		if (isLoadingComplete && !GIsExiting)
+			GIsExiting = true;
 	}
 
 	virtual void OnSetLoadingState(bool isLoading, bool canGoBack, bool canGoForward)
 	{
 		isLoadingComplete = !isLoading;
 		std::cout << "Loading state:" << isLoading << std::endl;
-		if (!isLoading)
+		if (isLoadingComplete && frameCount >= 1)
 			GIsExiting = true;
 		//Invalidate();
 
@@ -124,7 +127,7 @@ int main(int* argc, char** argv)
 		return -1;
 
 	Cef3D::Cef3DBrowserDefinition def;
-	def.DefaultUrl = "D:\\Arken\\C++\\cef3d\\Demos\\OSR_SavetoFile\\index.html";
+	def.DefaultUrl = "D:\\Arken\\C++\\cef3d\\Demos\\OSR_SavetoFile\\index2.html";
 	def.Rect = Cef3D::Cef3DRect(600, 400);
 
 	std::auto_ptr<SampleBrowser> browser2;
