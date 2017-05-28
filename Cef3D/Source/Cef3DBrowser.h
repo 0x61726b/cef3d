@@ -87,6 +87,11 @@ namespace Cef3D
 		virtual void OnDevToolsReady() {}
 		virtual Cef3DBrowser* GetBrowserForPopup() { return 0; }
 
+		// CefLoadHandler
+		virtual void OnSetLoadingState(bool isLoading, bool canGoBack, bool canGoForward) { };
+
+		virtual void OnDestroyed() { };
+
 	private:
 		Cef3DBrowserType Type;
 		int BrowserID;

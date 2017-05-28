@@ -67,7 +67,7 @@ int Cef3D_SubprocessLogic()
 	return CefExecuteProcess(main_args, NULL, NULL);
 }
 
-void Cef3D_PumpMessageLoop(bool isWindowless)
+void Cef3D_PumpMessageLoop()
 {
 	if(GMainContext->IsUsingCefLoop())
 		CefRunMessageLoop();

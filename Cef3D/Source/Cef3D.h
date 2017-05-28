@@ -28,7 +28,7 @@ namespace Cef3D
 CEF3D_API bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition);
 CEF3D_API int Cef3D_SubprocessLogic();
 CEF3D_API bool Cef3D_Shutdown();
-CEF3D_API void Cef3D_PumpMessageLoop(bool isWindowless);
+CEF3D_API void Cef3D_PumpMessageLoop();
 
 
 CEF3D_API bool Cef3D_CreateBrowser(Cef3D::Cef3DBrowser* browser,int Width,int Height, Cef3D::Cef3DBrowserType Type = Cef3D::Cef3DBrowserType::Offscreen);

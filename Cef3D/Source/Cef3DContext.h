@@ -52,6 +52,7 @@ namespace Cef3D
 			return UsingCefLoop;
 		}
 
+		void QuitMessageLoop();
 		void Shutdown();
 		~MainContext();
 

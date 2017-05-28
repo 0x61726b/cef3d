@@ -22,6 +22,7 @@ namespace Cef3D
 		window_destroyed_(false),
 		browser_destroyed_(false)
 	{
+		cef3dBrowser = 0;
 	}
 
 	RootWindowWin::~RootWindowWin() {
@@ -30,6 +31,8 @@ namespace Cef3D
 		// The window and browser should already have been destroyed.
 		DCHECK(window_destroyed_);
 		DCHECK(browser_destroyed_);
+		
+		//DCHECK(cef3dBrowser);
 	}
 
 	void RootWindowWin::Init(RootWindow::Delegate* delegate,
@@ -242,6 +245,7 @@ namespace Cef3D
 		bool canGoForward) {
 		REQUIRE_MAIN_THREAD();
 
+		GMainContext->GetCef3DBrowser(browser_window_->GetBrowser())->OnSetLoadingState(isLoading, canGoBack, canGoForward);
 	}
 
 	void RootWindowWin::OnSetDraggableRegions(
@@ -253,6 +257,8 @@ namespace Cef3D
 	void RootWindowWin::NotifyDestroyedIfDone() {
 		// Notify once both the window and the browser have been destroyed.
 		if (window_destroyed_ && browser_destroyed_)
+		{
 			delegate_->OnRootWindowDestroyed(this);
+		}
 	}
 }

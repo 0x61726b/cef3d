@@ -189,6 +189,10 @@ namespace Cef3D
 	void RootWindowManager::OnRootWindowDestroyed(RootWindow* root_window) {
 		REQUIRE_MAIN_THREAD();
 
+		DCHECK(root_window->cef3dBrowser);
+
+		root_window->cef3dBrowser->OnDestroyed();
+
 		RootWindowSet::iterator it = WindowList.find(root_window);
 		DCHECK(it != WindowList.end());
 		if (it != WindowList.end())

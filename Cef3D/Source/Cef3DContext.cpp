@@ -135,6 +135,7 @@ namespace Cef3D
 
 		RootWindow* Window = GetRootWindowManager()->CreateRootWindow(Def);
 		browser->SetRootWindow(Window);
+		Window->cef3dBrowser = browser;
 		Cef3DBrowserList.push_back(browser);
 		
 		return true;
@@ -184,6 +185,11 @@ namespace Cef3D
 		UsingCefLoop = Def.UseCefLoop;
 
 		return true;
+	}
+
+	void MainContext::QuitMessageLoop()
+	{
+		CefQuitMessageLoop();
 	}
 
 	void MainContext::Shutdown()

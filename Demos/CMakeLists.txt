@@ -5,3 +5,5 @@ endif()
 if(CEF3D_BUILD_DIRECT3D12_SAMPLE)
     #add_subdirectory(OSR_Direct3D12)
 endif()
+
+add_subdirectory(OSR_SavetoFile)

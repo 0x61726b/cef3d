@@ -128,5 +128,8 @@ namespace Cef3D
 		friend class base::RefCountedThreadSafe<RootWindow, DeleteOnMainThread>;
 
 		virtual ~RootWindow() {}
+
+	public:
+		Cef3DBrowser* cef3dBrowser;
 	};
 }
