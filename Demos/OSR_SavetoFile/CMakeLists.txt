@@ -15,6 +15,6 @@ target_link_libraries(OSR_SavetoFile
                         libcef_dll_wrapper
                         ${CEF_STANDARD_LIBS}
                         ${PROJECT_SOURCE_DIR}/Cef/Debug/libcef.lib
-                        ${CMAKE_SOURCE_DIR}/Cef3D/Binaries/Win64/libpngd.lib
-                        ${CMAKE_SOURCE_DIR}/../zlib/build_x64/Debug/zlibstaticd.lib
+                        ${CMAKE_SOURCE_DIR}/../libpng-libpng16/build/Debug/libpng16_staticd.lib
+                        ${CMAKE_SOURCE_DIR}/../zlib/build/Debug/zlibstaticd.lib
                         )

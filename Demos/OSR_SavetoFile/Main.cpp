@@ -25,6 +25,8 @@ using namespace Cef3D;
 #pragma warning(disable:4267)
 
 bool GIsExiting = false;
+char* SourceHTMLTargetPath;
+char* TargetPngPath;
 
 typedef unsigned char ui8;
 #define ASSERT_EX(cond, error_message) do { if (!(cond)) { std::cerr << error_message; exit(1);} } while(0)
@@ -78,7 +80,7 @@ public:
 		std::vector<unsigned char> out;
 		WritePngToMemory(width, height, (unsigned char*)buffer, &out);
 
-		std::ofstream outfile("D:\\Arken\\C++\\cef3d\\Cef3D\\Binaries\\Win64\\test.png", std::ios::out | std::ios::binary);
+		std::ofstream outfile(TargetPngPath, std::ios::out | std::ios::binary);
 		outfile.write((const char*)out.data(), out.size());
 
 		frameCount++;
@@ -110,9 +112,22 @@ private:
 	int frameCount;
 };
 
-int main(int* argc, char** argv)
+int main(int argc, char** argv)
 {
 	auto start = std::chrono::steady_clock::now();
+
+	if (argc != 3)
+	{
+		std::cout << "Need at least 2 parameters. 1: Target HTML, 2: Output PNG path" << std::endl;
+		return 0;
+	}
+
+	SourceHTMLTargetPath = argv[1];
+	TargetPngPath = argv[2];
+
+	std::cout << "---------------Cef3D-------------" << std::endl;
+	std::cout << "Target URL:" << SourceHTMLTargetPath << std::endl;
+	std::cout << "Target PNG:" << TargetPngPath << std::endl;
 
 	bool isSubProcessed = true;
 
@@ -127,7 +142,7 @@ int main(int* argc, char** argv)
 		return -1;
 
 	Cef3D::Cef3DBrowserDefinition def;
-	def.DefaultUrl = "D:\\Arken\\C++\\cef3d\\Demos\\OSR_SavetoFile\\index2.html";
+	def.DefaultUrl = SourceHTMLTargetPath;
 	def.Rect = Cef3D::Cef3DRect(600, 400);
 
 	std::auto_ptr<SampleBrowser> browser2;

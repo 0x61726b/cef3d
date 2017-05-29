@@ -32,6 +32,7 @@ namespace Cef3D
 
 	void Cef3DApplication::OnBeforeCommandLineProcessing(const CefString& process_type,CefRefPtr<CefCommandLine> command_line)
 	{
+		command_line->AppendSwitch("enable-experimental-web-platform-features");
 		// Pass additional command-line flags to the browser process.
 		if (process_type.empty())
 		{

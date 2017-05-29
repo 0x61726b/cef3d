@@ -210,7 +210,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		//def.DefaultUrl = "https://greensock.com/js/speed.html";
+		def.DefaultUrl = "D:/C++/cef3d/Demos/OSR_SavetoFile/index.html";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 
@@ -221,7 +221,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		
 		BrowserHWNDMap.insert(std::make_pair(TopWindow, browser2.get()));
 
-		Cef3D_PumpMessageLoop(true);
+		Cef3D_PumpMessageLoop();
 		
 		App.Shutdown();
 
