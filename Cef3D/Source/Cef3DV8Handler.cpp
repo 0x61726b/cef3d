@@ -7,12 +7,29 @@
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
 // Cef3DUtils.h
-// Date: 19.04.2017
+// Date: 30.05.2017
 //---------------------------------------------------------------------------
 
-#pragma once
+#include "Cef3DPCH.h"
+#include "Cef3DV8Handler.h"
 
 namespace Cef3D
 {
+	bool Cef3DV8Handler::Execute(
+		const CefString &name, CefRefPtr<CefV8Value> object,
+		const CefV8ValueList &arguments,
+		CefRefPtr<CefV8Value> &retval,
+		CefString &exception)
+	{
+		CefRefPtr<CefBrowser> browser = CefV8Context::GetCurrentContext()->GetBrowser();
+		if (!browser)
+			return false;
 
+		LOG(INFO) << "Received Js execute. Function name: " << name;
+
+		/*CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(name);
+		CefRefPtr<CefListValue> message_args = message->GetArgumentList();*/
+
+		return true;
+	}
 }

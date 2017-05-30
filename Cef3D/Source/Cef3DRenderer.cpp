@@ -12,6 +12,8 @@
 
 #include "Cef3DPCH.h"
 
+#include <iostream>
+
 namespace Cef3D
 {
 	Cef3DRenderer::Cef3DRenderer()
@@ -81,6 +83,10 @@ namespace Cef3D
 		DelegateSet::iterator it = Delegates.begin();
 		for (; it != Delegates.end(); ++it)
 			(*it)->OnContextCreated(this, browser, frame, context);
+
+		CefRefPtr<CefV8Value> object = context->GetGlobal();
+		CefRefPtr<CefV8Value> str = CefV8Value::CreateString("test123");
+		object->SetValue("cppSongName", str, V8_PROPERTY_ATTRIBUTE_NONE);
 	}
 
 	void Cef3DRenderer::OnContextReleased(CefRefPtr<CefBrowser> browser,CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) 

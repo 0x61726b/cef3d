@@ -7,12 +7,34 @@
 // (at your option) any later version.
 // https://github.com/arkenthera/cef3d
 // Cef3DUtils.h
-// Date: 19.04.2017
+// Date: 30.05.2017
 //---------------------------------------------------------------------------
 
 #pragma once
 
+#include "include/base/cef_bind.h"
+#include "include/wrapper/cef_closure_task.h"
+#include "include/cef_v8.h"
+
 namespace Cef3D
 {
+	class Cef3DV8Handler : public CefV8Handler
+	{
+	public:
+		explicit Cef3DV8Handler(CefRefPtr<Cef3DRenderer> clientApp)
+			: client_app_(clientApp)
+		{
+		}
 
+		virtual bool Execute(const CefString& name,
+			CefRefPtr<CefV8Value> object,
+			const CefV8ValueList& arguments,
+			CefRefPtr<CefV8Value>& retval,
+			CefString& exception) OVERRIDE;
+
+	private:
+		CefRefPtr<Cef3DRenderer> client_app_;
+
+		IMPLEMENT_REFCOUNTING(Cef3DV8Handler);
+	};
 }

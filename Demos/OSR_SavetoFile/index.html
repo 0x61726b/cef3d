@@ -1,36 +1,153 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="app.css">
     </head>
 
 <body>
     <div class="container">
-        <div class="artist-bg">
+        <div class="leftPanel">
+            <div class="album-bg">
+                <div class="title-overlay">
+                    <div class="song" id="songName">
+                        unknown
+                    </div>
+                    <div class="artist" id="artistName">
+                        unknown
+                    </div>
+                </div>
+            </div>
+            <div class="left-info">
+                <div class="item-container">
+                    <div class="item">
+                        <div class="item-upper">
+                            Album
+                        </div>
+                        <div class="item-lower" id="albumScrobbles">
+                            5262
+                        </div>                
+                    </div>
+                    <div class="item">
+                        <div class="item-upper">
+                            Artist
+                        </div>
+                        <div class="item-lower" id="artistScrobbles">
+                            9825
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-upper">
+                            Total
+                        </div>
+                        <div class="item-lower" id="totalScrobbles">
+                            5.7M
+                        </div>
+                    </div>
+                    <div class="lastitem">
+                        <div class="item-upper">
+                            Genre
+                        </div>
+                        <div class="item-lower" id="genre">
+                            Melodeath
+                        </div>
+                    </div>                    
+                </div>
+            </div>
         </div>
-        <div class="info-container">
-            <div class="np-username">
-                Currently playing by arkenthera
-            </div>
-            <div class="np">
-                <div class="album-img">
+        <div class="right-panel">
+            <div class="right-panel-container">
+            <div class="user-container">
+                <div class="name-panel">
+                    <h2 id="userName">arkenthera</h2>
                 </div>
-                <div class="np-songinfo">
-                    <div class="np-songname">
-                        Through the Shadows
+                <div class="user-avatar" id="userAvatar">
+                </div>                
+            </div>
+            <div class="user-info-panel">
+                <div class="item">
+                    <div class="item-upper">
+                        Scrobbles
                     </div>
-                    <div class="np-artistname">
-                        Insomnium
-                    </div>
-                    <div class="np-totalscrobbles">
-                        Total Artist Scrobbles: 999
-                    </div>
-                    <div class="np-albumscrobbles">
-                        Total Album Scrobbles: 999
+                    <div class="item-lower" id="userScrobbles">
+                        469863
                     </div>
                 </div>
+                <div class="item">
+                    <div class="item-upper">
+                        Artists
+                    </div>
+                    <div class="item-lower" id="userArtistCount">
+                        2500
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-upper">
+                        Loved
+                    </div>
+                    <div class="item-lower" id="userFavourites">
+                        120
+                    </div>
+                </div>
             </div>
+            <div class="previous-tracks-panel" id="pvt">
+                <div class="pvt-title">
+                    <h2>Previous Tracks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-panel">
+            <div id="footerText">
+            </div>
+        </div>
         </div>
     </div>
+    <script>
+        if(!window.cppSongName)
+            window.cppSongName =  "im broken";
+        window.artistName = "Insomnium";
+        window.artistScrobbles = 562;
+        window.albumScrobbles = 213;
+        window.totalScrobbles = 5600000;
+        window.genre = "Melodeath";
+
+        window.userName = "arkenthera";
+        window.userAvatar = "avatar.webp";
+        window.userScrobbles = 41255;
+        window.userArtistCount = 1253;
+        window.userFavourites = 250;
+        var albumCoverCount = 6;
+        // for(var i = 0; i < albumCoverCount; i++) {
+        //     document.getElementsByClassName("pvt-album-cover")[i].style = "background-image: url(" + window.prevTrackBg1 + ");";
+        // }
+
+        for(var i = 0; i < albumCoverCount; i++) {
+            createPrevTrack({ image: "album.jpg"});
+        }
+        
+        function createPrevTrack(pvtinfo) {
+            var txt = document.createElement("div");
+            txt.className = "item";
+            txt.innerHTML = "<div class=\"pvt-album-cover\" style=\"background-image: url(\'"+ pvtinfo.image+ "\')\";></div><div class\"album-text\">Insomnium - Black Heart Rebellion</div>"
+            var parent = document.getElementById('pvt');
+            parent.insertBefore(txt, parent.lastChild);
+        }
+
+        function setInfo() {
+            document.getElementById("songName").innerText = window.cppSongName;
+            document.getElementById("artistName").innerText = window.artistName;
+            document.getElementById("artistScrobbles").innerText = window.artistScrobbles;
+            document.getElementById("albumScrobbles").innerText = window.albumScrobbles;
+            document.getElementById("totalScrobbles").innerText = window.totalScrobbles;
+
+            document.getElementById("userName").innerText = window.userName;
+            document.getElementById("userAvatar").style ="background-image: url('"+  window.userAvatar + "');";
+            document.getElementById("userArtistCount").innerText = window.userArtistCount;
+            document.getElementById("userScrobbles").innerText = window.userScrobbles;
+            document.getElementById("userFavourites").innerText = window.userFavourites;
+            document.getElementById("footerText").innerText = "http://last.fm/user/" + window.userName;
+        }
+        setInfo();
+    </script>
 </body>
 </html>

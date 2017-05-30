@@ -23,6 +23,7 @@
 
 #include "Cef3DApplication.h"
 #include "Cef3DRenderer.h"
+#include "Cef3DV8Handler.h"
 
 #include "Cef3DBrowser.h"
 #include "Cef3DBrowserWindow.h"

@@ -91,6 +91,8 @@ namespace Cef3D
 
 		void RegisterDelegate(CefRefPtr<Cef3DRendererDelegate> Del);
 
+		virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE { return this; }
+
 		// CefRenderProcessHandler methods.
 		void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) OVERRIDE;
 		void OnWebKitInitialized() OVERRIDE;

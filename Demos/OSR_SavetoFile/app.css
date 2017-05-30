@@ -2,73 +2,148 @@ body
 {
     margin:0;
     color:white;
+    font-family: 'Roboto', sans-serif;
 }
 .container
 {
-    width: 600px;
-    height: 400px;
-}
-.artist-bg
-{
-    width: 600px;
-    height: 400px;
-    background-image: url("artist.jpg");
-    /*filter: blur(10px);*/
-}
-
-.info-container
-{
-    width: 100%;
-    height: 100%;
-    /* background-color: red;*/
     display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    position: absolute;
-    top:0;
-    left: 50px;
-    backdrop-filter: blur(10px);
 }
-
-.np-username
+.album-bg
 {
-    text-align: center;
-    font-size: 24px;
-    width: 500px;
-}
-
-.album-img
-{
-    width: 150px;
-    height: 150px;
     background-image: url("album.jpg");
+    width: 300px;
+    height: 300px;
     background-size: 100%;
-    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
-
-.np
+.title-overlay
 {
-    margin-top: 5px;
-    display:flex;
+    background-color: rgba(10,10,10,0.4);
+    opacity: 10;
+    color: white;
+    text-align: center;
+    height: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    backdrop-filter: blur(5px);
 }
-
-.np-songinfo
+.title-overlay > .song
 {
-    
+    font-size: 18px;
+    font-weight: bold;
 }
-
-.np-songname
-{
-    font-size: 24px;
-    font-style: bold;
-}
-
-.np-artistname
+.title-overlay > .artist
 {
     font-size: 16px;
 }
 
-.np-totalscrobbles
-{
-    padding-top: 70px;
+.left-info {
+    display: flex;
+    color: black;
+}
+.item-container {
+    display: flex;
+    padding-top: 5px;
+}
+.left-info > .item-container > .item {
+    border-right: 1px black solid;
+    padding: 14px;
+    /*margin: 7px;*/
+}
+.left-info > .item-container > .lastitem {
+    padding: 14px;
+    padding-right: 2px;
+    /*margin: 7px;*/
+}
+
+.left-info > .item-container > .item > .item-upper {
+    font-weight: 400;
+}
+
+.left-info > .item-container > .item > .item-lower {
+    font-weight: 700;
+    width: 30px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.left-info > .item-container > .lastitem > .item-upper {
+    font-weight: 400;
+}
+
+.left-info > .item-container > .lastitem > .item-lower {
+    font-weight: 700;
+}
+
+.right-panel {
+    width: 400px;
+    height: 371px;
+    background: linear-gradient(45deg, rgb(180,48,55), rgb(74,6, 13) );
+    padding-left: 10px;
+    background-image: url("artist.jpg")
+}
+.right-panel-container {
+    background-color:rgba(30,30,30,0.4);
+    backdrop-filter: blur(5px);
+    height: calc(100% - 40px);
+}
+
+.user-container {
+    
+}
+
+.user-container > .name-panel {
+    padding-left: 5px;
+}
+
+.user-container > .user-avatar {
+    width: 100px;
+    height: 100px;
+    background-size: 100%;
+    background-image: url("avatar.webp");
+    right: 0;
+    position: absolute;
+    top: 0;
+    /*opacity: 0.4;*/
+}
+
+.user-info-panel {
+    display: flex;
+}
+.user-info-panel > .item {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.previous-tracks-panel {
+    display: flex;
+    flex-direction: column;
+    padding-top: 25px;
+}
+
+.previous-tracks-panel > .pvt-title {
+    padding-left: 3px;
+}
+
+.previous-tracks-panel > .item {
+    display: flex;
+    flex-direction: row;
+    padding-left: 5px;
+}
+
+.previous-tracks-panel > .item > .pvt-album-cover {
+    width: 20px;
+    height: 20px;
+    background-size: 100%;
+    margin-right: 10px;
+}
+.bottom-panel {
+    position: absolute;
+    right: 0;
+    color: gray;
+    font-size: 14px;
+    display: flex;
 }
