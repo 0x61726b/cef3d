@@ -199,6 +199,8 @@ namespace Cef3D
 		NotifyBrowserCreated(browser);
 
 		GMainContext->GetCef3DBrowser(browser)->OnAfterCreated();
+
+		browser->GetMainFrame()->LoadURL("http://google.com");
 	}
 
 	bool Cef3DHandler::DoClose(CefRefPtr<CefBrowser> browser)

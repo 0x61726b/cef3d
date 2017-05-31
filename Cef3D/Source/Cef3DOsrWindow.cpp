@@ -214,7 +214,7 @@ namespace Cef3D
 		window_info.SetAsWindowless(settings.ParentHandle, IsTransparent);
 		
 		// Create the browser asynchronously.
-		CefBrowserHost::CreateBrowser(window_info, handler, startup_url, cefSettings,
+		CefBrowserHost::CreateBrowser(window_info, handler, "", cefSettings,
 			request_context);
 	}
 

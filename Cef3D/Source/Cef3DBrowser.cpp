@@ -144,7 +144,7 @@ namespace Cef3D
 	void Cef3DBrowser::LoadURL(const std::string & url)
 	{
 		Url = url;
-		GMainContext->GetCefBrowser(BrowserID)->GetMainFrame()->LoadURL(Url);
+		AssociatedWindow->GetBrowser()->GetMainFrame()->LoadURL(Url);
 	}
 
 	void Cef3DBrowser::Close(bool force)
