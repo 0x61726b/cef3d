@@ -12,7 +12,7 @@
 
 #include "Cef3DPCH.h"
 
-CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp = 0;
+CefRefPtr<Cef3D::Cef3DBrowserApp> GCef3DBrowserApp = 0;
 Cef3D::MainContext* GMainContext = 0;
 
 //using namespace Cef3D;

@@ -12,33 +12,5 @@
 
 #pragma once
 
-extern CEF3D_API CefRefPtr<Cef3D::Cef3DApplication> Cef3DBrowserApp;
+extern CEF3D_API CefRefPtr<Cef3D::Cef3DBrowserApp> GCef3DBrowserApp;
 extern CEF3D_API Cef3D::MainContext* GMainContext;
-//extern CEF3D_API CefRefPtr<Cef3D::Cef3DHandler> Cef3DBrowserHandler;
-
-namespace Cef3D
-{
-	/*class Cef3DBrowser;*/
-
-	class Cef3DDelegates
-	{
-	public:
-		// Browser Process Delegates
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnBrowserCreated, Cef3DBrowser*);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnBrowserClosing, Cef3DBrowser*);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnBrowserClosed, Cef3DBrowser*);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnSetAddress, const std::string&);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnSetTitle, const std::string&);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnSetFavicon, CefRefPtr<CefImage>);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnSetFullscreen, bool);
-		//static DECLARE_MULTICAST_DELEGATE_THREEPARAM(OnSetLoadingState, bool,bool,bool);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnSetDraggableRegions, const std::vector<CefDraggableRegion>&);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnTakeFocus, bool);
-		//static DECLARE_MULTICAST_DELEGATE_ONEPARAM(OnBeforeContextMenu, Cef3DBrowser*);
-
-		// OSR Delegate
-		
-
-
-	};
-}

@@ -49,11 +49,11 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	CefString(&settings.log_file).FromASCII(Definition.LogPath.c_str());
 	settings.log_severity = Cef3D::Cef3DPrivate::Cef3DLogLevelToCef(Definition.LogLevel);
 
-	Cef3DBrowserApp = (new Cef3D::Cef3DApplication);
+	GCef3DBrowserApp = (new Cef3D::Cef3DBrowserApp);
 
 	GMainContext->PopulateSettings(&settings);
 
-	return GMainContext->Initialize(main_args, settings, Cef3DBrowserApp, NULL,Definition);
+	return GMainContext->Initialize(main_args, settings, GCef3DBrowserApp, NULL,Definition);
 }
 
 int Cef3D_SubprocessLogic()
@@ -102,7 +102,7 @@ bool Cef3D_Shutdown()
 {
 	GMainContext->Shutdown();
 
-	Cef3DBrowserApp = 0;
+	GCef3DBrowserApp = 0;
 
 	delete GMainContext;
 	GMainContext = 0;
