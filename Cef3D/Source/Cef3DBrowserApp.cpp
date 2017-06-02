@@ -90,6 +90,8 @@ namespace Cef3D
 		DelegateSet::iterator it = DelegateList.begin();
 		for (; it != DelegateList.end(); ++it)
 			(*it)->OnBeforeChildProcessLaunch(this, command_line);
+
+		command_line->AppendSwitchWithValue("lastfm_album_name", "1234");
 	}
 
 	void Cef3DBrowserApp::OnRenderProcessThreadCreated(CefRefPtr<CefListValue> extra_info)

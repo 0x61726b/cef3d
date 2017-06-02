@@ -84,8 +84,10 @@ namespace Cef3D
 		for (; it != Delegates.end(); ++it)
 			(*it)->OnContextCreated(this, browser, frame, context);
 
+		CefRefPtr<CefCommandLine> cmd = CefCommandLine::GetGlobalCommandLine();
+
 		CefRefPtr<CefV8Value> object = context->GetGlobal();
-		CefRefPtr<CefV8Value> str = CefV8Value::CreateString("test123");
+		CefRefPtr<CefV8Value> str = CefV8Value::CreateString(cmd->GetSwitchValue("lastfm_album_name"));
 		object->SetValue("cppSongName", str, V8_PROPERTY_ATTRIBUTE_NONE);
 	}
 

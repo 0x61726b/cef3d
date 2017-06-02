@@ -82,6 +82,8 @@ public:
 	void OnAfterCreated() override
 	{
 		isReady = true;
+
+		LoadURL("http://google.com");
 	}
 
 	virtual void OnPopupShow(bool show)
@@ -144,7 +146,7 @@ public:
 	{
 		isReady = true;
 
-		//LoadURL("http://www.google.com");
+		LoadURL("D:/C++/cef3d/Demos/OSR_SavetoFile/index.html");
 	}
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
