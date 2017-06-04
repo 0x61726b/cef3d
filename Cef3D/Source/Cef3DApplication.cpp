@@ -15,8 +15,5 @@
 
 namespace Cef3D
 {
-	Cef3DDelegate::Cef3DDelegate()
-	{
-		
-	}
+	
 }

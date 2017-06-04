@@ -8,7 +8,7 @@
 <body>
     <div class="container">
         <div class="leftPanel">
-            <div class="album-bg">
+            <div class="album-bg" id="albumCover">
                 <div class="title-overlay">
                     <div class="song" id="songName">
                         unknown
@@ -55,7 +55,7 @@
                 </div>
             </div>
         </div>
-        <div class="right-panel">
+        <div class="right-panel" id="artistCover">
             <div class="right-panel-container">
             <div class="user-container">
                 <div class="name-panel">
@@ -104,48 +104,81 @@
     </div>
     <script>
         if(!window.cppSongName)
-            window.cppSongName =  "im broken";
-        window.artistName = "Insomnium";
-        window.artistScrobbles = 562;
-        window.albumScrobbles = 213;
-        window.totalScrobbles = 5600000;
-        window.genre = "Melodeath";
+            window.cppSongName =  "im broke";
 
-        window.userName = "arkenthera";
-        window.userAvatar = "avatar.webp";
-        window.userScrobbles = 41255;
-        window.userArtistCount = 1253;
-        window.userFavourites = 250;
+        if(!window.cppArtistName)
+            window.cppArtistName = "";
+
+        if(!window.cppArtistScrobbles)
+            window.cppArtistScrobbles = -1;
+
+        if(!window.cppAlbumScrobbles)
+            window.cppAlbumScrobbles = -1;
+        
+        if(!window.cppTotalScrobbles)
+            window.cppTotalScrobbles = -1;
+        
+        if(!window.cppGenre)
+            window.cppGenre = "";
+
+        if(!window.cppUserName)
+            window.cppUserName = "";
+        
+        if(!window.cppUserAvatar)
+            window.cppUserAvatar = "avatar.webp";
+
+        if(!window.cppUserArtistCount)
+            window.cppUserArtistCount = -1;
+        
+        if(!window.cppUserScrobbles)
+            window.cppUserScrobbles = -1;
+
+        if(!window.cppUserFavourites)
+            window.cppUserFavourites = -1;
+
+        if(!window.cppAlbumCover)
+            window.cppAlbumCover = "album.jpg"
+
+        if(!window.cppArtistCover)
+            window.cppArtistCover = "artist.jpg"
+
         var albumCoverCount = 6;
-        // for(var i = 0; i < albumCoverCount; i++) {
-        //     document.getElementsByClassName("pvt-album-cover")[i].style = "background-image: url(" + window.prevTrackBg1 + ");";
-        // }
 
         for(var i = 0; i < albumCoverCount; i++) {
-            createPrevTrack({ image: "album.jpg"});
+            if(!window["prev_track_" + i + "_cover"])
+                window["prev_track_" + i + "_cover"] = "album.jpg";
+
+            if(!window["prev_track_" + i + "_text"])
+                window["prev_track_" + i + "_text"] = "broken";
+
+            createPrevTrack({ image: window["prev_track_" + i + "_cover"], text: window["prev_track_" + i + "_text"]});
         }
         
         function createPrevTrack(pvtinfo) {
             var txt = document.createElement("div");
             txt.className = "item";
-            txt.innerHTML = "<div class=\"pvt-album-cover\" style=\"background-image: url(\'"+ pvtinfo.image+ "\')\";></div><div class\"album-text\">Insomnium - Black Heart Rebellion</div>"
+            txt.innerHTML = "<div class=\"pvt-album-cover\" style=\"background-image: url(\'"+ pvtinfo.image+ "\')\";></div><div class\"album-text\">" + pvtinfo.text + "</div>"
             var parent = document.getElementById('pvt');
             parent.insertBefore(txt, parent.lastChild);
         }
 
         function setInfo() {
             document.getElementById("songName").innerText = window.cppSongName;
-            document.getElementById("artistName").innerText = window.artistName;
-            document.getElementById("artistScrobbles").innerText = window.artistScrobbles;
-            document.getElementById("albumScrobbles").innerText = window.albumScrobbles;
-            document.getElementById("totalScrobbles").innerText = window.totalScrobbles;
+            document.getElementById("artistName").innerText = window.cppArtistName;
+            document.getElementById("artistScrobbles").innerText = window.cppArtistScrobbles;
+            document.getElementById("albumScrobbles").innerText = window.cppAlbumScrobbles;
+            document.getElementById("totalScrobbles").innerText = window.cppTotalScrobbles;
+            document.getElementById("genre").innerText = window.cppGenre;
 
-            document.getElementById("userName").innerText = window.userName;
-            document.getElementById("userAvatar").style ="background-image: url('"+  window.userAvatar + "');";
-            document.getElementById("userArtistCount").innerText = window.userArtistCount;
-            document.getElementById("userScrobbles").innerText = window.userScrobbles;
-            document.getElementById("userFavourites").innerText = window.userFavourites;
-            document.getElementById("footerText").innerText = "http://last.fm/user/" + window.userName;
+            document.getElementById("userName").innerText = window.cppUserName;
+            document.getElementById("userAvatar").style = "background-image: url('"+  window.cppUserAvatar + "');";
+            document.getElementById("userArtistCount").innerText = window.cppUserArtistCount;
+            document.getElementById("userScrobbles").innerText = window.cppUserScrobbles;
+            document.getElementById("userFavourites").innerText = window.cppUserFavourites;
+            document.getElementById("footerText").innerText = "http://last.fm/user/" + window.cppUserName;
+
+            document.getElementById("albumCover").style = "background-image: url('"+  window.cppAlbumCover + "');";
+            document.getElementById("artistCover").style = "background-image: url('"+  window.cppArtistCover + "');";
         }
         setInfo();
     </script>

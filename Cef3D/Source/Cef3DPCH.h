@@ -19,8 +19,9 @@
 #include "Cef3DEventSystem.h"
 #include "Cef3DFileSystem.h"
 #include "Cef3DPaths.h"
+#include "Cef3DCommandLine.h"
 #include "Cef3DHandler.h"
-
+#include "Cef3DApplication.h"
 #include "Cef3DBrowserApp.h"
 #include "Cef3DRenderer.h"
 #include "Cef3DV8Handler.h"
@@ -38,5 +39,3 @@
 #include "Cef3DWindowManager.h"
 #include "Cef3DContext.h"
 #include "Cef3DGlobals.h"
-
-#include "Cef3DApplication.h"

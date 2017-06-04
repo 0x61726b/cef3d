@@ -14,13 +14,17 @@
 
 namespace Cef3D
 {
-	class Cef3DDelegate
+	class Cef3DAppDelegate
 	{
 	public:
-		Cef3DDelegate();
-
 		virtual void OnReady() { };
 		virtual void OnShutdown() { }
+
+		virtual void OnContextInitialized() { }
+		virtual void OnBeforeChildProcessLaunch(Cef3DCommandLine& CmdLine) { }
+		virtual void OnRenderProcessThreadCreated() { }
+		virtual void OnScheduleMessagePumpWork() { }
+		virtual void OnBeforeCommandLineProcessing(CefProcessType processType, const Cef3DCommandLine& CmdLine) { }
 	};
 }
 

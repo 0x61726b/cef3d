@@ -15,15 +15,15 @@
 
 using namespace Cef3D;
 
-bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
+bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition, Cef3DAppDelegate* AppDelegate)
 {
 	// Enable High-DPI support on Windows 7 or newer.
 	CefEnableHighDPISupport();
-	CefRefPtr<CefCommandLine> command_line = CefCommandLine::CreateCommandLine();
+	GCmdLine = new Cef3DCommandLine(CefCommandLine::CreateCommandLine());
 
 #if PLATFORM_WINDOWS
 	CefMainArgs main_args(GetModuleHandle(NULL));
-	command_line->InitFromString(::GetCommandLineW());
+	GCmdLine->InitFromString(CefString(::GetCommandLineW()));
 #else
 	CefMainArgs main_args();
 	command_line->InitFromString("");
@@ -31,10 +31,10 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 
 	if (Definition.OffscreenRendering)
 	{
-		command_line->AppendSwitch("off-screen-frame-rate=60");
-		command_line->AppendSwitch("off-screen-rendering-enabled");
+		GCmdLine->AppendSwitch("off-screen-frame-rate=60");
+		GCmdLine->AppendSwitch("off-screen-rendering-enabled");
 	}
-	GMainContext = (new MainContext(command_line));
+	GMainContext = new MainContext();
 
 	CefSettings settings;
 	if (Definition.OffscreenRendering)
@@ -49,7 +49,7 @@ bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition)
 	CefString(&settings.log_file).FromASCII(Definition.LogPath.c_str());
 	settings.log_severity = Cef3D::Cef3DPrivate::Cef3DLogLevelToCef(Definition.LogLevel);
 
-	GCef3DBrowserApp = (new Cef3D::Cef3DBrowserApp);
+	GCef3DBrowserApp = new Cef3D::Cef3DBrowserApp(AppDelegate);
 
 	GMainContext->PopulateSettings(&settings);
 

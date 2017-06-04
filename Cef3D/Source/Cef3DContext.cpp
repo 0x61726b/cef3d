@@ -47,34 +47,21 @@ namespace Cef3D
 	}  // namespace
 
 	MainContext::MainContext()
-	{
-		DCHECK(!GMainContext);
-		GMainContext = this;
-	}
-
-
-	MainContext::MainContext(CefRefPtr<CefCommandLine> command_line)
-		: CmdLine(command_line),
-		IsInitialized(false),
+		: IsInitialized(false),
 		IsShuttingDown(false),
 		UseViews(false),
 		UsingCefLoop(false)
 	{
+		DCHECK(!GMainContext);
+		GMainContext = this;
+		CmdLine = GCmdLine->GetCefCmdLine();
+
+
 		DCHECK(CmdLine.get());
 
-		// Whether windowless (off-screen) rendering will be used.
 		WindowLessRendering = CmdLine->HasSwitch("off-screen-rendering-enabled");
 
-#if PLATFORM_WINDOWS || PLATFORM_LINUX
-		// Whether the Views framework will be used.
-		UseViews = true;
-
-		if (WindowLessRendering && UseViews) {
-			LOG(ERROR) <<
-				"Windowless rendering is not supported by the Views framework.";
-			UseViews = false;
-		}
-#endif 
+		UseViews = false;
 	}
 
 	MainContext::~MainContext()

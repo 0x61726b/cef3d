@@ -146,7 +146,7 @@ public:
 	{
 		isReady = true;
 
-		LoadURL("D:/C++/cef3d/Demos/OSR_SavetoFile/index.html");
+		LoadURL("D:/Arken/C++/cef3d/Demos/OSR_SavetoFile/index.html");
 	}
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
@@ -173,6 +173,42 @@ public:
 private:
 	DevToolsBrowser* devTools;
 	bool isReady;
+};
+
+class AppDelegate : public Cef3D::Cef3DAppDelegate
+{
+public:
+	virtual void OnBeforeChildProcessLaunch(Cef3D::Cef3DCommandLine& CmdLine) override
+	{
+		CmdLine.AppendSwitchWithValue("song_name", "1");
+		CmdLine.AppendSwitchWithValue("artist_name", "1");
+		CmdLine.AppendSwitchWithValue("artist_scrobbles", "1");
+		CmdLine.AppendSwitchWithValue("album_scrobbles", "1");
+		CmdLine.AppendSwitchWithValue("total_scrobbles", "1");
+		CmdLine.AppendSwitchWithValue("album_cover", "album.jpg");
+		CmdLine.AppendSwitchWithValue("artist_cover", "artist.jpg");
+		CmdLine.AppendSwitchWithValue("genre", "1");
+		CmdLine.AppendSwitchWithValue("user_name", "1");
+		CmdLine.AppendSwitchWithValue("user_avatar", "1");
+		CmdLine.AppendSwitchWithValue("user_artist_count", "1");
+		CmdLine.AppendSwitchWithValue("user_scrobbles", "1");
+		CmdLine.AppendSwitchWithValue("user_favourites", "1");
+
+		// 6 prev tracks
+		for (int i = 0; i < 6; i++)
+		{
+			std::string cover = "prev_track_";
+			cover.append(std::to_string(i));
+			cover.append("_cover");
+
+			std::string text = "prev_track_";
+			text.append(std::to_string(i));
+			text.append("_text");
+
+			CmdLine.AppendSwitchWithValue(cover, "album.jpg");
+			CmdLine.AppendSwitchWithValue(text, "hehe");
+		}
+	}
 };
 
 
@@ -211,7 +247,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		definition.OffscreenRendering = true;
 		definition.UseCefLoop = true;
 
-		bool init = Cef3D_Init(definition);
+		//AppDelegate appDelegate;
+
+		bool init = Cef3D_Init(definition,new AppDelegate());
 
 		if (!init)
 			return -1;
@@ -442,23 +480,23 @@ int GetMouseModifiers(WPARAM wparam)
 	using namespace Cef3D;
 	int modifiers = 0;
 	if (wparam & MK_CONTROL)
-		modifiers |= EVENTFLAG_CONTROL_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_CONTROL_DOWN;
 	if (wparam & MK_SHIFT)
-		modifiers |= EVENTFLAG_SHIFT_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_SHIFT_DOWN;
 	if (IsKeyDown(VK_MENU))
-		modifiers |= EVENTFLAG_ALT_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_ALT_DOWN;
 	if (wparam & MK_LBUTTON)
-		modifiers |= EVENTFLAG_LEFT_MOUSE_BUTTON;
+		modifiers |= CefEventFlags::EVENTFLAG_LEFT_MOUSE_BUTTON;
 	if (wparam & MK_MBUTTON)
-		modifiers |= EVENTFLAG_MIDDLE_MOUSE_BUTTON;
+		modifiers |= CefEventFlags::EVENTFLAG_MIDDLE_MOUSE_BUTTON;
 	if (wparam & MK_RBUTTON)
-		modifiers |= EVENTFLAG_RIGHT_MOUSE_BUTTON;
+		modifiers |= CefEventFlags::EVENTFLAG_RIGHT_MOUSE_BUTTON;
 
 	// Low bit set from GetKeyState indicates "toggled".
 	if (::GetKeyState(VK_NUMLOCK) & 1)
-		modifiers |= EVENTFLAG_NUM_LOCK_ON;
+		modifiers |= CefEventFlags::EVENTFLAG_NUM_LOCK_ON;
 	if (::GetKeyState(VK_CAPITAL) & 1)
-		modifiers |= EVENTFLAG_CAPS_LOCK_ON;
+		modifiers |= CefEventFlags::EVENTFLAG_CAPS_LOCK_ON;
 	return modifiers;
 }
 
@@ -468,22 +506,22 @@ int GetKeyboardModifiers(WPARAM wparam, LPARAM lparam)
 
 	int modifiers = 0;
 	if (IsKeyDown(VK_SHIFT))
-		modifiers |= EVENTFLAG_SHIFT_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_SHIFT_DOWN;
 	if (IsKeyDown(VK_CONTROL))
-		modifiers |= EVENTFLAG_CONTROL_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_CONTROL_DOWN;
 	if (IsKeyDown(VK_MENU))
-		modifiers |= EVENTFLAG_ALT_DOWN;
+		modifiers |= CefEventFlags::EVENTFLAG_ALT_DOWN;
 
 	// Low bit set from GetKeyState indicates "toggled".
 	if (::GetKeyState(VK_NUMLOCK) & 1)
-		modifiers |= EVENTFLAG_NUM_LOCK_ON;
+		modifiers |= CefEventFlags::EVENTFLAG_NUM_LOCK_ON;
 	if (::GetKeyState(VK_CAPITAL) & 1)
-		modifiers |= EVENTFLAG_CAPS_LOCK_ON;
+		modifiers |= CefEventFlags::EVENTFLAG_CAPS_LOCK_ON;
 
 	switch (wparam) {
 	case VK_RETURN:
 		if ((lparam >> 16) & KF_EXTENDED)
-			modifiers |= EVENTFLAG_IS_KEY_PAD;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_KEY_PAD;
 		break;
 	case VK_INSERT:
 	case VK_DELETE:
@@ -496,7 +534,7 @@ int GetKeyboardModifiers(WPARAM wparam, LPARAM lparam)
 	case VK_LEFT:
 	case VK_RIGHT:
 		if (!((lparam >> 16) & KF_EXTENDED))
-			modifiers |= EVENTFLAG_IS_KEY_PAD;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_KEY_PAD;
 		break;
 	case VK_NUMLOCK:
 	case VK_NUMPAD0:
@@ -515,31 +553,31 @@ int GetKeyboardModifiers(WPARAM wparam, LPARAM lparam)
 	case VK_ADD:
 	case VK_DECIMAL:
 	case VK_CLEAR:
-		modifiers |= EVENTFLAG_IS_KEY_PAD;
+		modifiers |= CefEventFlags::EVENTFLAG_IS_KEY_PAD;
 		break;
 	case VK_SHIFT:
 		if (IsKeyDown(VK_LSHIFT))
-			modifiers |= EVENTFLAG_IS_LEFT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_LEFT;
 		else if (IsKeyDown(VK_RSHIFT))
-			modifiers |= EVENTFLAG_IS_RIGHT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_RIGHT;
 		break;
 	case VK_CONTROL:
 		if (IsKeyDown(VK_LCONTROL))
-			modifiers |= EVENTFLAG_IS_LEFT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_LEFT;
 		else if (IsKeyDown(VK_RCONTROL))
-			modifiers |= EVENTFLAG_IS_RIGHT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_RIGHT;
 		break;
 	case VK_MENU:
 		if (IsKeyDown(VK_LMENU))
-			modifiers |= EVENTFLAG_IS_LEFT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_LEFT;
 		else if (IsKeyDown(VK_RMENU))
-			modifiers |= EVENTFLAG_IS_RIGHT;
+			modifiers |= CefEventFlags::EVENTFLAG_IS_RIGHT;
 		break;
 	case VK_LWIN:
-		modifiers |= EVENTFLAG_IS_LEFT;
+		modifiers |= CefEventFlags::EVENTFLAG_IS_LEFT;
 		break;
 	case VK_RWIN:
-		modifiers |= EVENTFLAG_IS_RIGHT;
+		modifiers |= CefEventFlags::EVENTFLAG_IS_RIGHT;
 		break;
 	}
 	return modifiers;

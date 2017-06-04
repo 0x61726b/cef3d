@@ -23,28 +23,7 @@ namespace Cef3D
 	public:
 		static CefProcessType GetProcessType(CefRefPtr<CefCommandLine> command_line);
 
-		class BrowserDelegate : public virtual CefBaseRefCounted
-		{
-		public:
-			virtual void OnBeforeCommandLineProcessing(
-				CefRefPtr<Cef3DBrowserApp> app,
-				CefRefPtr<CefCommandLine> command_line) {}
-
-			virtual void OnContextInitialized(CefRefPtr<Cef3DBrowserApp> app) {}
-
-			virtual void OnBeforeChildProcessLaunch(
-				CefRefPtr<Cef3DBrowserApp> app,
-				CefRefPtr<CefCommandLine> command_line) {}
-
-			virtual void OnRenderProcessThreadCreated(
-				CefRefPtr<Cef3DBrowserApp> app,
-				CefRefPtr<CefListValue> extra_info) {}
-		};
-
-		typedef std::set<CefRefPtr<BrowserDelegate> > DelegateSet;
-
 	private:
-		void RegisterDelegate(CefRefPtr<BrowserDelegate> del);
 
 		// CefApp methods.
 		void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr<CefCommandLine> command_line) OVERRIDE;
@@ -56,14 +35,12 @@ namespace Cef3D
 		void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line) OVERRIDE;
 		void OnRenderProcessThreadCreated(CefRefPtr<CefListValue> extra_info) OVERRIDE;
 		void OnScheduleMessagePumpWork(int64 delay) OVERRIDE;
-
-		// Set of supported Delegates.
-		DelegateSet DelegateList;
-		std::vector<CefString> CookieableSchemes;
 	public:
-		Cef3DBrowserApp();
+		Cef3DBrowserApp(Cef3DAppDelegate* Delegate);
 
 	private:
+		Cef3DAppDelegate* AppDelegate; // might be NULL
+
 		IMPLEMENT_REFCOUNTING(Cef3DBrowserApp);
 	};
 }

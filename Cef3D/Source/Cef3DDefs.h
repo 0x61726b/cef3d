@@ -147,6 +147,8 @@ namespace Cef3D
 		Cef3DBrowserType Type;
 
 		WindowHandle ParentHandle;
+
+		bool LoadImmediately;
 	};
 
 	struct Cef3DOSRSettings

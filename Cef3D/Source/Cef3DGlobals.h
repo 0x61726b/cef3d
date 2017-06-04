@@ -14,3 +14,5 @@
 
 extern CEF3D_API CefRefPtr<Cef3D::Cef3DBrowserApp> GCef3DBrowserApp;
 extern CEF3D_API Cef3D::MainContext* GMainContext;
+
+extern Cef3D::Cef3DCommandLine* GCmdLine;

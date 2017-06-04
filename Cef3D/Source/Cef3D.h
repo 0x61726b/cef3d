@@ -19,13 +19,15 @@
 #include "Cef3DPaths.h"
 #include "Cef3DEventSystem.h"
 #include "Cef3DBrowser.h"
+#include "Cef3DCommandLine.h"
+#include "Cef3DApplication.h"
 
 namespace Cef3D
 {
 	class Cef3DBrowser;
 }
 
-CEF3D_API bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition);
+CEF3D_API bool Cef3D_Init(const Cef3D::Cef3DDefinition& Definition, Cef3D::Cef3DAppDelegate* AppDelegate);
 CEF3D_API int Cef3D_SubprocessLogic();
 CEF3D_API bool Cef3D_Shutdown();
 CEF3D_API void Cef3D_PumpMessageLoop();

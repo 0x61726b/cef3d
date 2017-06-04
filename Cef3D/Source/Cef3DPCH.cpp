@@ -14,22 +14,7 @@
 
 CefRefPtr<Cef3D::Cef3DBrowserApp> GCef3DBrowserApp = 0;
 Cef3D::MainContext* GMainContext = 0;
-
-//using namespace Cef3D;
-//TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserCreated;
-//TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserClosing;
-//TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBrowserClosed;
-//
-//TMulticastDelegate<void(const std::string&)> Cef3DDelegates::OnSetAddress;
-//TMulticastDelegate<void(const std::string&)> Cef3DDelegates::OnSetTitle;
-//
-//TMulticastDelegate<void(CefRefPtr<CefImage>)> Cef3DDelegates::OnSetFavicon;
-//
-//TMulticastDelegate<void(bool)> Cef3DDelegates::OnSetFullscreen;
-//TMulticastDelegate<void(bool,bool,bool)> Cef3DDelegates::OnSetLoadingState;
-//TMulticastDelegate<void(const std::vector<CefDraggableRegion>&)> Cef3DDelegates::OnSetDraggableRegions;
-//TMulticastDelegate<void(bool)> Cef3DDelegates::OnTakeFocus;
-//TMulticastDelegate<void(Cef3DBrowser*)> Cef3DDelegates::OnBeforeContextMenu;
+Cef3D::Cef3DCommandLine* GCmdLine = 0;
 
 
 Cef3D::Cef3DDefinition::Cef3DDefinition()

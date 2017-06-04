@@ -22,7 +22,6 @@ namespace Cef3D
 	{
 	public:
 		MainContext();
-		MainContext(CefRefPtr<CefCommandLine> command_line);
 
 		// MainContext members.
 		
@@ -55,6 +54,11 @@ namespace Cef3D
 		void QuitMessageLoop();
 		void Shutdown();
 		~MainContext();
+
+		CefRefPtr<CefCommandLine> GetCmdLine()
+		{
+			return CmdLine;
+		}
 
 	private:
 
