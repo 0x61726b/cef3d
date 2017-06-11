@@ -39,3 +39,4 @@
 #include "Cef3DWindowManager.h"
 #include "Cef3DContext.h"
 #include "Cef3DGlobals.h"
+#include "Cef3DJsValue.h"

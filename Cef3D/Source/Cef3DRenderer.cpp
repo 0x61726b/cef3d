@@ -134,6 +134,16 @@ namespace Cef3D
 		object->SetValue("cppUserArtistCount", user_artist_count, V8_PROPERTY_ATTRIBUTE_NONE);
 		object->SetValue("cppUserScrobbles", user_scrobbles, V8_PROPERTY_ATTRIBUTE_NONE);
 		object->SetValue("cppUserFavourites", user_favourites, V8_PROPERTY_ATTRIBUTE_NONE);
+
+		CefRefPtr<Cef3DV8Handler> handler(new Cef3DV8Handler(this));
+		CefRefPtr<CefV8Value> app = CefV8Value::CreateObject(NULL, NULL);
+
+		CefRefPtr<CefV8Value> fnc = app->CreateFunction("exitApp", handler);
+		app->SetValue("exitApp", fnc, V8_PROPERTY_ATTRIBUTE_NONE);
+
+		object->SetValue("app", app, V8_PROPERTY_ATTRIBUTE_NONE);
+
+		
 	}
 
 	void Cef3DRenderer::OnContextReleased(CefRefPtr<CefBrowser> browser,CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) 

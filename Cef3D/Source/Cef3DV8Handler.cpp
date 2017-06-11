@@ -13,6 +13,9 @@
 #include "Cef3DPCH.h"
 #include "Cef3DV8Handler.h"
 
+#include "include/base/cef_bind.h"
+#include "include/wrapper/cef_closure_task.h"
+
 namespace Cef3D
 {
 	bool Cef3DV8Handler::Execute(
@@ -25,10 +28,14 @@ namespace Cef3D
 		if (!browser)
 			return false;
 
-		LOG(INFO) << "Received Js execute. Function name: " << name;
+		LOG(INFO) << "Received Js execute. Function name: ";
 
-		/*CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(name);
-		CefRefPtr<CefListValue> message_args = message->GetArgumentList();*/
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(name);
+		if (arguments.size() == 0)
+		{
+			browser->SendProcessMessage(PID_BROWSER, message);
+			return true;
+		}
 
 		return true;
 	}

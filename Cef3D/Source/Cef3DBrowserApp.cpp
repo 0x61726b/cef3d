@@ -44,6 +44,9 @@ namespace Cef3D
 			{
 				command_line->AppendSwitch("disable-gpu");
 				command_line->AppendSwitch("disable-gpu-compositing");
+				command_line->AppendSwitch("off-screen-rendering-enabled");
+				command_line->AppendSwitch("off-screen-frame-rate=60"); 
+
 			}
 		}
 

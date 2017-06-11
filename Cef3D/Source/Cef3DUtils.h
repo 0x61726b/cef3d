@@ -53,7 +53,7 @@ namespace Cef3D
 			CefBrowserSettings settings;
 
 			if (Definition.Type == Cef3DBrowserType::Offscreen)
-				settings.windowless_frame_rate = 120;
+				settings.windowless_frame_rate = 60;
 			return settings;
 		}
 	}

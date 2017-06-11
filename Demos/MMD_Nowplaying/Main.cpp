@@ -36,13 +36,15 @@ char* SourceHTMLTargetPath;
 char* TargetPngPath;
 
 // Exit after frame threshold
-int MaxFrameCountBeforeExit = 2;
+int MaxFrameCountBeforeExit = 15;
 
-// Timeout threshold
-int MaxSecondsBeforeExit = 5;
 
 // Current frame count
 int RenderedFrameCount = 0;
+int OnPaintFrameCount = 0;
+
+int TargetWidth = -1;
+int TargetHeight = -1;
 
 
 struct PreviousTrack
@@ -114,28 +116,33 @@ void WritePngToMemory(size_t w, size_t h, const ui8 *dataRGBA, std::vector<ui8> 
 }
 
 
-void Update(long timePassed)
-{
-	// Indicate that we want to exit if we reach the max frame count
-	if (RenderedFrameCount >= MaxFrameCountBeforeExit)
-	{
-		std::cout << "Exiting because max frame count has been reached." << std::endl;
-		GIsExiting = true;
-		return;
-	}
-
-	// Indicate that we want to exit if we didnt reach the max frame count but we raeched max seconds
-	if (RenderedFrameCount < MaxFrameCountBeforeExit && timePassed >= MaxSecondsBeforeExit)
-	{
-		std::cout << "Exiting because timeout. FrameCount:" << RenderedFrameCount << std::endl;
-		GIsExiting = true;
-	}
-}
+//void Update(long timePassed)
+//{
+//	// Indicate that we want to exit if we reach the max frame count
+//	if (RenderedFrameCount >= MaxFrameCountBeforeExit)
+//	{
+//		std::cout << "Exiting because max frame count has been reached." << std::endl;
+//		GIsExiting = true;
+//		return;
+//	}
+//
+//	// Indicate that we want to exit if we didnt reach the max frame count but we raeched max seconds
+//	if (RenderedFrameCount < MaxFrameCountBeforeExit && timePassed >= MaxSecondsBeforeExit)
+//	{
+//		std::cout << "Exiting because timeout. FrameCount:" << RenderedFrameCount << std::endl;
+//		GIsExiting = true;
+//	}
+//}
 
 /*
 * Html Browser instance that will be used to render |SourceHTMLTargetPath|
 * Deriving from |Cef3DBrowser| class lets us override the OnPaint method which will be called by Chromium with the invalidated pixel buffer.
 */
+
+#include <algorithm>
+#include <iterator>
+#include <set>
+
 class SampleBrowser : public Cef3DBrowser
 {
 public:
@@ -146,12 +153,22 @@ public:
 		int width,
 		int height) override
 	{
-		auto start = std::chrono::steady_clock::now();
+		std::cout << "OnPaint frame # " << OnPaintFrameCount << std::endl;
 
+		if (OnPaintFrameCount >= MaxFrameCountBeforeExit)
+			Render(buffer);
+
+		/*if (RenderedFrameCount >= MaxFrameCountBeforeExit && exitReceived)
+			GIsExiting = true;*/
+		OnPaintFrameCount++;
+	}
+
+	void Render(const void* buffer)
+	{
 		std::cout << "Rendering frame #" << RenderedFrameCount << std::endl;
 
 		std::vector<unsigned char> out;
-		WritePngToMemory(width, height, (unsigned char*)buffer, &out);
+		WritePngToMemory(TargetWidth, TargetHeight, (unsigned char*)buffer, &out);
 
 		std::ofstream outfile(TargetPngPath, std::ios::out | std::ios::binary);
 
@@ -162,42 +179,35 @@ public:
 			if (outfile.bad())
 			{
 				std::cout << "Could not save!";
+				return;
 			}
 		}
 		else
 		{
 			std::cout << "Could not open the file !";
+			return;
 		}
 
-
+		first_frame_rendered = true;
 		RenderedFrameCount++;
 
-		auto end = std::chrono::steady_clock::now();
-
-		auto diff = end - start;
-		std::cout << "Frame stats: " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+		if (first_frame_rendered)
+			GIsExiting = true;
 	}
 
-	virtual void OnSetLoadingState(bool isLoading, bool canGoBack, bool canGoForward)
+	virtual void OnProcessMessageReceived(const std::string& name)
 	{
-		isLoadingComplete = !isLoading;
-		std::cout << "Loading state:" << isLoading << std::endl;
-	}
-
-	void OnAfterCreated() override
-	{
-		// For speed, we use LoadImmediately = true instead of loading here
-		//LoadURL(SourceHTMLTargetPath);
-	}
-
-	virtual void OnDestroyed()
-	{
-
+		if (name == "exitApp")
+		{
+			exitReceived = true;
+			/*if(RenderedFrameCount >= MaxFrameCountBeforeExit)
+				GIsExiting = true;*/
+		}
 	}
 
 private:
-	bool isLoadingComplete;
-	bool isClosing;
+	bool first_frame_rendered;
+	bool exitReceived;
 };
 
 
@@ -230,7 +240,7 @@ public:
 			cover.append("_cover");
 
 			std::string text = "prev_track_";
-			text.append(std::to_string(i));
+			text.append(std::to_string(i)); 
 			text.append("_text");
 
 			CmdLine.AppendSwitchWithValue(cover, entry.PrevTracks[i].Cover);
@@ -316,40 +326,22 @@ int main(int argc, char** argv)
 	Cef3D::Cef3DBrowserDefinition def;
 	def.DefaultUrl = SourceHTMLTargetPath;
 	def.LoadImmediately = true;
-	def.Rect = Cef3D::Cef3DRect(710, 300);
+	def.Rect = Cef3D::Cef3DRect(710, 300 + 170);
+
+	TargetWidth = 710;
+	TargetHeight = 300;
 
 	std::auto_ptr<SampleBrowser> browser2;
 	browser2.reset(new SampleBrowser());
 	if (!Cef3D_CreateBrowser(browser2.get(), def))
 		return -1;
 
-	double time_counter = 0;
-
-	clock_t this_time = clock();
-	clock_t last_time = this_time;
-	int seconds = 0;
-
-	/* Main Loop */
 	while (!GIsExiting)
 	{
-		this_time = clock();
-
-		time_counter += (double)(this_time - last_time);
-
-		last_time = this_time;
-
-		if (time_counter > (double)(1 * CLOCKS_PER_SEC))
-		{
-			time_counter -= (double)(1 * CLOCKS_PER_SEC);
-			
-			Update(seconds);
-
-			seconds++;
-		}
-
-		/* Call Cef3D loop to start rendering */
 		Cef3D_PumpMessageLoop();
 	}
+	
+	std::cout << "Shutting down.." << std::endl;
 
 	/* We have exited the main loop, means we are exiting. Close the browser*/
 	browser2->Close(true);

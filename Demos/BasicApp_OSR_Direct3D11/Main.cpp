@@ -146,7 +146,7 @@ public:
 	{
 		isReady = true;
 
-		LoadURL("D:/Arken/C++/cef3d/Demos/OSR_SavetoFile/index.html");
+		LoadURL("https://www.testufo.com/#test=framerates");
 	}
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
@@ -218,8 +218,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	{
-		int WinWidth = 710;
-		int WinHeight = 380;
+		int WinWidth = 1400;
+		int WinHeight = 900;
 
 
 
@@ -257,7 +257,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.DefaultUrl = "D:/C++/cef3d/Demos/OSR_SavetoFile/index.html";
+		def.DefaultUrl = "https://www.testufo.com/#test=framerates";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 

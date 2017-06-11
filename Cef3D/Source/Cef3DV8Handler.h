@@ -12,9 +12,8 @@
 
 #pragma once
 
-#include "include/base/cef_bind.h"
-#include "include/wrapper/cef_closure_task.h"
 #include "include/cef_v8.h"
+#include "include/cef_client.h"
 
 namespace Cef3D
 {

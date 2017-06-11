@@ -63,7 +63,9 @@ namespace Cef3D
 			return true;
 		}
 
-		return false;
+		GMainContext->GetCef3DBrowser(browser)->OnProcessMessageReceived(message->GetName());
+
+		return true;
 	}
 
 	void Cef3DHandler::OnBeforeContextMenu(

@@ -92,6 +92,8 @@ namespace Cef3D
 
 		virtual void OnDestroyed() { };
 
+		virtual void OnProcessMessageReceived(const std::string& name) { }
+
 	private:
 		Cef3DBrowserType Type;
 		int BrowserID;
