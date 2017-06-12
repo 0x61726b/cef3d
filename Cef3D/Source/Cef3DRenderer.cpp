@@ -84,6 +84,9 @@ namespace Cef3D
 		for (; it != Delegates.end(); ++it)
 			(*it)->OnContextCreated(this, browser, frame, context);
 
+		LOG(INFO) << "Context created";
+		LOG(INFO) << context->GetBrowser()->GetIdentifier() << " id";
+
 		CefRefPtr<CefCommandLine> cmd = CefCommandLine::GetGlobalCommandLine();
 
 		CefRefPtr<CefV8Value> object = context->GetGlobal();
@@ -143,7 +146,10 @@ namespace Cef3D
 
 		object->SetValue("app", app, V8_PROPERTY_ATTRIBUTE_NONE);
 
-		
+		if (QueuedJsObjects.size())
+		{
+
+		}
 	}
 
 	void Cef3DRenderer::OnContextReleased(CefRefPtr<CefBrowser> browser,CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) 
@@ -175,11 +181,52 @@ namespace Cef3D
 
 		bool handled = false;
 
+		//LOG(INFO) << "Breaking";
+		//__debugbreak();
+
 		DelegateSet::iterator it = Delegates.begin();
 		for (; it != Delegates.end() && !handled; ++it) {
 			handled = (*it)->OnProcessMessageReceived(this, browser, source_process,
 				message);
 		}
+
+		CefString message_name = message->GetName();
+
+		if (message_name == "create_object_request")
+		{
+			CefRefPtr<CefListValue> args = message->GetArgumentList();
+			int obj_type = args->GetInt(0);
+			CefString obj_name = args->GetString(1);
+
+			switch (obj_type)
+			{
+			case Cef3DJsValueTypes::CEF3D_JSVALUE_INT:
+			{
+
+			}break;
+			case Cef3DJsValueTypes::CEF3D_JSVALUE_STRING:
+			{
+				CefString obj_val = args->GetString(2);
+
+				CefRefPtr<CefV8Context> v8_context = browser->GetMainFrame()->GetV8Context();
+				if (v8_context->IsValid() && v8_context->GetBrowser())
+				{
+					v8_context->Enter();
+					CefRefPtr<CefV8Value> v8_obj_value = CefV8Value::CreateString(obj_val);
+					CefRefPtr<CefV8Value> global_context = v8_context->GetGlobal();
+					if (global_context->IsValid() && global_context->IsObject())
+						global_context->SetValue(obj_name, v8_obj_value, V8_PROPERTY_ATTRIBUTE_NONE);
+
+					LOG(INFO) << "Created new string object";
+
+					v8_context->Exit();
+				}
+			}break;
+			default:
+				break;
+			}
+		}
+
 
 		return handled;
 	}

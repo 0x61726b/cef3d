@@ -159,7 +159,7 @@ public:
 			Render(buffer);
 
 		/*if (RenderedFrameCount >= MaxFrameCountBeforeExit && exitReceived)
-			GIsExiting = true;*/
+		GIsExiting = true;*/
 		OnPaintFrameCount++;
 	}
 
@@ -201,7 +201,7 @@ public:
 		{
 			exitReceived = true;
 			/*if(RenderedFrameCount >= MaxFrameCountBeforeExit)
-				GIsExiting = true;*/
+			GIsExiting = true;*/
 		}
 	}
 
@@ -240,7 +240,7 @@ public:
 			cover.append("_cover");
 
 			std::string text = "prev_track_";
-			text.append(std::to_string(i)); 
+			text.append(std::to_string(i));
 			text.append("_text");
 
 			CmdLine.AppendSwitchWithValue(cover, entry.PrevTracks[i].Cover);
@@ -278,20 +278,20 @@ int main(int argc, char** argv)
 	entry.ArtistCover = argv[15];
 
 	int j = 0;
-	for (int i = 0;  i < 12; i += 2)
+	for (int i = 0; i < 12; i += 2)
 	{
 		entry.PrevTracks[j].Cover = argv[16 + i];
 		entry.PrevTracks[j].Text = argv[16 + i + 1];
 		j++;
 	}
-	
+
 	// Output the arguments
 	std::cout << "---------------Cef3D-------------" << std::endl;
 	std::cout << "Target URL:" << SourceHTMLTargetPath << std::endl;
 	std::cout << "Target PNG:" << TargetPngPath << std::endl;
 	std::cout << "SongName:" << entry.SongName << std::endl;
 	std::cout << "ArtistName:" << entry.ArtistName << std::endl;
-	std::cout << "ArtistCover:" << entry.ArtistCover<< std::endl;
+	std::cout << "ArtistCover:" << entry.ArtistCover << std::endl;
 	std::cout << "AlbumCover:" << entry.AlbumCover << std::endl;
 	std::cout << "ArtistScrobbles:" << entry.ArtistScrobbles << std::endl;
 	std::cout << "AlbumScrobbles:" << entry.AlbumScrobbles << std::endl;
@@ -340,7 +340,7 @@ int main(int argc, char** argv)
 	{
 		Cef3D_PumpMessageLoop();
 	}
-	
+
 	std::cout << "Shutting down.." << std::endl;
 
 	/* We have exited the main loop, means we are exiting. Close the browser*/

@@ -13,8 +13,64 @@
 
 namespace Cef3D
 {
-	Cef3DJsValue * Cef3DJsValue::GetGlobal()
+	Cef3DJsValue::Cef3DJsValue(const std::string& name, Cef3DJsValueTypes type)
+		: Type(type),
+		Name(name)
 	{
-		return nullptr;
+	}
+
+	Cef3DJsValue Cef3DJsValue::CreateInt(const std::string& Name, int value)
+	{
+		return Cef3DJsInt::Create(Name, value);
+	}
+
+	Cef3DJsValue Cef3DJsValue::CreateString(const std::string& Name, const std::string & value)
+	{
+		return Cef3DJsString(Name, value);
+	}
+
+	void Cef3DJsValue::OnValueChanged()
+	{
+	}
+
+	/* Int Js type on browser process */
+	Cef3DJsInt::Cef3DJsInt(const std::string& Name,int value)
+		: Cef3DJsValue(Name, CEF3D_JSVALUE_INT),
+		Value(value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+	}
+	Cef3DJsValue Cef3DJsInt::Create(const std::string& Name, int value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+		return Cef3DJsInt(Name, value);
+	}
+	void Cef3DJsInt::SetValue(int value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+
+		Value = value;
+	}
+
+	/* String Js type on browser process */
+	Cef3DJsString::Cef3DJsString(const std::string& Name, const std::string & value)
+		: Cef3DJsValue(Name, CEF3D_JSVALUE_STRING),
+		Value(value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+	}
+
+	Cef3DJsValue Cef3DJsString::Create(const std::string& Name, const std::string & value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+
+		return Cef3DJsString(Name, value);
+	}
+
+	void Cef3DJsString::SetValue(const std::string & value)
+	{
+		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+
+		Value = value;
 	}
 }

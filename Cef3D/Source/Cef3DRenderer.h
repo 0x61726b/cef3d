@@ -109,6 +109,9 @@ namespace Cef3D
 	private:
 		DelegateSet Delegates;
 
+		typedef std::map< CefRefPtr<CefBrowser>, std::vector< Cef3DJsValue > > JsObjectQueueMap;
+		std::map< CefRefPtr<CefBrowser>, std::vector< Cef3DJsValue > > QueuedJsObjects;
+
 		IMPLEMENT_REFCOUNTING(Cef3DRenderer);
 		DISALLOW_COPY_AND_ASSIGN(Cef3DRenderer);
 	};

@@ -17,6 +17,7 @@
 #include "include/base/cef_scoped_ptr.h"
 #include "include/cef_task.h"
 #include "include/wrapper/cef_closure_task.h"
+#include "include/cef_v8.h"
 
 #define CURRENTLY_ON_MAIN_THREAD() CefCurrentlyOn(TID_UI)
 #define REQUIRE_MAIN_THREAD() DCHECK(CURRENTLY_ON_MAIN_THREAD())
@@ -122,4 +123,9 @@ namespace Cef3D
 			}
 		}
 	};
+
+	inline void SetList(CefRefPtr<CefV8Value> source, CefRefPtr<CefListValue> target);
+	inline void SetList(CefRefPtr<CefListValue> source, CefRefPtr<CefV8Value> target);
+	inline void SetListValue(CefRefPtr<CefListValue> list, int index, CefRefPtr<CefV8Value> value);
+	inline void SetListValue(CefRefPtr<CefV8Value> list, int index, CefRefPtr<CefListValue> value);
 }

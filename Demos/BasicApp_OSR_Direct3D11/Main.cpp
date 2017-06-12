@@ -44,6 +44,8 @@ SampleAppDirect3D11 DevToolsApp;
 
 std::map<HWND, Cef3D::Cef3DBrowser*> BrowserHWNDMap;
 
+using namespace Cef3D;
+
 
 class RootWindowWndProc : public WndProcListener
 {
@@ -82,8 +84,6 @@ public:
 	void OnAfterCreated() override
 	{
 		isReady = true;
-
-		LoadURL("http://google.com");
 	}
 
 	virtual void OnPopupShow(bool show)
@@ -144,14 +144,16 @@ public:
 
 	void OnAfterCreated() override
 	{
-		isReady = true;
+		//LoadURL("http://google.com");
 
-		LoadURL("https://www.testufo.com/#test=framerates");
+
+		isReady = true;
 	}
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
 	{
-		
+		Cef3DJsString val("am_i_work", "test_123");
+		CreateJsObject(val);
 	}
 
 	virtual Cef3DBrowser* GetBrowserForPopup() override
@@ -178,36 +180,9 @@ private:
 class AppDelegate : public Cef3D::Cef3DAppDelegate
 {
 public:
-	virtual void OnBeforeChildProcessLaunch(Cef3D::Cef3DCommandLine& CmdLine) override
+	virtual void OnRenderProcessThreadCreated()
 	{
-		CmdLine.AppendSwitchWithValue("song_name", "1");
-		CmdLine.AppendSwitchWithValue("artist_name", "1");
-		CmdLine.AppendSwitchWithValue("artist_scrobbles", "1");
-		CmdLine.AppendSwitchWithValue("album_scrobbles", "1");
-		CmdLine.AppendSwitchWithValue("total_scrobbles", "1");
-		CmdLine.AppendSwitchWithValue("album_cover", "album.jpg");
-		CmdLine.AppendSwitchWithValue("artist_cover", "artist.jpg");
-		CmdLine.AppendSwitchWithValue("genre", "1");
-		CmdLine.AppendSwitchWithValue("user_name", "1");
-		CmdLine.AppendSwitchWithValue("user_avatar", "1");
-		CmdLine.AppendSwitchWithValue("user_artist_count", "1");
-		CmdLine.AppendSwitchWithValue("user_scrobbles", "1");
-		CmdLine.AppendSwitchWithValue("user_favourites", "1");
 
-		// 6 prev tracks
-		for (int i = 0; i < 6; i++)
-		{
-			std::string cover = "prev_track_";
-			cover.append(std::to_string(i));
-			cover.append("_cover");
-
-			std::string text = "prev_track_";
-			text.append(std::to_string(i));
-			text.append("_text");
-
-			CmdLine.AppendSwitchWithValue(cover, "album.jpg");
-			CmdLine.AppendSwitchWithValue(text, "hehe");
-		}
 	}
 };
 
@@ -257,9 +232,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.DefaultUrl = "https://www.testufo.com/#test=framerates";
+		def.DefaultUrl = "https://www.google.com";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
+		def.LoadImmediately = true;
 
 		std::auto_ptr<SampleBrowser> browser2;
 		browser2.reset(new SampleBrowser());

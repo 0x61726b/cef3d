@@ -18,6 +18,7 @@
 #include "Cef3DFileSystem.h"
 #include "Cef3DPaths.h"
 #include "Cef3DEventSystem.h"
+#include "Cef3DJsValue.h"
 #include "Cef3DBrowser.h"
 #include "Cef3DCommandLine.h"
 #include "Cef3DApplication.h"

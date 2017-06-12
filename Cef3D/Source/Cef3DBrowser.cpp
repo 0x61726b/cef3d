@@ -279,6 +279,55 @@ namespace Cef3D
 		return false;
 	}
 
+	void Cef3DBrowser::OnProcessMessageReceived(Cef3DIPCMessageType type, const Cef3DIPCMessageResult & result)
+	{
+	}
+
+	void Cef3DBrowser::CreateJsObject(Cef3DJsInt & value)
+	{
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("create_object_request");
+		CefRefPtr<CefListValue> message_list = message->GetArgumentList();
+
+		message_list->SetInt(0, value.GetType());
+		message_list->SetString(1, value.GetName());
+		message_list->SetInt(2, value.GetValue());
+		AssociatedWindow->GetBrowser()->SendProcessMessage(PID_RENDERER, message);
+	}
+
+	void Cef3DBrowser::CreateJsObject(Cef3DJsString & value)
+	{
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("create_object_request");
+		CefRefPtr<CefListValue> message_list = message->GetArgumentList();
+
+		message_list->SetInt(0, value.GetType());
+		message_list->SetString(1, value.GetName());
+		message_list->SetString(2, value.GetValue());
+		AssociatedWindow->GetBrowser()->SendProcessMessage(PID_RENDERER, message);
+	}
+
+	void Cef3DBrowser::SetJsObjectValue(Cef3DJsInt& obj, Cef3DJsInt& value)
+	{
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("set_object_value");
+		CefRefPtr<CefListValue> message_list = message->GetArgumentList();
+
+		message_list->SetInt(0, value.GetType());
+		message_list->SetString(1, value.GetName());
+		message_list->SetInt(2, value.GetValue());
+
+		AssociatedWindow->GetBrowser()->SendProcessMessage(PID_RENDERER, message);
+	}
+
+	void Cef3DBrowser::SetJsObjectValue(Cef3DJsString& obj, Cef3DJsString& value)
+	{
+		CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("set_object_value");
+		CefRefPtr<CefListValue> message_list = message->GetArgumentList();
+
+		message_list->SetInt(0, value.GetType());
+		message_list->SetString(1, value.GetName());
+		message_list->SetString(2, value.GetValue());
+		AssociatedWindow->GetBrowser()->SendProcessMessage(PID_RENDERER, message);
+	}
+
 	void Cef3DBrowser::SetBrowserID(int ID)
 	{
 		BrowserID = ID;

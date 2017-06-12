@@ -93,6 +93,21 @@ namespace Cef3D
 		EVENTFLAG_IS_RIGHT = 1 << 11,
 	};
 
+	enum Cef3DIPCMessageType
+	{
+		CREATE_OBJECT_REQUEST,
+		CREATE_OBJECT_RESPONSE,
+
+		SET_VALUE_REQUEST,
+		SET_VALUE_RESPONSE
+	};
+
+	struct Cef3DIPCMessageResult
+	{
+		bool Result;
+		int AssociatedObjectId;
+	};
+
 	struct Cef3DRect
 	{
 		int Width;

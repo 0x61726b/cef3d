@@ -76,8 +76,19 @@ namespace Cef3D
 
 		bool IsTransparent() { return Transparent; }
 
-		/* Delegates */
+		
+		/* Javascript bindings */
+
+		void OnProcessMessageReceived(Cef3DIPCMessageType type, const Cef3DIPCMessageResult& result);
+
+		void CreateJsObject(Cef3DJsInt& value);
+		void CreateJsObject(Cef3DJsString& value);
+
+		void SetJsObjectValue(Cef3DJsInt& obj, Cef3DJsInt& value);
+		void SetJsObjectValue(Cef3DJsString& obj, Cef3DJsString& value);
+
 	public:
+		/* Delegates */
 		virtual void OnBeforeClose() {}
 		virtual void OnPopupShow(bool) {}
 		virtual void OnPopupSize(Cef3DRect) {}
