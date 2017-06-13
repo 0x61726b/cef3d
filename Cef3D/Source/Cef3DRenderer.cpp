@@ -87,7 +87,7 @@ namespace Cef3D
 		LOG(INFO) << "Context created";
 		LOG(INFO) << context->GetBrowser()->GetIdentifier() << " id";
 
-		CefRefPtr<CefCommandLine> cmd = CefCommandLine::GetGlobalCommandLine();
+		/*CefRefPtr<CefCommandLine> cmd = CefCommandLine::GetGlobalCommandLine();
 
 		CefRefPtr<CefV8Value> object = context->GetGlobal();
 		
@@ -144,11 +144,14 @@ namespace Cef3D
 		CefRefPtr<CefV8Value> fnc = app->CreateFunction("exitApp", handler);
 		app->SetValue("exitApp", fnc, V8_PROPERTY_ATTRIBUTE_NONE);
 
-		object->SetValue("app", app, V8_PROPERTY_ATTRIBUTE_NONE);
+		object->SetValue("app", app, V8_PROPERTY_ATTRIBUTE_NONE);*/
 
-		if (QueuedJsObjects.size())
+		LOG(INFO) << "Global object count:" << (int)GlobalJsObjects.size();
+
+		if (GlobalJsObjects.size())
 		{
-
+			LOG(INFO) << "Applying global objects:" << (int)GlobalJsObjects.size();
+			ApplyGlobalJsObjects();
 		}
 	}
 
@@ -198,6 +201,9 @@ namespace Cef3D
 			int obj_type = args->GetInt(0);
 			CefString obj_name = args->GetString(1);
 
+			LOG(INFO) << "create_object_request";
+			LOG(INFO) << "Type: " << obj_type << " Name: " << obj_name.ToString().c_str();
+
 			switch (obj_type)
 			{
 			case Cef3DJsValueTypes::CEF3D_JSVALUE_INT:
@@ -207,20 +213,10 @@ namespace Cef3D
 			case Cef3DJsValueTypes::CEF3D_JSVALUE_STRING:
 			{
 				CefString obj_val = args->GetString(2);
+				Cef3DJsValue cef3d_js_value(obj_name, obj_val);
 
-				CefRefPtr<CefV8Context> v8_context = browser->GetMainFrame()->GetV8Context();
-				if (v8_context->IsValid() && v8_context->GetBrowser())
-				{
-					v8_context->Enter();
-					CefRefPtr<CefV8Value> v8_obj_value = CefV8Value::CreateString(obj_val);
-					CefRefPtr<CefV8Value> global_context = v8_context->GetGlobal();
-					if (global_context->IsValid() && global_context->IsObject())
-						global_context->SetValue(obj_name, v8_obj_value, V8_PROPERTY_ATTRIBUTE_NONE);
-
-					LOG(INFO) << "Created new string object";
-
-					v8_context->Exit();
-				}
+				AddGlobalJsObject(browser, cef3d_js_value);
+				ApplyGlobalJsObjects();
 			}break;
 			default:
 				break;
@@ -229,5 +225,117 @@ namespace Cef3D
 
 
 		return handled;
+	}
+	bool Cef3DRenderer::GlobalJsObjectExists(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value)
+	{
+		GlobalJsObjectMap::iterator it = GlobalJsObjects.find(browser);
+		if (it == GlobalJsObjects.end())
+			return false;
+
+		std::vector<Cef3DJsValue> objects = it->second;
+		std::vector<Cef3DJsValue>::iterator val = std::find(objects.begin(), objects.end(), value);
+		if (val == objects.end())
+			return false;
+		return true;
+	}
+
+	void Cef3DRenderer::AddGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value)
+	{
+		if (!GlobalJsObjectExists(browser, value))
+		{
+			GlobalJsObjectMap::iterator it = GlobalJsObjects.find(browser);
+			std::vector<Cef3DJsValue> objects;
+			if (it != GlobalJsObjects.end())
+			{
+				objects = it->second;
+			}
+			
+			std::vector<Cef3DJsValue>::iterator val = std::find(objects.begin(), objects.end(), value);
+			// return if it already exists
+			if (val != objects.end())
+				return;
+
+			objects.push_back(value);
+
+			if (it == GlobalJsObjects.end())
+			{
+				GlobalJsObjects.insert(std::make_pair(browser, objects));
+			}
+		}
+	}
+
+	void Cef3DRenderer::RemoveGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value)
+	{
+		if (GlobalJsObjectExists(browser, value))
+		{
+			GlobalJsObjectMap::iterator it = GlobalJsObjects.find(browser);
+			if (it == GlobalJsObjects.end())
+				return;
+
+			std::vector<Cef3DJsValue> objects = it->second;
+			std::vector<Cef3DJsValue>::iterator val = std::find(objects.begin(), objects.end(), value);
+			// return if it doesnt exists
+			if (val == objects.end())
+				return;
+
+			objects.erase(val);
+		}
+	}
+
+	void Cef3DRenderer::UpdateGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value)
+	{
+		if (GlobalJsObjectExists(browser, value))
+		{
+			GlobalJsObjectMap::iterator it = GlobalJsObjects.find(browser);
+			if (it != GlobalJsObjects.end())
+				return;
+
+			std::vector<Cef3DJsValue> objects = it->second;
+			std::vector<Cef3DJsValue>::iterator val = std::find(objects.begin(), objects.end(), value);
+			// return if it doesnt exists
+			if (val == objects.end())
+				return;
+
+			*val = value;
+		}
+	}
+	void Cef3DRenderer::ApplyGlobalJsObjects()
+	{
+		GlobalJsObjectMap::iterator it = GlobalJsObjects.begin();
+		for (it; it != GlobalJsObjects.end(); ++it)
+		{
+			CefRefPtr<CefBrowser> browser = it->first;
+			std::vector<Cef3DJsValue> values = it->second;
+			for (int i = 0; i < values.size(); ++i)
+			{
+				Cef3DJsValue cef3d_value = values[i];
+				CefString cef3d_obj_name = cef3d_value.GetName();
+				int cef3d_value_type = cef3d_value.GetType();
+
+				switch (cef3d_value_type)
+				{
+				case CEF3D_JSVALUE_STRING:
+				{
+					CefRefPtr<CefV8Context> v8_context = browser->GetMainFrame()->GetV8Context();
+					CefString obj_val = cef3d_value.GetString();
+
+					if (v8_context->IsValid() && v8_context->GetBrowser())
+					{
+						v8_context->Enter();
+						CefRefPtr<CefV8Value> v8_obj_value = CefV8Value::CreateString(obj_val);
+						CefRefPtr<CefV8Value> global_context = v8_context->GetGlobal();
+						if (global_context->IsValid() && global_context->IsObject())
+							global_context->SetValue(cef3d_obj_name, v8_obj_value, V8_PROPERTY_ATTRIBUTE_NONE);
+
+						LOG(INFO) << "Created new string object";
+
+						v8_context->Exit();
+					}
+				}break;
+				default:
+					break;
+				}
+			}
+		}
 	}
 }

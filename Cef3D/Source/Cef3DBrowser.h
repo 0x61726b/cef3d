@@ -81,11 +81,7 @@ namespace Cef3D
 
 		void OnProcessMessageReceived(Cef3DIPCMessageType type, const Cef3DIPCMessageResult& result);
 
-		void CreateJsObject(Cef3DJsInt& value);
-		void CreateJsObject(Cef3DJsString& value);
-
-		void SetJsObjectValue(Cef3DJsInt& obj, Cef3DJsInt& value);
-		void SetJsObjectValue(Cef3DJsString& obj, Cef3DJsString& value);
+		void CreateJsObject(Cef3DJsValue& value);
 
 	public:
 		/* Delegates */

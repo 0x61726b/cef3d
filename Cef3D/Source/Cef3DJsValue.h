@@ -17,51 +17,41 @@ namespace Cef3D
 	enum Cef3DJsValueTypes
 	{
 		CEF3D_JSVALUE_INT,
-		CEF3D_JSVALUE_STRING
+		CEF3D_JSVALUE_STRING,
+		CEF3D_JSVALUE_DOUBLE,
+		CEF3D_JSVALUE_FLOAT
 	};
 	class CEF3D_API Cef3DJsValue
 	{
 	public:
 		Cef3DJsValue(const std::string& Name, Cef3DJsValueTypes type);
+		Cef3DJsValue(const std::string& name, const std::string& value);
+		Cef3DJsValue(const std::string& name, const char* value);
+		Cef3DJsValue(const std::string& name, int value);
+		Cef3DJsValue(const std::string& name, double value);
+		Cef3DJsValue(const std::string& name, float value);
 
 		Cef3DJsValueTypes GetType() const { return Type; }
 		std::string GetName() const { return Name;  }
 
-		static Cef3DJsValue CreateInt(const std::string& Name, int value);
-		static Cef3DJsValue CreateString(const std::string& Name, const std::string& value);
+		void SetString(const char* value);
+		void SetInt(int val);
+		void SetDouble(double val);
+		void SetFloat(float f);
 
-	private:
-		void OnValueChanged();
+		const std::string& GetString();
+		int GetInt();
+		double GetDouble();
+		float GetFloat();
+
+		bool operator==(const Cef3DJsValue& rhs) const
+		{
+			return GetName() == rhs.GetName();
+		}
 		
 	protected:
 		Cef3DJsValueTypes Type;
 		std::string Name;
-	};
-
-	class CEF3D_API Cef3DJsInt : public Cef3DJsValue
-	{
-	public:
-		Cef3DJsInt(const std::string& Name, int value);
-
-		static Cef3DJsValue Create(const std::string& Name, int value);
-
-	
-		void SetValue(int value);
-		int GetValue() const { return Value;  }
-	protected:
-		int Value;
-	};
-
-	class CEF3D_API Cef3DJsString : public Cef3DJsValue
-	{
-	public:
-		Cef3DJsString(const std::string& Name, const std::string& value);
-
-		static Cef3DJsValue Create(const std::string& Name, const std::string& value);
-
-		void SetValue(const std::string& value);
-		std::string GetValue() const { return Value;}
-	protected:
-		std::string Value;
+		Cef3DVariant Value;
 	};
 }

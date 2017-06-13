@@ -19,58 +19,79 @@ namespace Cef3D
 	{
 	}
 
-	Cef3DJsValue Cef3DJsValue::CreateInt(const std::string& Name, int value)
+	Cef3DJsValue::Cef3DJsValue(const std::string & name, const std::string & value)
+		: Type(CEF3D_JSVALUE_STRING),
+		Name(name)
 	{
-		return Cef3DJsInt::Create(Name, value);
+		SetString(value.c_str());
 	}
 
-	Cef3DJsValue Cef3DJsValue::CreateString(const std::string& Name, const std::string & value)
+	Cef3DJsValue::Cef3DJsValue(const std::string & name, const char* value)
+		: Type(CEF3D_JSVALUE_STRING),
+		Name(name)
 	{
-		return Cef3DJsString(Name, value);
+		SetString(value);
 	}
 
-	void Cef3DJsValue::OnValueChanged()
+	Cef3DJsValue::Cef3DJsValue(const std::string & name, int value)
+		: Type(CEF3D_JSVALUE_INT),
+		Name(name)
 	{
+		SetInt(value);
 	}
 
-	/* Int Js type on browser process */
-	Cef3DJsInt::Cef3DJsInt(const std::string& Name,int value)
-		: Cef3DJsValue(Name, CEF3D_JSVALUE_INT),
-		Value(value)
+	Cef3DJsValue::Cef3DJsValue(const std::string & name, double value)
+		: Type(CEF3D_JSVALUE_DOUBLE),
+		Name(name)
 	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+		SetDouble(value);
 	}
-	Cef3DJsValue Cef3DJsInt::Create(const std::string& Name, int value)
-	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
-		return Cef3DJsInt(Name, value);
-	}
-	void Cef3DJsInt::SetValue(int value)
-	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
 
+	Cef3DJsValue::Cef3DJsValue(const std::string & name, float value)
+		: Type(CEF3D_JSVALUE_FLOAT),
+		Name(name)
+	{
+		SetFloat(value);
+	}
+
+	void Cef3DJsValue::SetString(const char* value)
+	{
 		Value = value;
 	}
 
-	/* String Js type on browser process */
-	Cef3DJsString::Cef3DJsString(const std::string& Name, const std::string & value)
-		: Cef3DJsValue(Name, CEF3D_JSVALUE_STRING),
-		Value(value)
+	void Cef3DJsValue::SetInt(int val)
 	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
+		Value = val;
 	}
 
-	Cef3DJsValue Cef3DJsString::Create(const std::string& Name, const std::string & value)
+	void Cef3DJsValue::SetDouble(double val)
 	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
-
-		return Cef3DJsString(Name, value);
+		Value = val;
 	}
 
-	void Cef3DJsString::SetValue(const std::string & value)
+	void Cef3DJsValue::SetFloat(float val)
 	{
-		DCHECK(CURRENTLY_ON_MAIN_THREAD());
-
-		Value = value;
+		Value = val;
 	}
+
+	const std::string& Cef3DJsValue::GetString()
+	{
+		return Value.GetString();
+	}
+
+	int Cef3DJsValue::GetInt()
+	{
+		return Value.GetInt();
+	}
+
+	double Cef3DJsValue::GetDouble()
+	{
+		return Value.GetDouble();
+	}
+
+	float Cef3DJsValue::GetFloat()
+	{
+		return Value.GetFloat();
+	}
+	
 }

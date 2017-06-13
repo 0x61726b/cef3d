@@ -106,11 +106,17 @@ namespace Cef3D
 		void OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefDOMNode> node) OVERRIDE;
 		bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
+		bool GlobalJsObjectExists(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value);
+		void AddGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value);
+		void UpdateGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value);
+		void RemoveGlobalJsObject(CefRefPtr<CefBrowser> browser, const Cef3DJsValue& value);
+
+		void ApplyGlobalJsObjects();
 	private:
 		DelegateSet Delegates;
 
-		typedef std::map< CefRefPtr<CefBrowser>, std::vector< Cef3DJsValue > > JsObjectQueueMap;
-		std::map< CefRefPtr<CefBrowser>, std::vector< Cef3DJsValue > > QueuedJsObjects;
+		typedef std::map< CefRefPtr<CefBrowser>, std::vector< Cef3DJsValue > > GlobalJsObjectMap;
+		GlobalJsObjectMap GlobalJsObjects;
 
 		IMPLEMENT_REFCOUNTING(Cef3DRenderer);
 		DISALLOW_COPY_AND_ASSIGN(Cef3DRenderer);

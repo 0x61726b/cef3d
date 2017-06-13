@@ -87,6 +87,7 @@ namespace Cef3D
 			model->AddItem(1, "Close DevTools");
 			model->AddSeparator();
 			model->AddItem(2, "Inspect Element");
+			model->AddItem(3, "Refresh");
 		}
 
 		if (Delegate)
@@ -111,6 +112,10 @@ namespace Cef3D
 			return true;
 		case 2:
 			ShowDevTools(browser, CefPoint(params->GetXCoord(), params->GetYCoord()));
+			return true;
+
+		case 3:
+			browser->ReloadIgnoreCache();
 			return true;
 		default:
 			return true;

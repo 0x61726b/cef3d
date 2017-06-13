@@ -152,7 +152,7 @@ public:
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
 	{
-		Cef3DJsString val("am_i_work", "test_123");
+		Cef3DJsValue val("am_i_work", "test_123");
 		CreateJsObject(val);
 	}
 
@@ -195,8 +195,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 	{
 		int WinWidth = 1400;
 		int WinHeight = 900;
-
-
 
 		InitWindowDefinition windowDef;
 		windowDef.Width = WinWidth;

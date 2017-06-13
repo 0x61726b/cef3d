@@ -15,6 +15,7 @@
 #include "Cef3DPlatform.h"
 #include "Cef3DBuild.h"
 #include "Cef3DDefs.h"
+#include "Cef3DVariant.h"
 #include "Cef3DUtils.h"
 #include "Cef3DEventSystem.h"
 #include "Cef3DFileSystem.h"
