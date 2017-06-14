@@ -70,8 +70,6 @@ option(CEF3D_SHARED_LIBS OFF)
 CMAKE_DEPENDENT_OPTION(CEF3D_BUILD_DIRECT3D11_SAMPLE "Build OSR Direct3D 11 Sample App" ON "WIN32;" OFF)
 CMAKE_DEPENDENT_OPTION(CEF3D_BUILD_DIRECT3D12_SAMPLE "Build OSR Direct3D 12 Sample App" ON "WIN32;" OFF)
 
-set (CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
-
 add_subdirectory(Cef)
 add_subdirectory(Cef3D/Source)
 add_subdirectory(CefSubProcess)

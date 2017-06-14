@@ -46,33 +46,29 @@ int OnPaintFrameCount = 0;
 int TargetWidth = -1;
 int TargetHeight = -1;
 
-
-struct PreviousTrack
+struct ImageEntry
 {
 	char* Cover;
 	char* Text;
 };
 
-struct LastfmScrobbleEntry
+struct UserInfo
 {
-	char* SongName;
-	char* ArtistName;
-	char* AlbumCover;
-	char* ArtistCover;
-	char* ArtistScrobbles;
-	char* AlbumScrobbles;
-	char* TotalScrobbles;
-	char* Genre;
-	char* UserName;
-	char* UserAvatar;
-	char* UserArtistCount;
-	char* UserScrobbles;
-	char* UserFavourites;
-
-	PreviousTrack PrevTracks[6];
+	char* Name;
+	char* ScrobbleCount;
+	char* ArtistCount;
+	char* AlbumCount;
+	char* Avatar;
 };
 
-LastfmScrobbleEntry entry;
+ImageEntry topAlbum;
+ImageEntry topArtist;
+int topArtistCount = 0;
+int topAlbumCount = 0;
+std::vector<ImageEntry> topAlbums;
+std::vector<ImageEntry> topArtists;
+UserInfo userInfo;
+char* tags;
 
 typedef unsigned char ui8;
 #define ASSERT_EX(cond, error_message) do { if (!(cond)) { std::cerr << error_message; exit(1);} } while(0)
@@ -115,25 +111,6 @@ void WritePngToMemory(size_t w, size_t h, const ui8 *dataRGBA, std::vector<ui8> 
 	png_write_png(p, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 }
 
-
-//void Update(long timePassed)
-//{
-//	// Indicate that we want to exit if we reach the max frame count
-//	if (RenderedFrameCount >= MaxFrameCountBeforeExit)
-//	{
-//		std::cout << "Exiting because max frame count has been reached." << std::endl;
-//		GIsExiting = true;
-//		return;
-//	}
-//
-//	// Indicate that we want to exit if we didnt reach the max frame count but we raeched max seconds
-//	if (RenderedFrameCount < MaxFrameCountBeforeExit && timePassed >= MaxSecondsBeforeExit)
-//	{
-//		std::cout << "Exiting because timeout. FrameCount:" << RenderedFrameCount << std::endl;
-//		GIsExiting = true;
-//	}
-//}
-
 /*
 * Html Browser instance that will be used to render |SourceHTMLTargetPath|
 * Deriving from |Cef3DBrowser| class lets us override the OnPaint method which will be called by Chromium with the invalidated pixel buffer.
@@ -158,8 +135,6 @@ public:
 		if (OnPaintFrameCount >= MaxFrameCountBeforeExit)
 			Render(buffer);
 
-		/*if (RenderedFrameCount >= MaxFrameCountBeforeExit && exitReceived)
-		GIsExiting = true;*/
 		OnPaintFrameCount++;
 	}
 
@@ -197,12 +172,64 @@ public:
 
 	virtual void OnProcessMessageReceived(const std::string& name)
 	{
-		if (name == "exitApp")
+
+	}
+
+	virtual void OnAfterCreated()
+	{
+		Cef3DJsValue jsTopAlbumCount("cppAlbumCount", std::to_string(topAlbumCount));
+		Cef3DJsValue jsTopArtistCount("cppArtistCount", std::to_string(topArtistCount));
+
+		Cef3DJsValue jsTopAlbumText("cppTopAlbumText", topAlbum.Text);
+		Cef3DJsValue jsTopAlbumCover("cppTopAlbumCover", topAlbum.Cover);
+
+		Cef3DJsValue jsTopArtistText("cppTopArtistText", topArtist.Text);
+		Cef3DJsValue jsTopArtistCover("cppTopArtistCover", topArtist.Cover);
+
+		Cef3DJsValue jsUserArtists("cppUserArtists", userInfo.ArtistCount);
+		Cef3DJsValue jsUserAlbums("cppUserAlbums", userInfo.AlbumCount);
+		Cef3DJsValue jsUserScrobbles("cppUserScrobbles", userInfo.ScrobbleCount);
+		Cef3DJsValue jsUserAvatar("cppUserAvatar", userInfo.Avatar);
+		Cef3DJsValue jsUserName("cppUserName", userInfo.Name);
+
+		Cef3DJsValue jsTags("cppTags", tags);
+
+		CreateJsObject(jsTopAlbumCount);
+		CreateJsObject(jsTopArtistCount);
+
+		CreateJsObject(jsTopAlbumText);
+		CreateJsObject(jsTopAlbumCover);
+
+		CreateJsObject(jsTopArtistText);
+		CreateJsObject(jsTopArtistCover);
+
+		CreateJsObject(jsUserArtists);
+		CreateJsObject(jsUserAlbums);
+		CreateJsObject(jsUserScrobbles);
+		CreateJsObject(jsUserAvatar);
+
+		CreateJsObject(jsTags);
+		CreateJsObject(jsUserName);
+
+		for (int i = 0; i < topAlbumCount; i++)
 		{
-			exitReceived = true;
-			/*if(RenderedFrameCount >= MaxFrameCountBeforeExit)
-			GIsExiting = true;*/
+			Cef3DJsValue jsTopAlbumText_("cppTopAlbum_" + std::to_string(i) + "_Text", topAlbums[i].Text);
+			Cef3DJsValue jsTopAlbumCover_("cppTopAlbum_" + std::to_string(i) + "_Cover", topAlbums[i].Cover);
+
+			CreateJsObject(jsTopAlbumText_);
+			CreateJsObject(jsTopAlbumCover_);
 		}
+
+		for (int i = 0; i < topArtistCount; i++)
+		{
+			Cef3DJsValue jsTopArtistText_("cppTopArtist_" + std::to_string(i) + "_Text", topArtists[i].Text);
+			Cef3DJsValue jsTopArtistCover_("cppTopArtist_" + std::to_string(i) + "_Cover", topArtists[i].Cover);
+
+			CreateJsObject(jsTopArtistText_);
+			CreateJsObject(jsTopArtistCover_);
+		}
+
+		
 	}
 
 private:
@@ -218,34 +245,7 @@ class AppDelegate : public Cef3D::Cef3DAppDelegate
 public:
 	virtual void OnBeforeChildProcessLaunch(Cef3D::Cef3DCommandLine& CmdLine) override
 	{
-		CmdLine.AppendSwitchWithValue("song_name", entry.SongName);
-		CmdLine.AppendSwitchWithValue("artist_name", entry.ArtistName);
-		CmdLine.AppendSwitchWithValue("artist_scrobbles", entry.ArtistScrobbles);
-		CmdLine.AppendSwitchWithValue("album_scrobbles", entry.AlbumScrobbles);
-		CmdLine.AppendSwitchWithValue("total_scrobbles", entry.TotalScrobbles);
-		CmdLine.AppendSwitchWithValue("album_cover", entry.AlbumCover);
-		CmdLine.AppendSwitchWithValue("artist_cover", entry.ArtistCover);
-		CmdLine.AppendSwitchWithValue("genre", entry.Genre);
-		CmdLine.AppendSwitchWithValue("user_name", entry.UserName);
-		CmdLine.AppendSwitchWithValue("user_avatar", entry.UserAvatar);
-		CmdLine.AppendSwitchWithValue("user_artist_count", entry.UserArtistCount);
-		CmdLine.AppendSwitchWithValue("user_scrobbles", entry.UserScrobbles);
-		CmdLine.AppendSwitchWithValue("user_favourites", entry.UserFavourites);
-
-		// 6 prev tracks
-		for (int i = 0; i < 6; i++)
-		{
-			std::string cover = "prev_track_";
-			cover.append(std::to_string(i));
-			cover.append("_cover");
-
-			std::string text = "prev_track_";
-			text.append(std::to_string(i));
-			text.append("_text");
-
-			CmdLine.AppendSwitchWithValue(cover, entry.PrevTracks[i].Cover);
-			CmdLine.AppendSwitchWithValue(text, entry.PrevTracks[i].Text);
-		}
+		
 	}
 };
 
@@ -253,61 +253,92 @@ int main(int argc, char** argv)
 {
 	auto start = std::chrono::steady_clock::now();
 
-	if (argc != 3 + 25)
-	{
-		std::cout << "Need 28 parameters. Got: " << argc << " 1: Target HTML, 2: Output PNG path" << std::endl;
-		return 0;
-	}
-
+	if (argc <= 5)
+		return -1;
+	
 	// Read arguments from command line
 	SourceHTMLTargetPath = argv[1];
 	TargetPngPath = argv[2];
 
-	entry.SongName = argv[3];
-	entry.ArtistName = argv[4];
-	entry.AlbumCover = argv[5];
-	entry.ArtistScrobbles = argv[6];
-	entry.AlbumScrobbles = argv[7];
-	entry.TotalScrobbles = argv[8];
-	entry.Genre = argv[9];
-	entry.UserName = argv[10];
-	entry.UserAvatar = argv[11];
-	entry.UserArtistCount = argv[12];
-	entry.UserScrobbles = argv[13];
-	entry.UserFavourites = argv[14];
-	entry.ArtistCover = argv[15];
+	topAlbumCount = atoi(argv[4]);
+	topArtistCount = atoi(argv[3]);
+
+	int expected_argc = 1 + 14 + topAlbumCount * 2 + topArtistCount * 2;
+
+	if (argc != expected_argc)
+	{
+		std::cout << "unpexpected exit. Arg count: " << argc << " expected:" << expected_argc;
+		return -1;
+	}
+
+
+	topArtist.Text = argv[5];
+	topArtist.Cover = argv[6];
+
+	topAlbum.Text = argv[7];
+	topAlbum.Cover = argv[8];
+
+	userInfo.Name = argv[9];
+	userInfo.ArtistCount = argv[10];
+	userInfo.AlbumCount = argv[11];
+	userInfo.ScrobbleCount = argv[12];
+	userInfo.Avatar = argv[13];
+	tags = argv[14];
 
 	int j = 0;
-	for (int i = 0; i < 12; i += 2)
+	for (int i = 0; i < topArtistCount*2; i+=2)
 	{
-		entry.PrevTracks[j].Cover = argv[16 + i];
-		entry.PrevTracks[j].Text = argv[16 + i + 1];
+		ImageEntry top_artist;
+		top_artist.Text = argv[15 + i];
+		top_artist.Cover = argv[15 + i + 1];
+		topArtists.push_back(top_artist);
 		j++;
 	}
+
+	j = 0;
+	for (int i = 0; i < topAlbumCount * 2; i += 2)
+	{
+		ImageEntry top_album;
+		top_album.Text = argv[15 + topArtistCount*2 + i];
+		top_album.Cover = argv[15 + topArtistCount*2 +  i + 1];
+		topAlbums.push_back(top_album);
+		j++;
+	}
+
+
+	
 
 	// Output the arguments
 	std::cout << "---------------Cef3D-------------" << std::endl;
 	std::cout << "Target URL:" << SourceHTMLTargetPath << std::endl;
 	std::cout << "Target PNG:" << TargetPngPath << std::endl;
-	std::cout << "SongName:" << entry.SongName << std::endl;
-	std::cout << "ArtistName:" << entry.ArtistName << std::endl;
-	std::cout << "ArtistCover:" << entry.ArtistCover << std::endl;
-	std::cout << "AlbumCover:" << entry.AlbumCover << std::endl;
-	std::cout << "ArtistScrobbles:" << entry.ArtistScrobbles << std::endl;
-	std::cout << "AlbumScrobbles:" << entry.AlbumScrobbles << std::endl;
-	std::cout << "TotalScrobbles:" << entry.TotalScrobbles << std::endl;
-	std::cout << "Genre:" << entry.Genre << std::endl;
-	std::cout << "UserName:" << entry.UserName << std::endl;
-	std::cout << "UserAvatar:" << entry.UserAvatar << std::endl;
-	std::cout << "UserArtistCount:" << entry.UserArtistCount << std::endl;
-	std::cout << "UserScrobbles:" << entry.UserScrobbles << std::endl;
-	std::cout << "UserFavourites:" << entry.UserFavourites << std::endl;
-	for (int i = 0; i < 6; i++)
+
+	std::cout << "Top Artist Count:" << topArtistCount << std::endl;
+	std::cout << "Top Album Count:" << topAlbumCount << std::endl;
+
+	std::cout << "Top Artist text:" << topArtist.Text << std::endl;
+	std::cout << "Top Artist cover:" << topArtist.Cover << std::endl;
+
+	std::cout << "Top Album text:" << topAlbum.Text << std::endl;
+	std::cout << "Top Album cover:" << topAlbum.Cover << std::endl;
+
+	std::cout << "UserInfo name:" << userInfo.Name << std::endl;
+	std::cout << "UserInfo artist count:" << userInfo.ArtistCount << std::endl;
+	std::cout << "UserInfo album count:" << userInfo.AlbumCount << std::endl;
+	std::cout << "UserInfo scrobble count:" << userInfo.ScrobbleCount << std::endl;
+
+	for (int i = 0; i < topArtistCount; i++)
 	{
-		std::cout << "PrevTrack" << i << "_Cover:" << entry.PrevTracks[i].Cover << std::endl;
-		std::cout << "PrevTrack" << i << "_Text:" << entry.PrevTracks[i].Text << std::endl;
+		std::cout << "Top Artist " << std::to_string(i) << " text:" << topArtists[i].Text << std::endl;
+		std::cout << "Top Artist " << std::to_string(i) << " cover:" << topArtists[i].Cover << std::endl;
 	}
 
+	for (int i = 0; i < topAlbumCount; i++)
+	{
+		std::cout << "Top Album " << std::to_string(i) << " text:" << topAlbums[i].Text << std::endl;
+		std::cout << "Top Album " << std::to_string(i) << " cover:" << topAlbums[i].Cover << std::endl;
+	}
+	
 
 	/* Initialize Cef3D */
 	bool isSubProcessed = true;
@@ -316,20 +347,22 @@ int main(int argc, char** argv)
 	definition.UseChildProcess = isSubProcessed;
 	definition.OffscreenRendering = true;
 	definition.UseCefLoop = false;
+	definition.LogLevel = Cef3DLogLevel::Warning;
 
 	AppDelegate appDel;
 	bool init = Cef3D_Init(definition, &appDel);
-
+	
 	if (!init)
 		return -1;
 
 	Cef3D::Cef3DBrowserDefinition def;
 	def.DefaultUrl = SourceHTMLTargetPath;
 	def.LoadImmediately = true;
-	def.Rect = Cef3D::Cef3DRect(710, 300 + 170);
+	def.Rect = Cef3D::Cef3DRect(1200, 900 + 170);
+	
 
-	TargetWidth = 710;
-	TargetHeight = 300;
+	TargetWidth = 1200;
+	TargetHeight = 900;
 
 	std::auto_ptr<SampleBrowser> browser2;
 	browser2.reset(new SampleBrowser());

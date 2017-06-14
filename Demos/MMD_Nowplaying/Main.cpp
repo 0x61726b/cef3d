@@ -205,6 +205,55 @@ public:
 		}
 	}
 
+	virtual void OnAfterCreated()
+	{
+		Cef3DJsValue song_name("cppSongName", entry.SongName);
+		Cef3DJsValue artist_name("cppArtistName", entry.ArtistName);
+		Cef3DJsValue artist_scrobbles("cppArtistScrobbles", entry.ArtistScrobbles);
+		Cef3DJsValue album_scrobbles("cppAlbumScrobbles", entry.AlbumScrobbles);
+		Cef3DJsValue total_scrobbles("cppTotalScrobbles", entry.TotalScrobbles);
+		Cef3DJsValue album_cover("cppAlbumCover", entry.AlbumCover);
+		Cef3DJsValue artist_cover("cppArtistCover", entry.ArtistCover);
+		Cef3DJsValue genre("cppGenre", entry.Genre);
+		Cef3DJsValue user_name("cppUserName", entry.UserName);
+		Cef3DJsValue user_avatar("cppUserAvatar", entry.UserAvatar);
+		Cef3DJsValue user_artist_count("cppUserArtistCount", entry.UserArtistCount);
+		Cef3DJsValue user_scrobbles("cppUserScrobbles", entry.UserScrobbles);
+		Cef3DJsValue user_favourites("cppUserFavourites", entry.UserFavourites);
+
+		this->CreateJsObject(song_name);
+		this->CreateJsObject(artist_name);
+		this->CreateJsObject(artist_scrobbles);
+		this->CreateJsObject(album_scrobbles);
+		this->CreateJsObject(total_scrobbles);
+		this->CreateJsObject(album_cover);
+		this->CreateJsObject(artist_cover);
+		this->CreateJsObject(genre);
+		this->CreateJsObject(user_name);
+		this->CreateJsObject(user_avatar);
+		this->CreateJsObject(user_artist_count);
+		this->CreateJsObject(user_scrobbles);
+		this->CreateJsObject(user_favourites);
+
+		// 6 prev tracks
+		for (int i = 0; i < 6; i++)
+		{
+			std::string cover = "prev_track_";
+			cover.append(std::to_string(i));
+			cover.append("_cover");
+
+			std::string text = "prev_track_";
+			text.append(std::to_string(i));
+			text.append("_text");
+
+			Cef3DJsValue cover_js(cover, entry.PrevTracks[i].Cover);
+			Cef3DJsValue text_js(text, entry.PrevTracks[i].Text);
+
+			this->CreateJsObject(cover_js);
+			this->CreateJsObject(text_js);
+		}
+	}
+
 private:
 	bool first_frame_rendered;
 	bool exitReceived;
@@ -218,34 +267,7 @@ class AppDelegate : public Cef3D::Cef3DAppDelegate
 public:
 	virtual void OnBeforeChildProcessLaunch(Cef3D::Cef3DCommandLine& CmdLine) override
 	{
-		CmdLine.AppendSwitchWithValue("song_name", entry.SongName);
-		CmdLine.AppendSwitchWithValue("artist_name", entry.ArtistName);
-		CmdLine.AppendSwitchWithValue("artist_scrobbles", entry.ArtistScrobbles);
-		CmdLine.AppendSwitchWithValue("album_scrobbles", entry.AlbumScrobbles);
-		CmdLine.AppendSwitchWithValue("total_scrobbles", entry.TotalScrobbles);
-		CmdLine.AppendSwitchWithValue("album_cover", entry.AlbumCover);
-		CmdLine.AppendSwitchWithValue("artist_cover", entry.ArtistCover);
-		CmdLine.AppendSwitchWithValue("genre", entry.Genre);
-		CmdLine.AppendSwitchWithValue("user_name", entry.UserName);
-		CmdLine.AppendSwitchWithValue("user_avatar", entry.UserAvatar);
-		CmdLine.AppendSwitchWithValue("user_artist_count", entry.UserArtistCount);
-		CmdLine.AppendSwitchWithValue("user_scrobbles", entry.UserScrobbles);
-		CmdLine.AppendSwitchWithValue("user_favourites", entry.UserFavourites);
-
-		// 6 prev tracks
-		for (int i = 0; i < 6; i++)
-		{
-			std::string cover = "prev_track_";
-			cover.append(std::to_string(i));
-			cover.append("_cover");
-
-			std::string text = "prev_track_";
-			text.append(std::to_string(i)); 
-			text.append("_text");
-
-			CmdLine.AppendSwitchWithValue(cover, entry.PrevTracks[i].Cover);
-			CmdLine.AppendSwitchWithValue(text, entry.PrevTracks[i].Text);
-		}
+		
 	}
 };
 
@@ -316,6 +338,7 @@ int main(int argc, char** argv)
 	definition.UseChildProcess = isSubProcessed;
 	definition.OffscreenRendering = true;
 	definition.UseCefLoop = false;
+	definition.LogLevel = Cef3DLogLevel::Warning;
 
 	AppDelegate appDel;
 	bool init = Cef3D_Init(definition, &appDel);

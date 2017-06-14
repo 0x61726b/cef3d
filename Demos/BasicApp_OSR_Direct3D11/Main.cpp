@@ -146,14 +146,12 @@ public:
 	{
 		//LoadURL("http://google.com");
 
-
 		isReady = true;
 	}
 
 	virtual void OnSetLoadingState(bool a, bool b, bool c)
 	{
-		Cef3DJsValue val("am_i_work", "test_123");
-		CreateJsObject(val);
+		
 	}
 
 	virtual Cef3DBrowser* GetBrowserForPopup() override

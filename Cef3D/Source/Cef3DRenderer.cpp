@@ -87,65 +87,6 @@ namespace Cef3D
 		LOG(INFO) << "Context created";
 		LOG(INFO) << context->GetBrowser()->GetIdentifier() << " id";
 
-		/*CefRefPtr<CefCommandLine> cmd = CefCommandLine::GetGlobalCommandLine();
-
-		CefRefPtr<CefV8Value> object = context->GetGlobal();
-		
-		CefRefPtr<CefV8Value> song_name = CefV8Value::CreateString(cmd->GetSwitchValue("song_name"));
-		CefRefPtr<CefV8Value> artist_name = CefV8Value::CreateString(cmd->GetSwitchValue("artist_name"));
-		CefRefPtr<CefV8Value> artist_scrobbles = CefV8Value::CreateString(cmd->GetSwitchValue("artist_scrobbles"));
-		CefRefPtr<CefV8Value> album_scrobbles = CefV8Value::CreateString(cmd->GetSwitchValue("album_scrobbles"));
-		CefRefPtr<CefV8Value> total_scrobbles = CefV8Value::CreateString(cmd->GetSwitchValue("total_scrobbles"));
-		CefRefPtr<CefV8Value> album_cover = CefV8Value::CreateString(cmd->GetSwitchValue("album_cover"));
-		CefRefPtr<CefV8Value> artist_cover = CefV8Value::CreateString(cmd->GetSwitchValue("artist_cover"));
-		CefRefPtr<CefV8Value> genre = CefV8Value::CreateString(cmd->GetSwitchValue("genre"));
-		CefRefPtr<CefV8Value> user_name = CefV8Value::CreateString(cmd->GetSwitchValue("user_name"));
-		CefRefPtr<CefV8Value> user_avatar = CefV8Value::CreateString(cmd->GetSwitchValue("user_avatar"));
-		CefRefPtr<CefV8Value> user_artist_count = CefV8Value::CreateString(cmd->GetSwitchValue("user_artist_count"));
-		CefRefPtr<CefV8Value> user_scrobbles = CefV8Value::CreateString(cmd->GetSwitchValue("user_scrobbles"));
-		CefRefPtr<CefV8Value> user_favourites = CefV8Value::CreateString(cmd->GetSwitchValue("user_favourites"));
-
-		for (int i = 0; i<6; i++)
-		{
-			std::string cover_switch = "prev_track_";
-			cover_switch.append(std::to_string(i));
-			cover_switch.append("_cover");
-
-			std::string text_switch = "prev_track_";
-			text_switch.append(std::to_string(i));
-			text_switch.append("_text");
-
-			CefRefPtr<CefV8Value> cover = CefV8Value::CreateString(cmd->GetSwitchValue(cover_switch));
-			CefRefPtr<CefV8Value> text = CefV8Value::CreateString(cmd->GetSwitchValue(text_switch));
-
-			object->SetValue(cover_switch, cover, V8_PROPERTY_ATTRIBUTE_NONE);
-			object->SetValue(text_switch, text, V8_PROPERTY_ATTRIBUTE_NONE);
-		}
-
-
-
-		object->SetValue("cppSongName", song_name, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppArtistName", artist_name, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppAlbumCover", album_cover, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppArtistCover", artist_cover, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppArtistScrobbles", artist_scrobbles, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppAlbumScrobbles", album_scrobbles, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppTotalScrobbles", total_scrobbles, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppGenre", genre, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppUserName", user_name, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppUserAvatar", user_avatar, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppUserArtistCount", user_artist_count, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppUserScrobbles", user_scrobbles, V8_PROPERTY_ATTRIBUTE_NONE);
-		object->SetValue("cppUserFavourites", user_favourites, V8_PROPERTY_ATTRIBUTE_NONE);
-
-		CefRefPtr<Cef3DV8Handler> handler(new Cef3DV8Handler(this));
-		CefRefPtr<CefV8Value> app = CefV8Value::CreateObject(NULL, NULL);
-
-		CefRefPtr<CefV8Value> fnc = app->CreateFunction("exitApp", handler);
-		app->SetValue("exitApp", fnc, V8_PROPERTY_ATTRIBUTE_NONE);
-
-		object->SetValue("app", app, V8_PROPERTY_ATTRIBUTE_NONE);*/
-
 		LOG(INFO) << "Global object count:" << (int)GlobalJsObjects.size();
 
 		if (GlobalJsObjects.size())
@@ -201,8 +142,8 @@ namespace Cef3D
 			int obj_type = args->GetInt(0);
 			CefString obj_name = args->GetString(1);
 
-			LOG(INFO) << "create_object_request";
-			LOG(INFO) << "Type: " << obj_type << " Name: " << obj_name.ToString().c_str();
+			DLOG(INFO) << "create_object_request";
+			DLOG(INFO) << "Type: " << obj_type << " Name: " << obj_name.ToString().c_str();
 
 			switch (obj_type)
 			{
@@ -327,7 +268,7 @@ namespace Cef3D
 						if (global_context->IsValid() && global_context->IsObject())
 							global_context->SetValue(cef3d_obj_name, v8_obj_value, V8_PROPERTY_ATTRIBUTE_NONE);
 
-						LOG(INFO) << "Created new string object";
+						DLOG(INFO) << "Created new string object";
 
 						v8_context->Exit();
 					}
