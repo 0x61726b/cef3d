@@ -36,7 +36,7 @@ char* SourceHTMLTargetPath;
 char* TargetPngPath;
 
 // Exit after frame threshold
-int MaxFrameCountBeforeExit = 15;
+int MaxFrameCountBeforeExit = 4;
 
 
 // Current frame count

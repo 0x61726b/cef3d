@@ -36,7 +36,6 @@ char* SourceHTMLTargetPath;
 char* TargetPngPath;
 
 // Exit after frame threshold
-int MaxFrameCountBeforeExit = 15;
 
 
 // Current frame count
@@ -358,11 +357,11 @@ int main(int argc, char** argv)
 	Cef3D::Cef3DBrowserDefinition def;
 	def.DefaultUrl = SourceHTMLTargetPath;
 	def.LoadImmediately = true;
-	def.Rect = Cef3D::Cef3DRect(1200, 900 + 170);
+	def.Rect = Cef3D::Cef3DRect(1200, 970 + 170);
 	
 
 	TargetWidth = 1200;
-	TargetHeight = 900;
+	TargetHeight = 970;
 
 	std::auto_ptr<SampleBrowser> browser2;
 	browser2.reset(new SampleBrowser());
