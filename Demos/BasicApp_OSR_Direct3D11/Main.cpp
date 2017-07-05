@@ -228,7 +228,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInInstance, _In_opt_ HINSTANCE hPrevInstance,
 		using namespace Cef3D;
 
 		Cef3D::Cef3DBrowserDefinition def;
-		def.DefaultUrl = "https://www.google.com";
+		def.DefaultUrl = "http://rateyourmusic.com/search?searchtype=a&searchterm=iron+maiden";
 		def.Rect = Cef3D::Cef3DRect(WinWidth, WinHeight);
 		def.ParentHandle = TopWindow;
 		def.LoadImmediately = true;

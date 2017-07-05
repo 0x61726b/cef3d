@@ -8,3 +8,4 @@ endif()
 
 add_subdirectory(MMD_Profile)
 add_subdirectory(MMD_Nowplaying)
+add_subdirectory(MMD_Rym)

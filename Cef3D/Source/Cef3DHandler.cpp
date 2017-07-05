@@ -19,8 +19,57 @@
 #include "include/wrapper/cef_closure_task.h"
 #include "include/wrapper/cef_helpers.h"
 
+#include <regex>
+#include <iterator>
+
+bool first_stage_complete = false;
+
 namespace Cef3D
 {
+	class Visitor : public CefStringVisitor {
+	public:
+		Visitor(CefRefPtr<CefBrowser> browser) : Browser(browser) {}
+
+		// Called asynchronously when the HTML contents are available.
+		virtual void Visit(const CefString& string) OVERRIDE {
+			// Do something with |string|...
+			if (!first_stage_complete)
+			{
+				std::regex url_regex("<a href=\"(.*?)\" class=\"searchpage\"", std::regex_constants::ECMAScript);
+
+				std::string html = string.ToString();
+				auto words_begin = std::sregex_iterator(html.begin(), html.end(), url_regex);
+				auto words_end = std::sregex_iterator();
+
+				auto match_count = std::distance(words_begin, words_end);
+				(match_count);
+
+				std::string url = "";
+				for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+				{
+					std::smatch match = *i;
+					if (match.size() > 1)
+					{
+						url = match[1];
+						break;
+					}
+				}
+
+				if (url.size())
+				{
+					Browser->GetMainFrame()->LoadURL("http://rateyourmusic.com/" + url);
+					first_stage_complete = true;
+				}
+			}
+			
+		}
+
+	private:
+		CefRefPtr<CefBrowser> Browser;
+
+		IMPLEMENT_REFCOUNTING(Visitor);
+	};
+
 	Cef3DHandler::Cef3DHandler(Cef3DHandlerDelegate* HandlerDelegate, bool Osr, const std::string& url)
 		: IsOsr(Osr),
 		StartupUrl(url),
@@ -282,6 +331,9 @@ namespace Cef3D
 		CEF_REQUIRE_UI_THREAD();
 
 		NotifyLoadingState(isLoading, canGoBack, canGoForward);
+
+		static bool test = false;
+		browser->GetMainFrame()->GetSource(new Visitor(browser));
 	}
 	/* END CefLoadHandler */
 

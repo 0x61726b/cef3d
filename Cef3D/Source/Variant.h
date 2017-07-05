@@ -147,7 +147,7 @@
 
 #if variant_COMPILER_MSVC_VERSION >= 14
 # undef  variant_CPP11_OR_GREATER
-# define variant_CPP11_OR_GREATER  1
+# define variant_CPP11_OR_GREATER  0
 #endif
 
 // C++ feature usage:
@@ -165,7 +165,7 @@
 #endif
 
 #if variant_HAVE_NOEXCEPT
-# define variant_noexcept noexcept
+# define variant_noexcept /*noexcept*/
 #else
 # define variant_noexcept /*noexcept*/
 #endif
